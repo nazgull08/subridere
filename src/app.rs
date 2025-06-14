@@ -1,6 +1,8 @@
 use bevy::prelude::*;
-use bevy_flycam::PlayerPlugin; // ← готовая FPS-камера
-use bevy_egui::egui::Style;
+use bevy_flycam::{MovementSettings, PlayerPlugin};
+use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
+
+use crate::{core::fps_stats::FpsStatsPlugin, ui::fps::UiOverlayPlugin}; // ← готовая FPS-камера
 
 pub fn run() {
     App::new()
@@ -12,7 +14,14 @@ pub fn run() {
             }),
             ..default()
         }))
-        .add_plugins(PlayerPlugin) // ← подключаем камеру как плагин
+        .add_plugins(PlayerPlugin)
+        .insert_resource(MovementSettings {
+            sensitivity: 0.00008, // default: 0.00012
+            speed: 6.0, // default: 12.0
+        })
+        .add_plugins(FpsStatsPlugin)
+        .add_plugins(UiOverlayPlugin)
+        .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_systems(Startup, setup_scene)
         .run();
 }
