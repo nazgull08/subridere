@@ -1,25 +1,53 @@
 use bevy::prelude::*;
-use bevy_egui::{EguiPlugin, EguiContexts, egui};
-
 use crate::core::fps_stats::FpsData;
 
-/// Плагин UI, отвечает за отрисовку FPS/дебаг информации
+#[derive(Component)]
+struct FpsText;
+
+/// Плагин UI, отвечает за отрисовку FPS
 pub struct UiOverlayPlugin;
 
 impl Plugin for UiOverlayPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_plugins(EguiPlugin)
-            .add_systems(Update, show_ui);
+        app.add_systems(Startup, spawn_fps_ui)
+           .add_systems(Update, update_fps_ui);
     }
 }
 
-fn show_ui(mut contexts: EguiContexts, fps: Res<FpsData>) {
-    egui::Window::new("UI")
-        .title_bar(false)
-        .resizable(false)
-        .anchor(egui::Align2::RIGHT_TOP, [-10.0, 10.0])
-        .show(contexts.ctx_mut(), |ui| {
-            ui.label(format!("FPS: {:.1}", fps.current));
-        });
+fn spawn_fps_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let text_font = TextFont {
+        font: asset_server.load("fonts/dogica.ttf"),
+        ..default()
+    };
+    commands.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(10.0),
+            right: Val::Px(10.0),
+            padding: UiRect::all(Val::Px(6.0)),
+            ..default()
+        },
+        BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.4)),
+        Name::new("FPS UI Root"),
+    ))
+    .with_children(|parent| {
+            parent
+                .spawn((
+                    Text::new("FPS: "),
+                    text_font.clone(),
+                ))
+                .with_child((
+                    TextSpan::from("0.0"),
+                    text_font.clone(),
+                    TextColor(Color::srgba(1.0, 1.0, 0.5, 0.7)), // или другой стиль
+                    FpsText,
+                ));
+                });
+    }
+
+fn update_fps_ui(fps: Res<FpsData>, mut query: Query<&mut TextSpan, With<FpsText>>) {
+    for mut span in &mut query {
+        **span = format!("{:.1}", fps.current);
+
+    }
 }

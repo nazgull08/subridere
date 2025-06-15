@@ -1,2 +1,3 @@
-pub mod control;
-pub use control::CameraPlugin;
+pub mod flycam;
+pub mod plugin;
+pub mod setup;
