@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::camera::flycam::FlyCamera;
+use crate::{camera::flycam::FlyCamera, unit::component::Unit};
+
+pub static PLAYER_START_POS : Vec3 = Vec3::new(0.0, 2.0, 10.0);  
 
 #[derive(Component)]
 pub struct Player;
@@ -24,14 +26,14 @@ fn spawn_player(
     let player_id = commands
         .spawn((
             Player,
-            // физика
-            RigidBody::Dynamic,
-            Collider::cuboid(half_extents.x, half_extents.y, half_extents.z),
-            // чтобы не заваливался:
-            LockedAxes::ROTATION_LOCKED_X
-                | LockedAxes::ROTATION_LOCKED_Z
-                | LockedAxes::ROTATION_LOCKED_Y,
-            Transform::from_xyz(0.0, 1.5, 10.0),
+            Unit,
+            Collider::capsule_y(0.9, 0.3),
+            KinematicCharacterController {
+                offset: CharacterLength::Absolute(0.01),
+                ..default()
+            },
+            KinematicCharacterControllerOutput::default(),
+            Transform::from_translation(PLAYER_START_POS),
             Name::new("Player"),
         ))
         .id();
@@ -56,7 +58,7 @@ fn kill_plane_system(
         
         if transform.translation.y < -50.0 {
             println!("💀 Игрок погиб. {:?} Respawning...", transform); 
-            commands.entity(entity).insert(Transform::from_xyz(0.0, 2.0, 10.0));
+            commands.entity(entity).insert(Transform::from_translation(PLAYER_START_POS));
         }
     }
 }
