@@ -69,4 +69,25 @@ fn setup_room(
             Transform::from_translation(pos),
         ));
     }
+
+    let jump_platform_mesh = meshes.add(Mesh::from(Cuboid::new(1.0, 0.2, 1.0)));
+    let jump_platform_material = materials.add(Color::srgb(0.2, 0.5, 1.0));
+
+    let mut rng = thread_rng();
+    let mut pos = Vec3::new(0.0, 1.0, 10.0); // начальная точка ПЕРЕД комнатой
+
+    for _ in 0..30 {
+        commands.spawn((
+            Mesh3d(jump_platform_mesh.clone()),
+            MeshMaterial3d(jump_platform_material.clone()),
+            Transform::from_translation(pos),
+        ));
+
+        // Хаотичное движение В СТОРОНУ комнаты (от +z к -z)
+        let dx = rng.gen_range(-1.0..1.0);
+        let dy = rng.gen_range(-0.1..0.6);
+        let dz = rng.gen_range(1.0..2.0);
+
+        pos += Vec3::new(dx, dy, -dz); // ← двигаемся к комнате
+    }
 }

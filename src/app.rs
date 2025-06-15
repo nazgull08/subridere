@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
+use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
 
 use crate::camera::plugin::CameraPlugin;
 use crate::core::fps_stats::FpsStatsPlugin;
+use crate::player::plugin::PlayerPlugin;
 use crate::ui::fps::UiOverlayPlugin;
 use crate::world::room::RoomPlugin;
 
@@ -18,8 +20,11 @@ pub fn run() {
             ..default()
         }))
         .add_plugins(FrameTimeDiagnosticsPlugin::new(100))
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default().with_default_system_setup(true))
         // ── Камера ───────────────────────────────────────────────────────
         .add_plugins(CameraPlugin)
+        // -- player
+        .add_plugins(PlayerPlugin)
         // ── Логика ───────────────────────────────────────────────────────
         .add_plugins(FpsStatsPlugin)
         .add_plugins(RoomPlugin)

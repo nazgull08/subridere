@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy::input::mouse::MouseMotion;
 
+use crate::player::plugin::Player;
+
 #[derive(Component)]
 pub struct FlyCamera {
     pub speed: f32,
@@ -24,44 +26,43 @@ pub fn fly_camera_input(
     time: Res<Time>,
     keys: Res<ButtonInput<KeyCode>>,
     mut mouse_motion_events: EventReader<MouseMotion>,
-    mut query: Query<(&mut Transform, &mut FlyCamera)>,
+    mut query: Query<(&mut Transform, &mut FlyCamera), With<FlyCamera>>,
+    mut player_query: Query<&mut Transform, (With<Player>, Without<FlyCamera>)>,
 ) {
-    // суммируем за кадр
     let mut mouse_delta = Vec2::ZERO;
     for ev in mouse_motion_events.read() {
         mouse_delta += ev.delta;
     }
 
-    for (mut transform, mut cam) in &mut query {
-        /* ---------- движение ---------- */
+    let mut player_transform = if let Ok(t) = player_query.single_mut() {
+        t
+    } else {
+        return;
+    };
+
+    for (mut cam_transform, mut cam) in &mut query {
+        // ===== перемещение игрока (тело) =====
         let mut dir = Vec3::ZERO;
-        if keys.pressed(KeyCode::KeyW) { dir += *transform.forward(); }
-        if keys.pressed(KeyCode::KeyS) { dir -= *transform.forward(); }
-        if keys.pressed(KeyCode::KeyA) { dir -= *transform.right();   }
-        if keys.pressed(KeyCode::KeyD) { dir += *transform.right();   }
+        if keys.pressed(KeyCode::KeyW) { dir += *player_transform.forward(); }
+        if keys.pressed(KeyCode::KeyS) { dir -= *player_transform.forward(); }
+        if keys.pressed(KeyCode::KeyA) { dir -= *player_transform.right(); }
+        if keys.pressed(KeyCode::KeyD) { dir += *player_transform.right(); }
         if keys.pressed(KeyCode::Space)     { dir += Vec3::Y; }
         if keys.pressed(KeyCode::ShiftLeft) { dir -= Vec3::Y; }
 
-        if keys.just_pressed(KeyCode::Minus) {
-            cam.sensitivity -= 0.01;
-            println!("↓ Sensitivity: {}", cam.sensitivity);
-        }
-        if keys.just_pressed(KeyCode::Equal) {
-            cam.sensitivity += 0.01;
-            println!("↑ Sensitivity: {}", cam.sensitivity);
-        }
+        player_transform.translation += dir.normalize_or_zero() * cam.speed * time.delta_secs();
 
-        transform.translation += dir.normalize_or_zero() * cam.speed * time.delta_secs();
-
-        /* ---------- вращение ---------- */
+        // ===== вращение =====
         if mouse_delta.length_squared() > 0.0 {
             cam.yaw   -= mouse_delta.x * cam.sensitivity;
             cam.pitch -= mouse_delta.y * cam.sensitivity;
             cam.pitch = cam.pitch.clamp(-89.0, 89.0);
 
-            transform.rotation =
-                Quat::from_rotation_y(cam.yaw.to_radians()) *
-                Quat::from_rotation_x(cam.pitch.to_radians());
+            // игрок поворачивается вокруг Y (вся модель)
+            player_transform.rotation = Quat::from_rotation_y(cam.yaw.to_radians());
+
+            // камера внутри него наклоняется по X
+            cam_transform.rotation = Quat::from_rotation_x(cam.pitch.to_radians());
         }
     }
 }
