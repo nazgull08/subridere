@@ -23,7 +23,7 @@ pub fn run() {
         }))
         .add_plugins(FrameTimeDiagnosticsPlugin::new(100))
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default().with_default_system_setup(true))
-        .add_plugins(RapierDebugRenderPlugin::default())
+//        .add_plugins(RapierDebugRenderPlugin::default())
         // ── Камера ───────────────────────────────────────────────────────
         .add_plugins(CameraPlugin)
         // -- player

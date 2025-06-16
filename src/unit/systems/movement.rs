@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-use crate::player::plugin::Player;
+use crate::player::component::Player;
 use crate::unit::component::Unit;
 
 pub fn movement_system(

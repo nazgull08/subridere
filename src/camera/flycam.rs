@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::input::mouse::MouseMotion;
 
-use crate::player::plugin::Player;
+use crate::player::component::Player;
 
 #[derive(Component)]
 pub struct FlyCamera {

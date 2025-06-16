@@ -1,6 +1,7 @@
 pub mod app;
 pub mod camera;
 pub mod core;
+pub mod input;
 pub mod player;
 pub mod ui;
 pub mod unit;
