@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::player::component::{PlayerBody, PlayerVisual};
+use crate::player::component::PlayerVisual;
 
 /// Создает меш и материал для тела игрока
 pub fn create_player_body_bundle(
@@ -24,33 +24,30 @@ pub fn create_player_body_bundle(
     (Mesh3d(mesh), MeshMaterial3d(material))
 }
 
-/// Система для управления видимостью тела игрока
-pub fn toggle_player_body_visibility(
-    mut body_query: Query<&mut Visibility, With<PlayerBody>>,
-    player_query: Query<&PlayerVisual, (With<crate::player::component::Player>, Changed<PlayerVisual>)>,
+/// Система для обновления цвета тела игрока
+pub fn update_player_body_color(
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    query: Query<(&MeshMaterial3d<StandardMaterial>, &PlayerVisual), (With<crate::player::component::Player>, Changed<PlayerVisual>)>,
 ) {
-    if let Ok(player_visual) = player_query.single() {
-        for mut visibility in &mut body_query {
-            *visibility = if player_visual.show_body {
-                Visibility::Visible
-            } else {
-                Visibility::Hidden
-            };
+    for (material_handle, player_visual) in &query {
+        if let Some(material) = materials.get_mut(&material_handle.0) {
+            material.base_color = player_visual.body_color;
         }
     }
 }
 
-/// Система для обновления цвета тела игрока
-pub fn update_player_body_color(
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    body_query: Query<&MeshMaterial3d<StandardMaterial>, With<PlayerBody>>,
-    player_query: Query<&PlayerVisual, (With<crate::player::component::Player>, Changed<PlayerVisual>)>,
+/// Система для обновления размеров тела игрока
+pub fn update_player_body_size(
+    mut meshes: ResMut<Assets<Mesh>>,
+    query: Query<(&Mesh3d, &PlayerVisual), (With<crate::player::component::Player>, Changed<PlayerVisual>)>,
 ) {
-    if let Ok(player_visual) = player_query.single() {
-        for material_handle in &body_query {
-            if let Some(material) = materials.get_mut(&material_handle.0) {
-                material.base_color = player_visual.body_color;
-            }
+    for (mesh_handle, player_visual) in &query {
+        if let Some(mesh) = meshes.get_mut(&mesh_handle.0) {
+            *mesh = Cuboid::new(
+                player_visual.body_size.x,
+                player_visual.body_size.y,
+                player_visual.body_size.z,
+            ).into();
         }
     }
 }

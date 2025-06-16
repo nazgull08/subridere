@@ -4,16 +4,11 @@ use bevy::prelude::*;
 #[derive(Component)]
 pub struct Player;
 
-/// Маркер для визуального тела игрока (меш)
-#[derive(Component)]
-pub struct PlayerBody;
-
 /// Настройки визуализации игрока
-#[derive(Component, Clone)]
+#[derive(Component)]
 pub struct PlayerVisual {
     pub body_color: Color,
     pub body_size: Vec3,
-    pub show_body: bool,
 }
 
 impl Default for PlayerVisual {
@@ -21,7 +16,6 @@ impl Default for PlayerVisual {
         Self {
             body_color: Color::srgb(0.2, 0.6, 0.8), // голубоватый цвет
             body_size: Vec3::new(0.6, 1.8, 0.3),    // ширина, высота, глубина
-            show_body: true,
         }
     }
 }

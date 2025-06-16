@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use super::collision::spawn_room_colliders;
 use super::geometry::generate_room_geometry;
 use super::layout::spawn_room_layout;
 
@@ -20,9 +19,6 @@ fn setup_room(
 ) {
     // Генерация геометрии комнаты
     let geometry = generate_room_geometry(&mut meshes);
-
-    // Спавним меш + физические коллайдеры
-    spawn_room_colliders(commands.reborrow(), &meshes, geometry.mesh.clone());
 
     // Спавним всё визуальное и платформы
     spawn_room_layout(commands, materials, meshes, geometry);

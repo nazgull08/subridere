@@ -4,17 +4,9 @@ use bevy_rapier3d::prelude::*;
 use crate::{
     camera::flycam::FlyCamera, 
     unit::component::Unit,
-    player::component::{Player, PlayerBody, PlayerVisual, PLAYER_START_POS},
-    player::visual::create_player_body_bundle,
-    player::systems::{
-        sync_player_body_transform,
-        update_player_body_size
-    },
-    player::visual::{
-        toggle_player_body_visibility,
-        update_player_body_color
-    },
-    input::components::{
+    player::component::{Player, PlayerVisual, PLAYER_START_POS},
+    player::visual::{create_player_body_bundle, update_player_body_color, update_player_body_size},
+    input::component::{
         MovementInput, 
         MovementStats, 
         MovementState, 
@@ -29,10 +21,8 @@ impl Plugin for PlayerPlugin {
         app.add_systems(Startup, spawn_player)
            .add_systems(Update, (
                kill_plane_system,
-               sync_player_body_transform,
-               update_player_body_size,
-               toggle_player_body_visibility,
                update_player_body_color,
+               update_player_body_size,
            ));
     }
 }
@@ -43,18 +33,22 @@ fn spawn_player(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let player_visual = PlayerVisual::default();
+    let (mesh, material) = create_player_body_bundle(&mut meshes, &mut materials, &player_visual);
     
-    // Создаем основную сущность игрока (коллайдер + контроллер + управление)
+    // Создаем игрока как единую сущность с визуалом и физикой
     let player_id = commands
         .spawn((
             Player,
             Unit,
-            player_visual.clone(),
+            player_visual,
             // Компоненты управления
             PlayerControlled,
             MovementInput::default(),
             MovementStats::default(),
             MovementState::default(),
+            // Визуал
+            mesh,
+            material,
             // Физика
             Collider::capsule_y(0.9, 0.3),
             KinematicCharacterController {
@@ -63,23 +57,10 @@ fn spawn_player(
             },
             KinematicCharacterControllerOutput::default(),
             Transform::from_translation(PLAYER_START_POS),
+            Visibility::Visible,
             Name::new("Player"),
         ))
         .id();
-
-    // Создаем визуальное тело игрока (отдельная сущность)
-    if player_visual.show_body {
-        let (mesh, material) = create_player_body_bundle(&mut meshes, &mut materials, &player_visual);
-        
-        commands.spawn((
-            PlayerBody,
-            mesh,
-            material,
-            Transform::from_translation(PLAYER_START_POS),
-            Visibility::Visible,
-            Name::new("PlayerBody"),
-        ));
-    }
 
     // Камера — дочерний узел игрока, смещённый на уровень «головы»
     commands.entity(player_id).with_children(|parent| {
