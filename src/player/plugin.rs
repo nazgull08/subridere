@@ -4,7 +4,7 @@ use bevy_rapier3d::prelude::*;
 use crate::{
     camera::flycam::FlyCamera, 
     player::component::{Player, PlayerVisual, PLAYER_START_POS},
-    player::visual::{create_player_body_bundle, update_player_body_color, update_player_body_size},
+    player::visual::create_player_body_bundle,
     unit::component::{Unit, Velocity, Grounded},
     input::component::PlayerControlled,
 };
@@ -16,8 +16,6 @@ impl Plugin for PlayerPlugin {
         app.add_systems(Startup, spawn_player)
            .add_systems(Update, (
                kill_plane_system,
-               update_player_body_color,
-               update_player_body_size,
            ));
     }
 }

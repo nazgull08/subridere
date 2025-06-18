@@ -44,7 +44,7 @@ pub fn spawn_room_layout(
     }
 
     // ── Прыжковые платформы ───────────────────────
-    let platform_mesh = meshes.add(Mesh::from(Cuboid::new(1.0, 0.2, 1.0))); // ← правильно
+    let platform_mesh = meshes.add(Mesh::from(Cuboid::new(2.0, 0.2, 2.0))); // ← правильно
     let platform_material = materials.add(Color::srgb(0.2, 0.5, 1.0));
 
     for pos in geometry.platform_positions {
@@ -53,8 +53,33 @@ pub fn spawn_room_layout(
             MeshMaterial3d(platform_material.clone()),
             Transform::from_translation(pos),
             RigidBody::Fixed,
-            Collider::cuboid(0.5, 0.1, 0.5),
+            Collider::cuboid(1.0, 0.1, 1.0),
             Name::new("Platform"),
+        ));
+    }
+
+
+    let ball_mesh = meshes.add(Mesh::from(Sphere {
+        radius: 0.5,
+        ..default()
+    }));
+    let ball_material = materials.add(Color::srgb(0.0, 0.1, 0.4));
+
+    let object_radius = 0.5;
+    let room_top_y = ROOM_HEIGHT as f32 * CUBE_SIZE;
+    let spawn_y = room_top_y + object_radius + 0.05;
+
+    for i in 0..10 {
+        let x = (i as f32 - 1.0) * 1.0;
+        let z = ROOM_Z_OFFSET + 1.0 + i as f32;
+
+        commands.spawn((
+            Mesh3d(ball_mesh.clone()),
+            MeshMaterial3d(ball_material.clone()),
+            Transform::from_xyz(x, spawn_y, z),
+            RigidBody::Dynamic,
+            Collider::ball(object_radius),
+            Name::new(format!("RoofBall_{i}")),
         ));
     }
 }

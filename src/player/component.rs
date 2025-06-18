@@ -21,4 +21,4 @@ impl Default for PlayerVisual {
 }
 
 /// Where the player spawns initially and on death.
-pub static PLAYER_START_POS: Vec3 = Vec3::new(0.0, 2.0, 10.0);
+pub static PLAYER_START_POS: Vec3 = Vec3::new(0.0, 5.0, 10.0);

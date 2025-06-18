@@ -1,19 +1,20 @@
 use bevy::prelude::*;
-use bevy::input::mouse::MouseMotion;
+use bevy::input::mouse::{MouseButtonInput, MouseMotion};
 use bevy::window::CursorGrabMode;
 
+use crate::input::component::PlayerControlled;
 use crate::input::{
     component::MovementInput,
     resources::InputSettings,
 };
-use crate::unit::component::{JumpIntent, DashIntent, MoveIntent};
+use crate::unit::component::{DashIntent, JumpIntent, MoveIntent, ShootIntent};
 
 /// Processes keyboard input and generates intent components.
 pub fn handle_keyboard_input(
     mut commands: Commands,
     keys: Res<ButtonInput<KeyCode>>,
     settings: Res<InputSettings>,
-    query: Query<Entity, With<crate::input::component::PlayerControlled>>, // ← ensure included
+    query: Query<Entity, With<PlayerControlled>>, // ← ensure included
 ) {
     let bindings = &settings.key_bindings;
 
@@ -56,28 +57,24 @@ pub fn handle_keyboard_input(
     }
 }
 
-/// Updates mouse delta used for look rotation.
-pub fn handle_mouse_input(
-    mut mouse_motion: EventReader<MouseMotion>,
-    settings: Res<InputSettings>,
-    mut query: Query<&mut MovementInput, With<crate::input::component::PlayerControlled>>,
+pub fn handle_shoot_input(
+    buttons: Res<ButtonInput<MouseButton>>,
+    mut commands: Commands,
+    camera_query: Query<&GlobalTransform, With<Camera>>,
+    player_query: Query<Entity, With<PlayerControlled>>,
 ) {
-    let mut delta = Vec2::ZERO;
-
-    for motion in mouse_motion.read() {
-        delta += motion.delta;
-    }
-
-    if delta != Vec2::ZERO {
-        for mut input in &mut query {
-            input.mouse_delta = delta * settings.mouse_sensitivity;
-
-            if settings.invert_y {
-                input.mouse_delta.y = -input.mouse_delta.y;
-            }
+    if buttons.just_pressed(MouseButton::Right) {
+        if let (Ok(camera), Ok(player_entity)) = (
+            camera_query.get_single(),
+            player_query.get_single(),
+        ) {
+            let direction = camera.forward();
+            commands.entity(player_entity).insert(ShootIntent(*direction));
+            println!("🔫 ShootIntent created");
         }
     }
 }
+
 
 /// Toggles mouse grab with Escape/Tab keys.
 pub fn cursor_grab_system(
