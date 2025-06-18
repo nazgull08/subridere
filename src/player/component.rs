@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 
-/// Основной маркер компонент игрока
+/// Marks the player entity.
 #[derive(Component)]
 pub struct Player;
 
-/// Настройки визуализации игрока
+/// Visual settings for player's body.
 #[derive(Component)]
 pub struct PlayerVisual {
     pub body_color: Color,
@@ -14,11 +14,11 @@ pub struct PlayerVisual {
 impl Default for PlayerVisual {
     fn default() -> Self {
         Self {
-            body_color: Color::srgb(0.2, 0.6, 0.8), // голубоватый цвет
-            body_size: Vec3::new(0.6, 1.8, 0.3),    // ширина, высота, глубина
+            body_color: Color::srgb(0.2, 0.6, 0.8),
+            body_size: Vec3::new(0.6, 1.8, 0.3),
         }
     }
 }
 
-/// Стартовая позиция игрока
+/// Where the player spawns initially and on death.
 pub static PLAYER_START_POS: Vec3 = Vec3::new(0.0, 2.0, 10.0);

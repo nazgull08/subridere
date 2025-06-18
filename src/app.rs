@@ -5,6 +5,7 @@ use bevy_rapier3d::render::RapierDebugRenderPlugin;
 
 use crate::camera::plugin::CameraPlugin;
 use crate::core::fps_stats::FpsStatsPlugin;
+use crate::input::plugin::InputPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::ui::fps::UiOverlayPlugin;
 use crate::unit::plugin::UnitPlugin;
@@ -26,6 +27,7 @@ pub fn run() {
 //        .add_plugins(RapierDebugRenderPlugin::default())
         // ── Камера ───────────────────────────────────────────────────────
         .add_plugins(CameraPlugin)
+        .add_plugins(InputPlugin)
         // -- player
         .add_plugins(PlayerPlugin)
         .add_plugins(UnitPlugin)

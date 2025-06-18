@@ -1,9 +1,24 @@
 use bevy::prelude::*;
 
-/// Отмечает любую сущность, к которой применима логика передвижения, гравитации, состояний и т.п.
+/// Marks entities that are affected by movement, gravity, and general unit behavior.
 #[derive(Component)]
 pub struct Unit;
 
-/// Состояние: стоит ли на земле
+/// Indicates whether the entity is currently grounded (on the floor).
 #[derive(Component, Default)]
 pub struct Grounded(pub bool);
+
+#[derive(Component, Default)]
+pub struct Velocity(pub Vec3);
+
+/// Signals the entity wants to jump. Added by input, consumed by logic.
+#[derive(Component)]
+pub struct JumpIntent;
+
+/// Signals the entity wants to dash. Direction can be zero (e.g., dash forward).
+#[derive(Component)]
+pub struct DashIntent(pub Vec3);
+
+/// Signals the entity wants to move. Usually set every frame based on input.
+#[derive(Component)]
+pub struct MoveIntent(pub Vec3);

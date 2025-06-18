@@ -3,15 +3,10 @@ use bevy_rapier3d::prelude::*;
 
 use crate::{
     camera::flycam::FlyCamera, 
-    unit::component::Unit,
     player::component::{Player, PlayerVisual, PLAYER_START_POS},
     player::visual::{create_player_body_bundle, update_player_body_color, update_player_body_size},
-    input::component::{
-        MovementInput, 
-        MovementStats, 
-        MovementState, 
-        PlayerControlled
-    },
+    unit::component::{Unit, Velocity, Grounded},
+    input::component::PlayerControlled,
 };
 
 pub struct PlayerPlugin;
@@ -32,37 +27,30 @@ fn spawn_player(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let player_visual = PlayerVisual::default();
-    let (mesh, material) = create_player_body_bundle(&mut meshes, &mut materials, &player_visual);
-    
-    // Создаем игрока как единую сущность с визуалом и физикой
-    let player_id = commands
-        .spawn((
-            Player,
-            Unit,
-            player_visual,
-            // Компоненты управления
-            PlayerControlled,
-            MovementInput::default(),
-            MovementStats::default(),
-            MovementState::default(),
-            // Визуал
-            mesh,
-            material,
-            // Физика
-            Collider::capsule_y(0.9, 0.3),
-            KinematicCharacterController {
-                offset: CharacterLength::Absolute(0.01),
-                ..default()
-            },
-            KinematicCharacterControllerOutput::default(),
-            Transform::from_translation(PLAYER_START_POS),
-            Visibility::Visible,
-            Name::new("Player"),
-        ))
-        .id();
+    let visual = PlayerVisual::default();
+    let (mesh, material) = create_player_body_bundle(&mut meshes, &mut materials, &visual);
 
-    // Камера — дочерний узел игрока, смещённый на уровень «головы»
+    let player_id = commands.spawn((
+        Player,
+        Unit,
+        PlayerControlled,
+        Grounded(true),
+        Velocity::default(),
+        visual,
+        mesh,
+        material,
+        Collider::capsule_y(0.9, 0.3),
+        KinematicCharacterController {
+            offset: CharacterLength::Absolute(0.01),
+            ..default()
+        },
+        KinematicCharacterControllerOutput::default(),
+        Transform::from_translation(PLAYER_START_POS),
+        Visibility::Visible,
+        Name::new("Player"),
+    )).id();
+
+    // Camera attached to head
     commands.entity(player_id).with_children(|parent| {
         parent.spawn((
             Camera3d::default(),
@@ -74,17 +62,13 @@ fn spawn_player(
 }
 
 fn kill_plane_system(
-    mut commands: Commands,
-    mut query: Query<(Entity, &Transform, &mut MovementState), With<Player>>,
+    mut query: Query<(&mut Transform, &mut Velocity), With<Player>>,
 ) {
-    for (entity, transform, mut movement_state) in &mut query {
+    for (mut transform, mut velocity) in &mut query {
         if transform.translation.y < -50.0 {
-            println!("💀 Игрок погиб. {:?} Respawning...", transform); 
-            commands.entity(entity).insert(Transform::from_translation(PLAYER_START_POS));
-            
-            // Сбрасываем скорость при возрождении
-            movement_state.velocity = Vec3::ZERO;
-            movement_state.is_grounded = false;
+            println!("💀 Player died. Respawning...");
+            transform.translation = PLAYER_START_POS;
+            velocity.0 = Vec3::ZERO;
         }
     }
 }
