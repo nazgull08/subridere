@@ -16,7 +16,7 @@ pub fn spawn_lighting(mut commands: Commands) {
     commands.spawn((
         PointLight {
             shadows_enabled: true,
-            intensity: 0.0,
+            intensity: 100000.0,
             range: 100.0,
             ..default()
         },

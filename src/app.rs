@@ -1,5 +1,6 @@
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
+use bevy_animation::AnimationPlugin;
 use bevy_kira_audio::AudioPlugin;
 use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
 use bevy_rapier3d::render::RapierDebugRenderPlugin;
@@ -42,5 +43,6 @@ pub fn run() {
         .add_plugins(PlayerPlugin)
         .add_plugins(ProjectilePlugin)
         .add_plugins(WorldPlugin)
+        .add_plugins(AnimationPlugin)
         .run();
 }

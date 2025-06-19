@@ -121,8 +121,8 @@ pub fn spawn_room_lights(
                 PointLight {
                     color: Color::srgb(0.0, 0.7, 0.0), // тёплый свет
                     intensity: 100_000.0,
-                    radius: 1.0,
-                    range: 100.0,
+                    radius: 20.0,
+                    range: 200.0,
                     shadows_enabled: true,
                     ..default()
                 },
