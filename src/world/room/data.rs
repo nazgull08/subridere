@@ -1,18 +1,18 @@
 use bevy::prelude::*;
 
 /// Размер кубика-вокселя (метры в мире Rapier / Bevy).
-pub const CUBE_SIZE: f32 = 0.2;
+pub const CUBE_SIZE: f32 = 0.3;
 
 /// Габариты комнаты в кубиках (по осям X, Y, Z).
-pub const ROOM_WIDTH:  usize = 40;
+pub const ROOM_WIDTH:  usize = 100;
 pub const ROOM_HEIGHT: usize = 20;
-pub const ROOM_DEPTH:  usize = 40;
+pub const ROOM_DEPTH:  usize = 200;
 
 /// Смещение комнаты по Z: чтобы platforms были «перед» входом.
 pub const ROOM_Z_OFFSET: f32 = -20.0;
 
 /// Вероятность оставить блок-воксель на поверхности стен (для “обветшалости”).
-pub const SURFACE_FILL_RATIO: f32 = 0.85;
+pub const SURFACE_FILL_RATIO: f32 = 0.45;
 
 /// Количество случайных платформ в пути к комнате.
 pub const PLATFORM_COUNT: usize = 30;

@@ -33,8 +33,8 @@ pub fn spawn_projectile(
         Collider::cuboid(size / 2.0, size / 2.0, size / 2.0),
         Projectile::new(size, lifetime, velocity),
         PointLight {
-            intensity: 1000.0,      // ← сила света
-            radius: 2.0,           // ← зона действия
+            intensity: 3000.0,      // ← сила света
+            radius: 15.0,           // ← зона действия
             color: Color::srgb(1.0, 0.2, 0.2),
             shadows_enabled: true, // можно выключить для производительности
             ..default()
