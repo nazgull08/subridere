@@ -1,12 +1,9 @@
-use bevy::prelude::*;
 use bevy::input::mouse::{MouseButtonInput, MouseMotion};
+use bevy::prelude::*;
 use bevy::window::CursorGrabMode;
 
 use crate::input::component::PlayerControlled;
-use crate::input::{
-    component::MovementInput,
-    resources::InputSettings,
-};
+use crate::input::{component::MovementInput, resources::InputSettings};
 use crate::unit::component::{DashIntent, JumpIntent, MoveIntent, ShootIntent};
 
 /// Processes keyboard input and generates intent components.
@@ -64,23 +61,20 @@ pub fn handle_shoot_input(
     player_query: Query<Entity, With<PlayerControlled>>,
 ) {
     if buttons.just_pressed(MouseButton::Right) {
-        if let (Ok(camera), Ok(player_entity)) = (
-            camera_query.get_single(),
-            player_query.get_single(),
-        ) {
+        if let (Ok(camera), Ok(player_entity)) =
+            (camera_query.get_single(), player_query.get_single())
+        {
             let direction = camera.forward();
-            commands.entity(player_entity).insert(ShootIntent(*direction));
+            commands
+                .entity(player_entity)
+                .insert(ShootIntent(*direction));
             println!("🔫 ShootIntent created");
         }
     }
 }
 
-
 /// Toggles mouse grab with Escape/Tab keys.
-pub fn cursor_grab_system(
-    mut windows: Query<&mut Window>,
-    keys: Res<ButtonInput<KeyCode>>,
-) {
+pub fn cursor_grab_system(mut windows: Query<&mut Window>, keys: Res<ButtonInput<KeyCode>>) {
     if let Ok(mut window) = windows.single_mut() {
         if keys.just_pressed(KeyCode::Escape) {
             window.cursor_options.grab_mode = CursorGrabMode::None;

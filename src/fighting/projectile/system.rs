@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use super::component::Projectile;
+use bevy::prelude::*;
 
 pub fn despawn_expired_projectiles(
     mut commands: Commands,

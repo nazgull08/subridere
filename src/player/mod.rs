@@ -1,4 +1,4 @@
 pub mod component;
 pub mod plugin;
-pub mod visual;
 pub mod systems;
+pub mod visual;

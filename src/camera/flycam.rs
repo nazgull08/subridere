@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use bevy::input::mouse::MouseMotion;
+use bevy::prelude::*;
 
 use crate::player::component::Player;
 
@@ -40,7 +40,7 @@ pub fn fly_camera_input(
 
     for (mut cam_transform, mut cam) in &mut query {
         if mouse_delta.length_squared() > 0.0 {
-            cam.yaw   -= mouse_delta.x * cam.sensitivity;
+            cam.yaw -= mouse_delta.x * cam.sensitivity;
             cam.pitch -= mouse_delta.y * cam.sensitivity;
             cam.pitch = cam.pitch.clamp(-89.0, 89.0);
 

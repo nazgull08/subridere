@@ -26,7 +26,11 @@ pub fn merge_cubes(cube_positions: &[Vec3], cube_size: f32) -> Mesh {
     ) = (base_positions, base_normals, base_uvs, base_indices.clone())
     {
         for pos in cube_positions {
-            positions.extend(base_pos.iter().map(|[x, y, z]| [x + pos.x, y + pos.y, z + pos.z]));
+            positions.extend(
+                base_pos
+                    .iter()
+                    .map(|[x, y, z]| [x + pos.x, y + pos.y, z + pos.z]),
+            );
             normals.extend_from_slice(base_norm);
             uvs.extend_from_slice(base_uv);
             indices.extend(base_idx.iter().map(|i| i + vertex_offset));
@@ -34,9 +38,12 @@ pub fn merge_cubes(cube_positions: &[Vec3], cube_size: f32) -> Mesh {
         }
     }
 
-    Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
-        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
-        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs)
-        .with_inserted_indices(Indices::U32(indices))
+    Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::default(),
+    )
+    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs)
+    .with_inserted_indices(Indices::U32(indices))
 }

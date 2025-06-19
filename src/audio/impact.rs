@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::*;
 use bevy_kira_audio::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 pub fn play_impact_sounds_system(
     mut events: EventReader<ContactForceEvent>,

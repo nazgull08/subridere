@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
+use bevy::prelude::*;
 use bevy_kira_audio::AudioPlugin;
 use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
 use bevy_rapier3d::render::RapierDebugRenderPlugin;
@@ -8,15 +8,16 @@ use crate::audio::plugin::SubAudioPlugin;
 use crate::camera::plugin::CameraPlugin;
 use crate::core::fps_stats::FpsStatsPlugin;
 use crate::fighting::projectile::plugin::ProjectilePlugin;
+use crate::game_init::plugin::GameInitPlugin;
 use crate::input::plugin::InputPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::ui::fps::UiOverlayPlugin;
 use crate::unit::plugin::UnitPlugin;
-use crate::world::room::plugin::RoomPlugin;
+use crate::world::plugin::WorldPlugin;
 
 pub fn run() {
     App::new()
-        // ── Системные и графические плагины ─────────────────────────────
+        // ── Engine plugins ───────────────────────
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "Subridere".into(),
@@ -25,37 +26,21 @@ pub fn run() {
             }),
             ..default()
         }))
-        .add_plugins(FrameTimeDiagnosticsPlugin::new(100))
+        .add_plugins(GameInitPlugin)
+        .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default().with_default_system_setup(true))
         //.add_plugins(RapierDebugRenderPlugin::default())
-        // -- Audio
         .add_plugins(AudioPlugin)
         .add_plugins(SubAudioPlugin)
-        // ── Камера ───────────────────────────────────────────────────────
+        // ── Core systems ─────────────────────────
         .add_plugins(CameraPlugin)
         .add_plugins(InputPlugin)
-        // -- player
-        .add_plugins(PlayerPlugin)
-        .add_plugins(UnitPlugin)
-        // -- fighting
-        .add_plugins(ProjectilePlugin)
-        // ── Логика ───────────────────────────────────────────────────────
         .add_plugins(FpsStatsPlugin)
-        .add_plugins(RoomPlugin)
-        // ── Стартовые объекты (временные) ───────────────────────────────
-        .add_systems(Startup, spawn_light)
         .add_plugins(UiOverlayPlugin)
-
+        // ── Game logic ───────────────────────────
+        .add_plugins(UnitPlugin)
+        .add_plugins(PlayerPlugin)
+        .add_plugins(ProjectilePlugin)
+        .add_plugins(WorldPlugin)
         .run();
-}
-
-fn spawn_light(mut commands: Commands) {
-    commands.spawn(
-        PointLight {
-            shadows_enabled: true,
-            intensity: 10_000_000.0,
-            range: 100.0,
-            ..default()
-        }
-    );
 }

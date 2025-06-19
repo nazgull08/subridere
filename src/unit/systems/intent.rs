@@ -1,14 +1,17 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::{fighting::projectile::spawn::spawn_projectile, unit::component::{DashIntent, Grounded, JumpIntent, MoveIntent, ShootIntent, Unit, Velocity}};
+use crate::{
+    fighting::projectile::spawn::spawn_projectile,
+    unit::component::{DashIntent, Grounded, JumpIntent, MoveIntent, ShootIntent, Unit, Velocity},
+};
 
 // Movement tuning constants
-const MOVE_ACCEL: f32 = 30.0;
+const MOVE_ACCEL: f32 = 50.0;
 const DASH_SPEED: f32 = 12.0;
-const JUMP_SPEED: f32 = 8.0;
+const JUMP_SPEED: f32 = 20.0;
 const GRAVITY: f32 = 20.0;
-const DAMPING: f32 = 6.0;
+const DAMPING: f32 = 3.0;
 
 /// Updates `Grounded` based on Rapier's KinematicCharacterController output.
 pub fn update_grounded_system(

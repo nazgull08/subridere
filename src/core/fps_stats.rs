@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin};
+use bevy::prelude::*;
 
 #[derive(Resource, Default)]
 pub struct FpsData {
@@ -16,7 +16,10 @@ impl Plugin for FpsStatsPlugin {
 }
 
 fn update_fps(diagnostics: Res<DiagnosticsStore>, mut fps: ResMut<FpsData>) {
-    if let Some(value) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS).and_then(|d| d.smoothed()) {
+    if let Some(value) = diagnostics
+        .get(&FrameTimeDiagnosticsPlugin::FPS)
+        .and_then(|d| d.smoothed())
+    {
         fps.current = value;
     }
 }
