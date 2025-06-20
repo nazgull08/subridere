@@ -1,4 +1,5 @@
 pub mod app;
+pub mod assets;
 pub mod audio;
 pub mod camera;
 pub mod core;
@@ -6,6 +7,7 @@ pub mod fighting;
 pub mod game_init;
 pub mod input;
 pub mod player;
+pub mod stats;
 pub mod ui;
 pub mod unit;
 pub mod utils;

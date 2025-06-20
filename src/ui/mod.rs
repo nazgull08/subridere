@@ -1,1 +1,3 @@
-pub mod fps;
+pub mod hud;      
+pub mod menu;     
+pub mod inventory;

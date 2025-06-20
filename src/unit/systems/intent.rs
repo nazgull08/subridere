@@ -5,6 +5,7 @@ use crate::{
     fighting::projectile::spawn::spawn_projectile,
     unit::component::{DashIntent, Grounded, JumpIntent, MoveIntent, ShootIntent, Unit, Velocity},
 };
+use crate::stats::mana::component::Mana;
 
 // Movement tuning constants
 const MOVE_ACCEL: f32 = 50.0;
@@ -96,23 +97,32 @@ pub fn apply_velocity(
     }
 }
 
+
 pub fn handle_shoot_intents(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    query: Query<(Entity, &GlobalTransform, &ShootIntent), With<Unit>>,
+    mut query: Query<(Entity, &GlobalTransform, &ShootIntent, &mut Mana), With<Unit>>,
 ) {
-    for (entity, transform, intent) in &query {
-        let origin = transform.translation() + Vec3::new(0.0, 2.0, 0.0);
-        let direction = intent.0;
+    let mana_cost = 10.0;
 
-        spawn_projectile(
-            &mut commands,
-            &mut meshes,
-            &mut materials,
-            origin + direction * 1.0, // сместим немного от центра тела
-            direction,
-        );
+    for (entity, transform, intent, mut mana) in &mut query {
+        if mana.current >= mana_cost {
+            mana.current -= mana_cost;
+
+            let origin = transform.translation() + Vec3::new(0.0, 2.0, 0.0);
+            let direction = intent.0;
+
+            spawn_projectile(
+                &mut commands,
+                &mut meshes,
+                &mut materials,
+                origin + direction * 1.0,
+                direction,
+            );
+        } else {
+            println!("Entity {:?} has not enough mana to shoot", entity);
+        }
 
         commands.entity(entity).remove::<ShootIntent>();
     }

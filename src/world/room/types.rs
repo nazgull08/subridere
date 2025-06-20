@@ -4,16 +4,16 @@ use std::collections::HashMap;
 #[derive(Debug, Default, Clone)]
 pub struct WallFlags {
     pub front: bool,
-    pub back:  bool,
-    pub left:  bool,
+    pub back: bool,
+    pub left: bool,
     pub right: bool,
 }
 
 #[derive(Debug, Default, Clone)]
 pub struct DoorFlags {
     pub front: bool,
-    pub back:  bool,
-    pub left:  bool,
+    pub back: bool,
+    pub left: bool,
     pub right: bool,
 }
 

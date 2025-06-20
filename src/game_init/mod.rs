@@ -1,6 +1,6 @@
-pub mod check_animations;
 pub mod lighting;
 pub mod maze_rooms;
+pub mod play_animation;
 pub mod player;
 pub mod plugin;
 pub mod rooms;

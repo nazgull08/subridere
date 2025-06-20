@@ -1,6 +1,6 @@
 use bevy::prelude::*;
+use rand::seq::SliceRandom;
 use rand::thread_rng;
-use rand::seq::SliceRandom; 
 use std::collections::{HashMap, HashSet};
 
 /// Клетка в лабиринте (x,z)
@@ -8,10 +8,10 @@ pub type Cell = IVec2;
 
 /// Направления и смещения
 const DIRS: &[(Cell, Cell)] = &[
-    (Cell::new( 1,  0), Cell::new( 1,  0)), // право
-    (Cell::new(-1,  0), Cell::new(-1,  0)), // лево
-    (Cell::new( 0,  1), Cell::new( 0,  1)), // вперед (+z)
-    (Cell::new( 0, -1), Cell::new( 0, -1)), // назад (-z)
+    (Cell::new(1, 0), Cell::new(1, 0)),   // право
+    (Cell::new(-1, 0), Cell::new(-1, 0)), // лево
+    (Cell::new(0, 1), Cell::new(0, 1)),   // вперед (+z)
+    (Cell::new(0, -1), Cell::new(0, -1)), // назад (-z)
 ];
 
 /// Возвращает карту смежности: для каждой клетки — список соседей,
@@ -29,7 +29,8 @@ pub fn generate_maze(width: i32, height: i32) -> HashMap<Cell, Vec<Cell>> {
 
     while let Some(cur) = stack.pop() {
         // собираем список не посещённых соседей
-        let neighbors = DIRS.iter()
+        let neighbors = DIRS
+            .iter()
             .map(|(delta, _)| cur + *delta)
             .filter(|&c| c.x >= 0 && c.x < width && c.y >= 0 && c.y < height)
             .filter(|c| !visited.contains(c))

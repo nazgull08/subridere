@@ -604,6 +604,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "10a080237c0b8842ccc15a06d3379302c68580eeea4497b1c7387e470eda1f07"
 dependencies = [
  "base64 0.22.1",
+ "bevy_animation",
  "bevy_app",
  "bevy_asset",
  "bevy_color",
@@ -700,6 +701,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "857da8785678fde537d02944cd20dec9cafb7d4c447efe15f898dc60e733cacd"
 dependencies = [
  "bevy_a11y",
+ "bevy_animation",
  "bevy_app",
  "bevy_asset",
  "bevy_color",
@@ -4004,7 +4006,6 @@ name = "subridere"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "bevy_animation",
  "bevy_kira_audio",
  "bevy_rapier3d",
  "rand 0.8.5",

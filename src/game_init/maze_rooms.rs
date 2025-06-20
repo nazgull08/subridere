@@ -1,10 +1,10 @@
 // src/game_init/maze_rooms.rs
 
-use bevy::prelude::*;
-use rand::{thread_rng, Rng};
-use crate::world::generators::maze::generate_maze;
-use crate::world::room::types::{RoomMap, RoomMetadata, WallFlags, DoorFlags};
 use crate::world::builders::room::spawn_simple_room;
+use crate::world::generators::maze::generate_maze;
+use crate::world::room::types::{DoorFlags, RoomMap, RoomMetadata, WallFlags};
+use bevy::prelude::*;
+use rand::{Rng, thread_rng};
 
 /// Спавним лабиринт из комнат в сетке width×height
 pub fn spawn_maze_rooms(
@@ -46,9 +46,7 @@ pub fn spawn_maze_rooms(
             let meta = room_map.rooms.get_mut(&pos3).unwrap();
 
             // соединения из графа
-            let neighbors = graph.get(&cell)
-                .cloned()
-                .unwrap_or_default();
+            let neighbors = graph.get(&cell).cloned().unwrap_or_default();
 
             // для каждого направления выставляем wall/door
             // back (z-1)
@@ -103,25 +101,21 @@ pub fn spawn_maze_rooms(
     }
 }
 
-
-pub fn spawn_room_lights(
-    mut commands: Commands,
-    room_map: Res<RoomMap>,
-) {
+pub fn spawn_room_lights(mut commands: Commands, room_map: Res<RoomMap>) {
     for (grid_pos, room) in room_map.rooms.iter() {
         if !room.has_light || room.entity.is_none() {
             continue;
         }
 
         let room_entity = room.entity.unwrap();
-        let light_pos = Vec3::new(0.0, 3.0, 0.0); // чуть выше пола, по центру
+        let light_pos = Vec3::new(0.0, 5.0, 0.0); // чуть выше пола, по центру
+        println!("room light {:?}", grid_pos);
 
         commands.entity(room_entity).with_children(|child| {
             child.spawn((
                 PointLight {
                     color: Color::srgb(0.0, 0.7, 0.0), // тёплый свет
-                    intensity: 100_000.0,
-                    radius: 20.0,
+                    intensity: 100_000_00.0,
                     range: 200.0,
                     shadows_enabled: true,
                     ..default()

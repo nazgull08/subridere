@@ -1,8 +1,8 @@
 // src/game_init/rooms.rs
 
-use bevy::prelude::*;
 use crate::world::builders::grid::{register_room, spawn_registered_rooms};
 use crate::world::room::types::RoomMap;
+use bevy::prelude::*;
 
 pub fn spawn_initial_rooms(
     mut commands: Commands,
