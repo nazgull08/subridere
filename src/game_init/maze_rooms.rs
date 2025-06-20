@@ -6,11 +6,14 @@ use crate::world::room::types::{DoorFlags, RoomMap, RoomMetadata, WallFlags};
 use bevy::prelude::*;
 use rand::{Rng, thread_rng};
 
+use super::state::InitStage;
+
 /// Спавним лабиринт из комнат в сетке width×height
 pub fn spawn_maze_rooms(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut next_state: ResMut<NextState<InitStage>>,
     mut room_map: ResMut<RoomMap>,
 ) {
     let mut rng = thread_rng();
@@ -99,9 +102,14 @@ pub fn spawn_maze_rooms(
         );
         meta.entity = Some(ent);
     }
+
+    next_state.set(InitStage::MazeReady);
 }
 
-pub fn spawn_room_lights(mut commands: Commands, room_map: Res<RoomMap>) {
+pub fn spawn_room_lights(mut commands: Commands, room_map: Res<RoomMap>,
+    mut next_state: ResMut<NextState<InitStage>>,
+) {
+    println!("room map {:?}", room_map);
     for (grid_pos, room) in room_map.rooms.iter() {
         if !room.has_light || room.entity.is_none() {
             continue;
@@ -115,7 +123,7 @@ pub fn spawn_room_lights(mut commands: Commands, room_map: Res<RoomMap>) {
             child.spawn((
                 PointLight {
                     color: Color::srgb(0.0, 0.7, 0.0), // тёплый свет
-                    intensity: 100_000_00.0,
+                    intensity: 10_000_00.0,
                     range: 200.0,
                     shadows_enabled: true,
                     ..default()
@@ -126,5 +134,6 @@ pub fn spawn_room_lights(mut commands: Commands, room_map: Res<RoomMap>) {
         });
 
         println!("spawned light in room {:?}", grid_pos);
+        next_state.set(InitStage::LightsReady);
     }
 }

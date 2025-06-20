@@ -14,10 +14,13 @@ use crate::{
     unit::component::{Grounded, Unit, Velocity},
 };
 
+use super::state::InitStage;
+
 pub fn spawn_player(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut next_state: ResMut<NextState<InitStage>>,
 ) {
     let visual = PlayerVisual::default();
     let (mesh, material) = create_player_body_bundle(&mut meshes, &mut materials, &visual);
@@ -52,4 +55,6 @@ pub fn spawn_player(
             Name::new("PlayerCamera"),
         ));
     });
+
+    next_state.set(InitStage::PlayerReady);
 }

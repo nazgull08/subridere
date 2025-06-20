@@ -8,6 +8,7 @@ use crate::assets::MyAssets;
 use crate::audio::plugin::SubAudioPlugin;
 use crate::camera::plugin::CameraPlugin;
 use crate::core::fps_stats::FpsStatsPlugin;
+use crate::enemy::plugin::EnemyPlugin;
 use crate::fighting::projectile::plugin::ProjectilePlugin;
 use crate::game_init::plugin::GameInitPlugin;
 use crate::input::plugin::InputPlugin;
@@ -46,5 +47,6 @@ pub fn run() {
         .add_plugins(PlayerPlugin)
         .add_plugins(ProjectilePlugin)
         .add_plugins(WorldPlugin)
+        .add_plugins(EnemyPlugin)
         .run();
 }

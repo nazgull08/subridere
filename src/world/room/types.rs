@@ -17,7 +17,7 @@ pub struct DoorFlags {
     pub right: bool,
 }
 
-#[derive(Default, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct RoomMetadata {
     pub wall_flags: WallFlags,
     pub door_flags: DoorFlags,
@@ -25,7 +25,7 @@ pub struct RoomMetadata {
     pub entity: Option<Entity>,
 }
 
-#[derive(Resource, Default)]
+#[derive(Debug, Resource, Default)]
 pub struct RoomMap {
     pub rooms: HashMap<IVec3, RoomMetadata>,
 }
