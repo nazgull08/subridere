@@ -1,9 +1,9 @@
 pub mod app;
 pub mod assets;
 pub mod audio;
+pub mod block_bodies;
 pub mod camera;
 pub mod core;
-pub mod block_bodies;
 pub mod enemy;
 pub mod fighting;
 pub mod game_init;

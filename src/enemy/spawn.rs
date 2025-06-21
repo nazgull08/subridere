@@ -3,13 +3,10 @@ use bevy_rapier3d::prelude::*;
 use rand::seq::IteratorRandom;
 
 use crate::{
-    enemy::component::*,
-    stats::health::component::Health,
-    unit::component::{Grounded, Unit, Velocity},
-    utils::block_body::{BlockPart, spawn_blocky_body},
-    world::room::types::RoomMap,
+    block_bodies::{enemies::jester::make_jester_body, pose::{BlockPose, PoseToApply}}, enemy::component::*, stats::health::component::Health, unit::component::{Grounded, Unit, Velocity}, utils::block_body::spawn_blocky_body, world::room::types::RoomMap
 };
 
+/// Спавним джестера в случайной комнате
 pub fn spawn_jester_in_room(
     mut commands: Commands,
     room_map: Res<RoomMap>,
@@ -17,64 +14,19 @@ pub fn spawn_jester_in_room(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    if let Some((_, meta)) = room_map.rooms.iter().choose(&mut rand::thread_rng()) {
-        if let Some(room_entity) = meta.entity {
-            if let Ok(room_transform) = room_query.get(room_entity) {
-                let pos = room_transform.translation + Vec3::Y;
+    let Some((_, meta)) = room_map.rooms.iter().choose(&mut rand::thread_rng()) else { return };
+    let Some(room_entity) = meta.entity else { return };
+    let Ok(room_transform) = room_query.get(room_entity) else { return };
 
-                let jester_entity = spawn_enemy_base(&mut commands, pos);
+    let pos = room_transform.translation + Vec3::Y;
 
-                // Материалы
-                let red = materials.add(Color::srgb(0.8, 0.2, 0.2));
-                let gray = materials.add(Color::srgb(0.5, 0.5, 0.5));
+    let jester_entity = spawn_enemy_base(&mut commands, pos);
+    spawn_jester_visuals(&mut commands, &mut meshes, &mut materials, jester_entity);
 
-                // Добавляем "блочное" тело
-                let parts = vec![
-                    BlockPart::new(
-                        "Torso",
-                        Vec3::new(0.0, 0.9, 0.0),
-                        Vec3::new(0.5, 0.6, 0.3),
-                        gray.clone(),
-                    ),
-                    BlockPart::new(
-                        "Head",
-                        Vec3::new(0.0, 1.5, 0.0),
-                        Vec3::new(0.4, 0.4, 0.4),
-                        red.clone(),
-                    ),
-                    BlockPart::new(
-                        "ArmL",
-                        Vec3::new(-0.5, 0.9, 0.0),
-                        Vec3::new(0.2, 0.5, 0.2),
-                        gray.clone(),
-                    ),
-                    BlockPart::new(
-                        "ArmR",
-                        Vec3::new(0.5, 0.9, 0.0),
-                        Vec3::new(0.2, 0.5, 0.2),
-                        gray.clone(),
-                    ),
-                    BlockPart::new(
-                        "LegL",
-                        Vec3::new(-0.2, 0.3, 0.0),
-                        Vec3::new(0.2, 0.6, 0.2),
-                        gray.clone(),
-                    ),
-                    BlockPart::new(
-                        "LegR",
-                        Vec3::new(0.2, 0.3, 0.0),
-                        Vec3::new(0.2, 0.6, 0.2),
-                        gray.clone(),
-                    ),
-                ];
-
-                spawn_blocky_body(&mut commands, &mut meshes, jester_entity, parts);
-                info!("Spawned Jester (blocky) at {:?}", pos);
-            }
-        }
-    }
+    info!("Spawned Jester (blocky) at {:?}", pos);
 }
 
+/// Базовая логическая сущность врага
 fn spawn_enemy_base(commands: &mut Commands, pos: Vec3) -> Entity {
     commands
         .spawn((
@@ -98,4 +50,26 @@ fn spawn_enemy_base(commands: &mut Commands, pos: Vec3) -> Entity {
             KinematicCharacterControllerOutput::default(),
         ))
         .id()
+}
+
+fn spawn_jester_visuals(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    parent: Entity,
+) {
+    let red  = materials.add(Color::srgb(0.8, 0.2, 0.2));
+    let gray = materials.add(Color::srgb(0.5, 0.5, 0.5));
+
+    // 1. Спавним блочное тело как детей `parent`
+    let body = make_jester_body(red, gray);
+    body.spawn(commands, meshes, parent);
+
+    // 2. Загружаем нужную позу
+    //    (путь относительно корня проекта; RON-файлы лежат в assets/poses/)
+    let pose = BlockPose::from_ron_file("assets/poses/idle.ron")
+        .expect("failed to load pose");
+
+    // 3. Вешаем PoseToApply на родителя, у которого уже есть Children
+    commands.entity(parent).insert(PoseToApply(pose));
 }

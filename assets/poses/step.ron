@@ -1,0 +1,7 @@
+BlockPose(
+  parts: [
+    (name: "ThighL", offset: (-0.15, 0.75, 0.2), rotation: (0.1, 0.0, 0.0, 0.995)),
+    (name: "ShinL", offset: (-0.15, 0.45, 0.25), rotation: (0.1, 0.0, 0.0, 0.995)),
+    (name: "FootL", offset: (-0.15, 0.1, 0.3), rotation: (0.0, 0.0, 0.0, 1.0)),
+  ]
+)

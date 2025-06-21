@@ -6,6 +6,7 @@ use bevy_rapier3d::render::RapierDebugRenderPlugin;
 
 use crate::assets::MyAssets;
 use crate::audio::plugin::SubAudioPlugin;
+use crate::block_bodies::animation::apply_pose_once_system;
 use crate::camera::plugin::CameraPlugin;
 use crate::core::fps_stats::FpsStatsPlugin;
 use crate::enemy::plugin::EnemyPlugin;
@@ -48,5 +49,6 @@ pub fn run() {
         .add_plugins(ProjectilePlugin)
         .add_plugins(WorldPlugin)
         .add_plugins(EnemyPlugin)
+        .add_systems(Update, apply_pose_once_system)
         .run();
 }

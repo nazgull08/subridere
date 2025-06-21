@@ -1,0 +1,6 @@
+BlockPose(
+  parts: [
+    (name: "ArmL", offset: (-0.45,1.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0)),
+    (name: "ArmR", offset: (0.45, 1.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0)),
+  ]
+)
