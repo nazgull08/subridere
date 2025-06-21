@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 
 pub fn setup_ambient_light(mut _commands: Commands) {
-    println!("spawn abmient");
     /*
     commands.insert_resource(AmbientLight {
         color: Color::srgb(0.25, 0.25, 0.25), // тускло-серый фон

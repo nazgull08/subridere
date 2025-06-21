@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use super::component::Mana;
+use bevy::prelude::*;
 
 pub fn regenerate_mana(mut query: Query<&mut Mana>, time: Res<Time>) {
     for mut mana in &mut query {

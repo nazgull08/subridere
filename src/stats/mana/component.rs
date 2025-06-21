@@ -38,4 +38,3 @@ impl Mana {
         self.current > 0.0
     }
 }
-

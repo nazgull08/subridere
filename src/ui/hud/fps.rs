@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::core::fps_stats::FpsData;
+use bevy::prelude::*;
 
 #[derive(Component)]
 struct FpsText;
@@ -9,7 +9,7 @@ pub struct UiFpsPlugin;
 impl Plugin for UiFpsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_fps_ui)
-           .add_systems(Update, update_fps_ui);
+            .add_systems(Update, update_fps_ui);
     }
 }
 
@@ -30,10 +30,19 @@ fn spawn_fps_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|parent| {
             parent
-                .spawn((Text::new("FPS: "), TextFont { font: font.clone(), ..default() }))
+                .spawn((
+                    Text::new("FPS: "),
+                    TextFont {
+                        font: font.clone(),
+                        ..default()
+                    },
+                ))
                 .with_child((
                     TextSpan::from("0.0"),
-                    TextFont { font: font.clone(), ..default() },
+                    TextFont {
+                        font: font.clone(),
+                        ..default()
+                    },
                     TextColor(Color::srgba(1.0, 1.0, 0.5, 0.7)),
                     FpsText,
                 ));

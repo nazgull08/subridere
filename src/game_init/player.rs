@@ -6,11 +6,7 @@ use crate::{
     input::component::PlayerControlled,
     player::component::{PLAYER_START_POS, Player, PlayerVisual},
     player::visual::create_player_body_bundle,
-    stats::{
-        health::component::Health,
-        mana::component::Mana,
-        stamina::component::Stamina,
-    },
+    stats::{health::component::Health, mana::component::Mana, stamina::component::Stamina},
     unit::component::{Grounded, Unit, Velocity},
 };
 
@@ -25,7 +21,8 @@ pub fn spawn_player(
     let visual = PlayerVisual::default();
     let (mesh, material) = create_player_body_bundle(&mut meshes, &mut materials, &visual);
 
-    let player_id = commands.spawn_empty()
+    let player_id = commands
+        .spawn_empty()
         .insert(Player)
         .insert(Unit)
         .insert(PlayerControlled)

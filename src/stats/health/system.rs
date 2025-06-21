@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use super::component::Health;
+use bevy::prelude::*;
 
 pub fn regenerate_health(mut query: Query<&mut Health>, time: Res<Time>) {
     for mut health in &mut query {

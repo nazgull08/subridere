@@ -106,10 +106,11 @@ pub fn spawn_maze_rooms(
     next_state.set(InitStage::MazeReady);
 }
 
-pub fn spawn_room_lights(mut commands: Commands, room_map: Res<RoomMap>,
+pub fn spawn_room_lights(
+    mut commands: Commands,
+    room_map: Res<RoomMap>,
     mut next_state: ResMut<NextState<InitStage>>,
 ) {
-    println!("room map {:?}", room_map);
     for (grid_pos, room) in room_map.rooms.iter() {
         if !room.has_light || room.entity.is_none() {
             continue;
@@ -117,7 +118,6 @@ pub fn spawn_room_lights(mut commands: Commands, room_map: Res<RoomMap>,
 
         let room_entity = room.entity.unwrap();
         let light_pos = Vec3::new(0.0, 5.0, 0.0); // чуть выше пола, по центру
-        println!("room light {:?}", grid_pos);
 
         commands.entity(room_entity).with_children(|child| {
             child.spawn((
@@ -132,8 +132,6 @@ pub fn spawn_room_lights(mut commands: Commands, room_map: Res<RoomMap>,
                 Name::new("RoomLight"),
             ));
         });
-
-        println!("spawned light in room {:?}", grid_pos);
         next_state.set(InitStage::LightsReady);
     }
 }

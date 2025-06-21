@@ -14,9 +14,9 @@ use crate::game_init::plugin::GameInitPlugin;
 use crate::input::plugin::InputPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::stats::plugin::StatsPlugin;
+use crate::ui::hud::plugin::HudUiPlugin;
 use crate::unit::plugin::UnitPlugin;
 use crate::world::plugin::WorldPlugin;
-use crate::ui::hud::plugin::HudUiPlugin;
 
 pub fn run() {
     App::new()

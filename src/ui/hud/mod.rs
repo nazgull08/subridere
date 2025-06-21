@@ -1,3 +1,3 @@
 pub mod fps;
-pub mod stats;
 pub mod plugin;
+pub mod stats;

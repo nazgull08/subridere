@@ -1,10 +1,6 @@
-use bevy::prelude::*;
-use crate::stats::{
-    health::component::Health,
-    mana::component::Mana,
-    stamina::component::Stamina,
-};
 use crate::player::component::Player;
+use crate::stats::{health::component::Health, mana::component::Mana, stamina::component::Stamina};
+use bevy::prelude::*;
 
 #[derive(Component)]
 struct HpText;
@@ -18,7 +14,7 @@ pub struct UiStatsPlugin;
 impl Plugin for UiStatsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_stats_ui)
-           .add_systems(Update, update_stats_ui);
+            .add_systems(Update, update_stats_ui);
     }
 }
 
@@ -38,31 +34,61 @@ fn spawn_stats_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|parent| {
             // HP
-            parent.spawn((Text::new("HP: "), TextFont { font: font.clone(), ..default() }))
-                  .with_child((
-                      TextSpan::from("0"),
-                      TextFont { font: font.clone(), ..default() },
-                      TextColor(Color::srgb(1.0, 0.2, 0.2)),
-                      HpText,
-                  ));
+            parent
+                .spawn((
+                    Text::new("HP: "),
+                    TextFont {
+                        font: font.clone(),
+                        ..default()
+                    },
+                ))
+                .with_child((
+                    TextSpan::from("0"),
+                    TextFont {
+                        font: font.clone(),
+                        ..default()
+                    },
+                    TextColor(Color::srgb(1.0, 0.2, 0.2)),
+                    HpText,
+                ));
 
             // MP
-            parent.spawn((Text::new("MP: "), TextFont { font: font.clone(), ..default() }))
-                  .with_child((
-                      TextSpan::from("0"),
-                      TextFont { font: font.clone(), ..default() },
-                      TextColor(Color::srgb(0.2, 0.2, 1.0)),
-                      MpText,
-                  ));
+            parent
+                .spawn((
+                    Text::new("MP: "),
+                    TextFont {
+                        font: font.clone(),
+                        ..default()
+                    },
+                ))
+                .with_child((
+                    TextSpan::from("0"),
+                    TextFont {
+                        font: font.clone(),
+                        ..default()
+                    },
+                    TextColor(Color::srgb(0.2, 0.2, 1.0)),
+                    MpText,
+                ));
 
             // SP
-            parent.spawn((Text::new("SP: "), TextFont { font: font.clone(), ..default() }))
-                  .with_child((
-                      TextSpan::from("0"),
-                      TextFont { font: font.clone(), ..default() },
-                      TextColor(Color::srgb(0.2, 1.0, 0.2)),
-                      SpText,
-                  ));
+            parent
+                .spawn((
+                    Text::new("SP: "),
+                    TextFont {
+                        font: font.clone(),
+                        ..default()
+                    },
+                ))
+                .with_child((
+                    TextSpan::from("0"),
+                    TextFont {
+                        font: font.clone(),
+                        ..default()
+                    },
+                    TextColor(Color::srgb(0.2, 1.0, 0.2)),
+                    SpText,
+                ));
         });
 }
 

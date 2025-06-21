@@ -1,6 +1,6 @@
-use bevy::prelude::*;
 use bevy::animation::graph::AnimationGraph;
 use bevy::animation::{AnimationPlayer, graph::AnimationGraphHandle};
+use bevy::prelude::*;
 
 #[derive(Resource)]
 pub struct SkeletonAnimAssets {

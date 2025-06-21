@@ -34,7 +34,7 @@ pub fn spawn_projectile(
             intensity: 3000.0,
             radius: 15.0,
             color: Color::srgb(1.0, 0.2, 0.2),
-            shadows_enabled: true,
+            shadows_enabled: false,
             ..default()
         },
         Name::new("Projectile"),

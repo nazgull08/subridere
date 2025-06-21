@@ -3,7 +3,7 @@ use bevy::prelude::*;
 
 /// Этапы иниц
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Default)]
-#[states(scoped_entities)] 
+#[states(scoped_entities)]
 pub enum InitStage {
     #[default]
     Setup,

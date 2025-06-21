@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+use crate::stats::mana::component::Mana;
 use crate::{
     fighting::projectile::spawn::spawn_projectile,
     unit::component::{DashIntent, Grounded, JumpIntent, MoveIntent, ShootIntent, Unit, Velocity},
 };
-use crate::stats::mana::component::Mana;
 
 // Movement tuning constants
 const MOVE_ACCEL: f32 = 50.0;
@@ -96,7 +96,6 @@ pub fn apply_velocity(
         controller.translation = Some(velocity.0 * dt);
     }
 }
-
 
 pub fn handle_shoot_intents(
     mut commands: Commands,
