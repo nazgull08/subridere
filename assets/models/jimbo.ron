@@ -1,0 +1,20 @@
+BlockModelFile(
+  parts: [
+    (name: "Torso", parent: None, local_offset: (0.0, 1.0, 0.0), size: (0.5, 0.6, 0.3), material: "green", socket: None),
+
+    (name: "Neck2", parent: Some("Torso"), local_offset: (0.0, 0.4, 0.0), size: (0.2, 0.2, 0.2), material: "gray", socket: None),
+    (name: "Neck1", parent: Some("Neck2"), local_offset: (0.0, 0.4, 0.0), size: (0.2, 0.2, 0.2), material: "gray", socket: None),
+
+    (name: "Head", parent: Some("Neck1"), local_offset: (0.0, 0.4, 0.0), size: (0.4, 0.4, 0.4), material: "red", socket: None),
+
+    // Левая рука
+    (name: "ShoulderL", parent: Some("Torso"), local_offset: (-0.45, 0.3, 0.0), size: (0.2, 0.2, 0.2), material: "red", socket: None),
+    (name: "ArmL", parent: Some("ShoulderL"), local_offset: (0.0, -0.3, 0.0), size: (0.2, 0.4, 0.2), material: "gray", socket: None),
+    (name: "HandL", parent: Some("ArmL"), local_offset: (0.0, -0.2, 0.0), size: (0.2, 0.2, 0.2), material: "red", socket: None),
+
+    // Правая рука
+    (name: "ShoulderR", parent: Some("Torso"), local_offset: (0.45, 0.3, 0.0), size: (0.2, 0.2, 0.2), material: "red", socket: None),
+    (name: "ArmR", parent: Some("ShoulderR"), local_offset: (0.0, -0.3, 0.0), size: (0.2, 0.4, 0.2), material: "gray", socket: None),
+    (name: "HandR", parent: Some("ArmR"), local_offset: (0.0, -0.2, 0.0), size: (0.2, 0.2, 0.2), material: "red", socket: None),
+  ]
+)

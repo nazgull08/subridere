@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 
 use crate::{
-    enemy::spawn::spawn_jester_in_room,
     game_init::{lighting::spawn_lighting, player::spawn_player},
 };
 

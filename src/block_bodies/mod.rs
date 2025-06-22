@@ -1,6 +1,4 @@
 pub mod animation;
-pub mod body;
-pub mod enemies;
+pub mod model;
 pub mod pose;
-pub mod humanoid;
 pub mod utils;

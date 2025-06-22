@@ -31,8 +31,8 @@ pub fn spawn_projectile(
         Collider::cuboid(size / 2.0, size / 2.0, size / 2.0),
         Projectile::new(size, lifetime, velocity),
         PointLight {
-            intensity: 3000.0,
-            radius: 15.0,
+            intensity: 30000.0,
+            radius: 25.0,
             color: Color::srgb(1.0, 0.2, 0.2),
             shadows_enabled: false,
             ..default()

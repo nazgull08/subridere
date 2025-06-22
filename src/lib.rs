@@ -1,5 +1,4 @@
 pub mod app;
-pub mod assets;
 pub mod audio;
 pub mod block_bodies;
 pub mod camera;

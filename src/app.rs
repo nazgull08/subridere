@@ -2,9 +2,7 @@ use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy_kira_audio::AudioPlugin;
 use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
-use bevy_rapier3d::render::RapierDebugRenderPlugin;
 
-use crate::assets::MyAssets;
 use crate::audio::plugin::SubAudioPlugin;
 use crate::block_bodies::animation::apply_pose_once_system;
 use crate::camera::plugin::CameraPlugin;
@@ -31,7 +29,6 @@ pub fn run() {
             ..default()
         }))
         .add_plugins(GameInitPlugin)
-        .init_resource::<MyAssets>()
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default().with_default_system_setup(true))
         //.add_plugins(RapierDebugRenderPlugin::default())

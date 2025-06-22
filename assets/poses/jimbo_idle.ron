@@ -1,0 +1,13 @@
+BlockPose(
+  parts: [
+    (name: "Neck2", rotation: (0.0, 0.0, 0.0, 1.0)),
+    (name: "Neck1", rotation: (0.0, 0.0, 0.0, 1.0)),
+    (name: "Head",  rotation: (0.0, 0.0, 0.0, 1.0)),
+    (name: "ShoulderL", rotation: (0.0, 0.0, 0.0, 1.0)),
+    (name: "ArmL", rotation: (0.0, 0.0, 0.0, 1.0)),
+    (name: "HandL", rotation: (0.0, 0.0, 0.0, 1.0)),
+    (name: "ShoulderR", rotation: (0.0, 0.0, 0.0, 1.0)),
+    (name: "ArmR", rotation: (0.0, 0.0, 0.0, 1.0)),
+    (name: "HandR", rotation: (0.0, 0.0, 0.0, 1.0)),
+  ]
+)

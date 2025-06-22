@@ -1,34 +1,39 @@
+// src/block_bodies/animation.rs
+
 use bevy::prelude::*;
-use crate::block_bodies::pose::BlockPose;
+use crate::block_bodies::pose::{BlockPose, PoseToApply};
 
-use super::pose::PoseToApply;
-
-/// Применяет позу к дочерним сущностям с `Name`, `Transform`
-pub fn apply_pose_to_body(
-    parent: Entity,
+/// Рекурсивно применяет позу к телу, не затирая позицию
+pub fn apply_pose_to_body_recursive(
+    entity: Entity,
     pose: &BlockPose,
-    children: &Children,
     transforms: &mut Query<(&Name, &mut Transform)>,
+    children_query: &Query<&Children>,
 ) {
-    for child in children.iter() {
-        if let Ok((name, mut transform)) = transforms.get_mut(child) {
-            if let Some(part_pose) = pose.get_part(name.as_str()) {
-                transform.translation = part_pose.offset;
-                transform.rotation = part_pose.rotation;
-            }
+    if let Ok((name, mut transform)) = transforms.get_mut(entity) {
+        if let Some(part_pose) = pose.get_part(name.as_str()) {
+            // Применяем только поворот, оставляя трансляцию как есть
+            transform.rotation = part_pose.rotation;
+        }
+    }
+
+    // Обрабатываем дочерние сущности
+    if let Ok(children) = children_query.get(entity) {
+        for child in children.iter() {
+            apply_pose_to_body_recursive(child, pose, transforms, children_query);
         }
     }
 }
 
-
+/// Система одноразового применения позы (удаляет компонент `PoseToApply`)
 pub fn apply_pose_once_system(
     mut commands: Commands,
-    query: Query<(Entity, &Children, &PoseToApply)>,
+    query: Query<(Entity, &PoseToApply)>,
     mut transforms: Query<(&Name, &mut Transform)>,
+    children_query: Query<&Children>,
 ) {
-    for (entity, children, pose) in &query {
-        println!("apply_pose_system");
-        super::animation::apply_pose_to_body(entity, &pose.0, children, &mut transforms);
+    for (entity, pose) in &query {
+        apply_pose_to_body_recursive(entity, &pose.0, &mut transforms, &children_query);
         commands.entity(entity).remove::<PoseToApply>();
     }
 }
