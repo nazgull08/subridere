@@ -1,0 +1,7 @@
+BlockPose(
+  parts: [
+    (name:"ShoulderL", rotation:(0.0, 0.0, -0.174, 0.985)),   // -20° Z
+    (name:"ShoulderR", rotation:(0.0, 0.0,  0.174, 0.985)),   // +20° Z
+    (name:"Neck1",     rotation:(0.0, 0.0,  0.0,   1.0)),
+  ]
+)

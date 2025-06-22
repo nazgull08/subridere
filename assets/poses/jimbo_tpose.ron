@@ -1,18 +1,18 @@
 BlockPose(
   parts: [
-    // Шея и голова — по умолчанию
+    // Шея и голова
     (name: "Neck2", rotation: (0.0, 0.0, 0.0, 1.0)),
     (name: "Neck1", rotation: (0.0, 0.0, 0.0, 1.0)),
     (name: "Head",  rotation: (0.0, 0.0, 0.0, 1.0)),
 
-    // Левая рука — горизонтально влево
-    (name: "ShoulderL", rotation: (0.0, 0.0, 0.707, 0.707)),  // 90° вокруг Z
-    (name: "ArmL", rotation: (0.0, 0.0, 0.0, 1.0)),
-    (name: "HandL", rotation: (0.0, 0.0, 0.0, 1.0)),
+    // Левая рука — горизонтально влево (-90° вокруг Z)
+    (name: "ShoulderL", rotation: (0.0, 0.0, -0.707, 0.707)),
+    (name: "ArmL",      rotation: (0.0, 0.0,  0.0,   1.0)),
+    (name: "HandL",     rotation: (0.0, 0.0,  0.0,   1.0)),
 
-    // Правая рука — горизонтально вправо
-    (name: "ShoulderR", rotation: (0.0, 0.0, -0.707, 0.707)), // -90° вокруг Z
-    (name: "ArmR", rotation: (0.0, 0.0, 0.0, 1.0)),
-    (name: "HandR", rotation: (0.0, 0.0, 0.0, 1.0)),
+    // Правая рука — горизонтально вправо (+90° вокруг Z)
+    (name: "ShoulderR", rotation: (0.0, 0.0,  0.707, 0.707)),
+    (name: "ArmR",      rotation: (0.0, 0.0,  0.0,   1.0)),
+    (name: "HandR",     rotation: (0.0, 0.0,  0.0,   1.0)),
   ]
 )

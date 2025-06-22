@@ -1,4 +1,4 @@
-// src/block_bodies/animation.rs
+// src/block_bodies/animation/apply.rs
 
 use bevy::prelude::*;
 use crate::block_bodies::pose::{BlockPose, PoseToApply};

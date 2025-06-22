@@ -10,14 +10,14 @@ use thiserror::Error;
 pub struct PoseToApply(pub BlockPose);
 
 /// Поворот части тела в позе
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct BlockPosePart {
     pub name: String,
     pub rotation: Quat,
 }
 
 /// Позы определяются только поворотами (rotation), а расположение берётся из модели
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct BlockPose {
     pub parts: Vec<BlockPosePart>,
 }

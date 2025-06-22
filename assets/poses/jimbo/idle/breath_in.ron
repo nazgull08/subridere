@@ -1,0 +1,18 @@
+BlockPose(
+  parts: [
+    (name:"Torso",     rotation:(-0.087, 0.0, 0.0, 0.996)),   // слегка назад
+    (name:"ShoulderL", rotation:(0.0, 0.0, -0.087, 0.996)),   // чуть ближе к телу
+    (name:"ShoulderR", rotation:(0.0, 0.0,  0.087, 0.996)),
+    (name:"Neck1",     rotation:(0.087, 0.0, 0.0, 0.996)),    // голова чуть вверх
+  ]
+)
+
+/*
+BlockPose(
+  parts: [
+    (name:"Torso",     rotation:(-0.087, 0.0, 0.0, 0.996)),   // слегка назад
+    (name:"ShoulderL", rotation:(0.0, 0.0, -0.087, 0.996)),   // чуть ближе к телу
+    (name:"ShoulderR", rotation:(0.0, 0.0,  0.087, 0.996)),
+    (name:"Neck1",     rotation:(0.087, 0.0, 0.0, 0.996)),    // голова чуть вверх
+  ]
+)*/

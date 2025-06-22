@@ -2,9 +2,10 @@ use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy_kira_audio::AudioPlugin;
 use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
+use bevy_rapier3d::render::RapierDebugRenderPlugin;
 
 use crate::audio::plugin::SubAudioPlugin;
-use crate::block_bodies::animation::apply_pose_once_system;
+use crate::block_bodies::animation::plugin::BlockAnimationPlugin;
 use crate::camera::plugin::CameraPlugin;
 use crate::core::fps_stats::FpsStatsPlugin;
 use crate::enemy::plugin::EnemyPlugin;
@@ -45,7 +46,7 @@ pub fn run() {
         .add_plugins(PlayerPlugin)
         .add_plugins(ProjectilePlugin)
         .add_plugins(WorldPlugin)
+        .add_plugins(BlockAnimationPlugin)
         .add_plugins(EnemyPlugin)
-        .add_systems(Update, apply_pose_once_system)
         .run();
 }

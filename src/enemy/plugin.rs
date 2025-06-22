@@ -1,7 +1,7 @@
-use crate::enemy::{fsm::update_enemy_fsm, spawn::spawn_jester_in_room};
+use crate::enemy::{fsm::update_enemy_fsm, spawn::jester::spawn_jester_in_room};
 use bevy::prelude::*;
 
-use super::spawn::spawn_jimbo_in_room;
+use super::spawn::jimbo::spawn_jimbo_in_room;
 
 pub struct EnemyPlugin;
 
