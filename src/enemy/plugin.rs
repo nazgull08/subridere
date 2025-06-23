@@ -1,7 +1,7 @@
-use crate::enemy::{fsm::update_enemy_fsm, spawn::jester::spawn_jester_in_room};
+use crate::enemy::spawn::jester::spawn_jester_in_room;
 use bevy::prelude::*;
 
-use super::spawn::jimbo::spawn_jimbo_in_room;
+use super::{fsm::update_enemy_fsm_system, spawn::jimbo::spawn_jimbo_in_room, system::update_enemy_animation_on_state_change};
 
 pub struct EnemyPlugin;
 
@@ -12,6 +12,7 @@ impl Plugin for EnemyPlugin {
             .add_systems(Startup, spawn_jimbo_in_room)
             .add_systems(Startup, spawn_jimbo_in_room)
             .add_systems(Startup, spawn_jimbo_in_room)
-            .add_systems(Update, update_enemy_fsm);
+            .add_systems(Update, update_enemy_fsm_system)
+            .add_systems(Update, update_enemy_animation_on_state_change);
     }
 }

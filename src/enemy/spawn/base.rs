@@ -9,26 +9,35 @@ use crate::{
 
 /// Общий базовый спавн для врага
 pub fn spawn_enemy_base(commands: &mut Commands, pos: Vec3, kind: EnemyKind) -> Entity {
-    commands
-        .spawn((
-            Enemy,
-            kind,
-            EnemyState::Idle,
-            Unit,
-            Grounded(true),
-            Velocity::default(),
-            Health::new(100.0, 0.0),
-            MeleeAttack { damage: 15.0 },
-            Transform::from_translation(pos),
-            GlobalTransform::default(),
-            Visibility::Visible,
-            Name::new(format!("{kind:?}")),
-            Collider::capsule_y(0.9, 0.3),
-            KinematicCharacterController {
-                offset: CharacterLength::Absolute(0.01),
-                ..default()
-            },
-            KinematicCharacterControllerOutput::default(),
-        ))
-        .id()
+    let mut entity = commands.spawn_empty();
+
+    entity.insert((
+        Enemy,
+        kind,
+        EnemyState::Idle,
+        StateTimer(Timer::from_seconds(2.0, TimerMode::Once)),
+        Unit,
+        Grounded(true),
+        Velocity::default(),
+        Health::new(100.0, 0.0),
+        MeleeAttack { damage: 15.0 },
+    ));
+
+    entity.insert((
+        Transform::from_translation(pos),
+        GlobalTransform::default(),
+        Visibility::Visible,
+        Name::new(format!("{kind:?}")),
+    ));
+
+    entity.insert((
+        Collider::capsule_y(0.9, 0.3),
+        KinematicCharacterController {
+            offset: CharacterLength::Absolute(0.01),
+            ..default()
+        },
+        KinematicCharacterControllerOutput::default(),
+    ));
+
+    entity.id()
 }

@@ -19,10 +19,5 @@ BlockModelFile(
     (name: "ShoulderR", parent: Some("Torso"), local_offset: ( 0.47, 0.32, -0.05), size: (0.26, 0.26, 0.3), material: "red"),
     (name: "ArmR",      parent: Some("ShoulderR"), local_offset: (0.0, -0.4, 0.0), size: (0.16, 0.6, 0.16), material: "gray"),
     (name: "HandR",     parent: Some("ArmR"), local_offset: (0.0, -0.4, -0.03), size: (0.14, 0.35, 0.14), material: "red"),
-
-    // 🐍 ХВОСТ — массивный, вытянутый назад
-    (name: "TailBase", parent: Some("Torso"), local_offset: (0.0, -0.3, -0.35), size: (0.4, 0.25, 0.6), material: "green"),
-    (name: "TailMid",  parent: Some("TailBase"), local_offset: (0.0, -0.05, -0.55), size: (0.34, 0.2, 0.5), material: "green"),
-    (name: "TailTip",  parent: Some("TailMid"),  local_offset: (0.0,  0.0, -0.45), size: (0.28, 0.15, 0.4), material: "green"),
   ]
 )

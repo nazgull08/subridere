@@ -4021,6 +4021,7 @@ dependencies = [
  "bevy",
  "bevy_kira_audio",
  "bevy_rapier3d",
+ "fastrand",
  "rand 0.8.5",
  "ron 0.10.1",
  "serde",
