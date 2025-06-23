@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use crate::enemy::component::*;
 
 pub mod plugin;
-pub mod walk;
 pub mod idle;
 
 pub fn update_enemy_fsm_system(
@@ -16,16 +15,16 @@ pub fn update_enemy_fsm_system(
         match *state {
             EnemyState::Idle => {
                 if timer.0.finished() {
-                    // Выбрать новую цель
+                    // Выбрать новую цель — радиус увеличен
                     let offset = Vec3::new(
-                        fastrand::f32() * 6.0 - 3.0,
+                        fastrand::f32() * 12.0 - 6.0, // от -6 до +6
                         0.0,
-                        fastrand::f32() * 6.0 - 3.0,
+                        fastrand::f32() * 12.0 - 6.0,
                     );
                     let target_pos = transform.translation + offset;
                     commands.entity(entity).insert(TargetPos(target_pos));
                     *state = EnemyState::Walk;
-                    timer.0 = Timer::from_seconds(10.0, TimerMode::Once); // запас на движение
+                    timer.0 = Timer::from_seconds(10.0, TimerMode::Once);
                 }
             }
 
@@ -33,7 +32,7 @@ pub fn update_enemy_fsm_system(
                 let Some(target) = target else { continue };
                 let dist = transform.translation.distance(target.0);
                 if dist < 0.5 || timer.0.finished() {
-                    // Достигли точки или вышло время — возвращаемся в Idle
+                    // Достигли цели или вышло время
                     commands.entity(entity).remove::<TargetPos>();
                     *state = EnemyState::Idle;
                     timer.0 = Timer::from_seconds(5.0, TimerMode::Once);
