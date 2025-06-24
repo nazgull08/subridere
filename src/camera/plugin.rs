@@ -1,4 +1,4 @@
-use crate::camera::flycam::{FlyCamera, fly_camera_input};
+use crate::camera::flycam::fly_camera_input;
 use bevy::prelude::*;
 
 use super::controller::grab_mouse;

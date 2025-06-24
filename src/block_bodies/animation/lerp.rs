@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::block_bodies::pose::{BlockPose, BlockPosePart, PoseToApply};
+use bevy::prelude::*;
 
 #[derive(Debug, Default, Component)]
 pub struct PoseLerp {
@@ -27,11 +27,16 @@ pub fn lerp_pose_system(
         for name in from_map.keys() {
             if let (Some(a), Some(b)) = (from_map.get(name), to_map.get(name)) {
                 let rot = a.rotation.slerp(b.rotation, t);
-                parts.push(BlockPosePart { name: name.clone(), rotation: rot });
+                parts.push(BlockPosePart {
+                    name: name.clone(),
+                    rotation: rot,
+                });
             }
         }
 
-        commands.entity(entity).insert(PoseToApply(BlockPose { parts }));
+        commands
+            .entity(entity)
+            .insert(PoseToApply(BlockPose { parts }));
 
         if lerp.timer.finished() {
             if lerp.looping {

@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+use crate::enemy::component::Enemy;
 use crate::stats::mana::component::Mana;
+use crate::unit::component::{AttackIntent, LookAtIntent, TurnIntent};
 use crate::{
     fighting::projectile::spawn::spawn_projectile,
     unit::component::{DashIntent, Grounded, JumpIntent, MoveIntent, ShootIntent, Unit, Velocity},
@@ -58,6 +60,18 @@ pub fn apply_jump_intents(
     }
 }
 
+
+pub fn apply_turn_intents(
+    mut commands: Commands,
+    mut query: Query<(Entity, &TurnIntent, &mut Transform)>,
+) {
+    for (entity, intent, mut transform) in &mut query {
+        transform.rotation = intent.0;
+        commands.entity(entity).remove::<TurnIntent>();
+    }
+}
+
+
 /// Overrides horizontal velocity for dash intents.
 pub fn apply_dash_intents(
     mut commands: Commands,
@@ -96,6 +110,62 @@ pub fn apply_velocity(
         controller.translation = Some(velocity.0 * dt);
     }
 }
+
+
+pub fn apply_move_intents_for_enemies(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut query: Query<(Entity, &MoveIntent, &mut Velocity), (With<Enemy>, With<Unit>)>,
+) {
+    let dt = time.delta_secs();
+
+    for (entity, intent, mut velocity) in &mut query {
+        let direction = intent.0.normalize_or_zero();
+        velocity.0.x += direction.x * 4.0 * dt;
+        velocity.0.z += direction.z * 4.0 * dt;
+
+        commands.entity(entity).remove::<MoveIntent>();
+    }
+}
+
+/// Applies look rotation based on LookAtIntent — smooth Y-axis facing.
+pub fn apply_look_intents_for_enemies(
+    mut commands: Commands,
+    mut query: Query<(Entity, &LookAtIntent, &mut Transform), (With<Enemy>, With<Unit>)>,
+) {
+    for (entity, intent, mut transform) in &mut query {
+        let direction = intent.0 - transform.translation;
+        if direction.length_squared() > 0.001 {
+            let yaw = direction.z.atan2(direction.x);
+            let target_rotation = Quat::from_rotation_y(-yaw);
+            transform.rotation = transform.rotation.slerp(target_rotation, 0.2);
+        }
+
+        commands.entity(entity).remove::<LookAtIntent>();
+    }
+}
+
+/// Processes enemy attack intents. Later: apply hit, trigger animations, sounds, etc.
+pub fn apply_attack_intents_for_enemies(
+    mut commands: Commands,
+    query: Query<(Entity, &AttackIntent), With<Enemy>>,
+) {
+    for (entity, intent) in &query {
+        match intent {
+            AttackIntent::Bite => {
+                tracing::info!(?entity, "Jimbo tries to BITE!");
+                // TODO: play bite animation, apply hitbox, etc
+            }
+            AttackIntent::Slash => {
+                tracing::info!(?entity, "Jimbo tries to SLASH!");
+                // TODO: play slash animation, apply hitbox, etc
+            }
+        }
+
+        commands.entity(entity).remove::<AttackIntent>();
+    }
+}
+
 
 pub fn handle_shoot_intents(
     mut commands: Commands,

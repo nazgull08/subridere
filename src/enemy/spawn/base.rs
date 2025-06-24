@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use crate::{
-    enemy::{component::*, kind::EnemyKind},
+    enemy::component::*,
     stats::health::component::Health,
     unit::component::{Grounded, Unit, Velocity},
 };
@@ -20,7 +20,10 @@ pub fn spawn_enemy_base(commands: &mut Commands, pos: Vec3, kind: EnemyKind) -> 
         Grounded(true),
         Velocity::default(),
         Health::new(100.0, 0.0),
-        MeleeAttack { damage: 15.0 },
+        MeleeAttack {
+            bite_damage: 15.0,
+            slash_damage: 20.0,
+        },
     ));
 
     entity.insert((
@@ -38,6 +41,8 @@ pub fn spawn_enemy_base(commands: &mut Commands, pos: Vec3, kind: EnemyKind) -> 
         },
         KinematicCharacterControllerOutput::default(),
     ));
+    entity.insert((EnemyMemory::default(),
+                SightRange(3.0)));
 
     entity.id()
 }

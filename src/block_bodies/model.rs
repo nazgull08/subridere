@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SocketType {
     WeaponMain,
@@ -76,12 +75,14 @@ pub fn spawn_model_hierarchical(
             part.size.z,
         )));
 
-        let entity = commands.spawn((
-            Mesh3d(mesh),
-            MeshMaterial3d(part.material.clone()),
-            Transform::from_translation(part.local_offset),
-            Name::new(part.name.clone()),
-        )).id();
+        let entity = commands
+            .spawn((
+                Mesh3d(mesh),
+                MeshMaterial3d(part.material.clone()),
+                Transform::from_translation(part.local_offset),
+                Name::new(part.name.clone()),
+            ))
+            .id();
 
         entity_map.insert(part.name.clone(), entity);
     }
@@ -93,7 +94,10 @@ pub fn spawn_model_hierarchical(
             if let Some(parent_entity) = entity_map.get(parent_name) {
                 commands.entity(*parent_entity).add_child(entity);
             } else {
-                warn!("Parent '{}' not found for part '{}'", parent_name, part.name);
+                warn!(
+                    "Parent '{}' not found for part '{}'",
+                    parent_name, part.name
+                );
                 commands.entity(root_entity).add_child(entity); // fallback
             }
         } else {

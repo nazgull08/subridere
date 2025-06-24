@@ -1,7 +1,7 @@
 // src/block_bodies/animation/apply.rs
 
-use bevy::prelude::*;
 use crate::block_bodies::pose::{BlockPose, PoseToApply};
+use bevy::prelude::*;
 
 /// Рекурсивно применяет позу к телу, не затирая позицию
 pub fn apply_pose_to_body_recursive(

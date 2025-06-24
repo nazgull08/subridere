@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{
-    game_init::{lighting::spawn_lighting, player::spawn_player},
-};
+use crate::game_init::{lighting::spawn_lighting, player::spawn_player};
 
 use super::{
     lighting::setup_ambient_light,

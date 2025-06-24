@@ -111,7 +111,7 @@ pub fn spawn_room_lights(
     room_map: Res<RoomMap>,
     mut next_state: ResMut<NextState<InitStage>>,
 ) {
-    for (grid_pos, room) in room_map.rooms.iter() {
+    for (_, room) in room_map.rooms.iter() {
         if !room.has_light || room.entity.is_none() {
             continue;
         }
@@ -123,7 +123,7 @@ pub fn spawn_room_lights(
             child.spawn((
                 PointLight {
                     color: Color::srgb(0.0, 0.7, 0.0), // тёплый свет
-                    intensity: 10_000_00.0,
+                    intensity: 1_000_000.0,
                     range: 200.0,
                     shadows_enabled: true,
                     ..default()

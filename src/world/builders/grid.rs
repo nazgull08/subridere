@@ -3,7 +3,6 @@
 use crate::world::builders::room::spawn_simple_room;
 use crate::world::room::types::{DoorFlags, RoomMap, RoomMetadata, WallFlags};
 use bevy::prelude::*;
-use std::collections::HashMap;
 
 pub fn register_room(map: &mut RoomMap, pos: IVec3) {
     let mut wall = WallFlags::default();

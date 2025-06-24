@@ -23,6 +23,20 @@ pub struct DashIntent(pub Vec3);
 #[derive(Component)]
 pub struct MoveIntent(pub Vec3);
 
+/// Signals the entity wants to turn (face a direction).
+#[derive(Component)]
+pub struct TurnIntent(pub Quat);
+
 /// Signals the entity wants to shoot.
 #[derive(Component)]
 pub struct ShootIntent(pub Vec3);
+
+
+#[derive(Component)]
+pub struct LookAtIntent(pub Vec3); // повернуться в сторону
+
+#[derive(Component)]
+pub enum AttackIntent {
+    Bite,
+    Slash,
+}

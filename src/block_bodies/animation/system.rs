@@ -1,11 +1,10 @@
 // src/block_bodies/animation/system.rs
 
-use bevy::prelude::*;
-use crate::block_bodies::pose::{BlockPose, BlockPosePart, PoseToApply};
 use crate::block_bodies::animation::component::AnimationCycle;
 use crate::block_bodies::animation::lerp::PoseLerp;
+use crate::block_bodies::pose::{BlockPose, BlockPosePart};
+use bevy::prelude::*;
 
-/// Утилита: собирает текущую позу по Transform‑ам и именам частей
 fn extract_current_pose(
     entity: Entity,
     transforms: &Query<(&Name, &Transform)>,

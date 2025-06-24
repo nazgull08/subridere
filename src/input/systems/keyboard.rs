@@ -1,9 +1,8 @@
-use bevy::input::mouse::{MouseButtonInput, MouseMotion};
 use bevy::prelude::*;
 use bevy::window::CursorGrabMode;
 
 use crate::input::component::PlayerControlled;
-use crate::input::{component::MovementInput, resources::InputSettings};
+use crate::input::resources::InputSettings;
 use crate::unit::component::{DashIntent, JumpIntent, MoveIntent, ShootIntent};
 
 /// Processes keyboard input and generates intent components.
@@ -62,7 +61,7 @@ pub fn handle_shoot_input(
 ) {
     if buttons.just_pressed(MouseButton::Right) {
         if let (Ok(camera), Ok(player_entity)) =
-            (camera_query.get_single(), player_query.get_single())
+            (camera_query.single(), player_query.single())
         {
             let direction = camera.forward();
             commands

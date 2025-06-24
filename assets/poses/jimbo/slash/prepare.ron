@@ -1,0 +1,8 @@
+BlockPose(
+  parts: [
+    (name:"ShoulderR", rotation:(0.0, 0.0, -0.4, 0.92)),   // рука назад
+    (name:"ArmR", rotation:(-0.2, 0.0, 0.0, 0.98)),
+    (name:"HandR", rotation:(0.0, 0.0, 0.0, 1.0)),
+    (name:"Torso", rotation:(0.0, -0.1, 0.0, 0.99)),       // корпус развёрнут вправо
+  ]
+)
