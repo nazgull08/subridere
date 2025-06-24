@@ -31,7 +31,7 @@ pub fn spawn_enemy_base(commands: &mut Commands, pos: Vec3, kind: EnemyKind) -> 
     ));
 
     entity.insert((
-        Collider::capsule_y(0.9, 0.3),
+        Collider::capsule_y(0.5, 0.3),
         KinematicCharacterController {
             offset: CharacterLength::Absolute(0.01),
             ..default()

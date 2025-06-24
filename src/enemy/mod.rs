@@ -1,4 +1,3 @@
-pub mod attack;
 pub mod component;
 pub mod fsm;
 pub mod kind;

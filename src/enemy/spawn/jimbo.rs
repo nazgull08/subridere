@@ -26,7 +26,7 @@ pub fn spawn_jimbo_in_room(
     let Some(room_entity) = meta.entity else { return };
     let Ok(room_transform) = room_query.get(room_entity) else { return };
 
-    let pos = room_transform.translation + Vec3::Y + Vec3::X * 3.0;
+    let pos = room_transform.translation + Vec3::Y *0.1 +  Vec3::X * 3.0;
 
     let entity = spawn_enemy_base(&mut commands, pos, EnemyKind::Jimbo);
     spawn_jimbo_visuals(&mut commands, &mut meshes, &mut materials, entity);
