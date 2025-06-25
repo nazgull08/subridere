@@ -57,17 +57,26 @@ impl BlockModel {
     }
 }
 
-/// Спавнит иерархическую модель: каждая часть становится дочерью `parent_name`
-/// Корневые части вешаются на `root_entity`
 pub fn spawn_model_hierarchical(
     model: &BlockModel,
     commands: &mut Commands,
     meshes: &mut Assets<Mesh>,
     root_entity: Entity,
 ) {
+    let visual_root = commands
+        .spawn((
+            Name::new("VisualRoot"),
+            // Повернём на -90° по Y, чтобы `-Z` модели стал смотреть «вперёд» в мире Bevy
+            Transform::from_rotation(Quat::from_rotation_y(-std::f32::consts::FRAC_PI_2)),
+            GlobalTransform::default(),
+        ))
+        .id();
+
+    commands.entity(root_entity).add_child(visual_root);
+
     let mut entity_map: HashMap<String, Entity> = HashMap::new();
 
-    // Сначала создаём все части как сущности
+    // Создаём части
     for part in &model.parts {
         let mesh = meshes.add(Mesh::from(Cuboid::new(
             part.size.x,
@@ -87,7 +96,7 @@ pub fn spawn_model_hierarchical(
         entity_map.insert(part.name.clone(), entity);
     }
 
-    // Затем связываем по parent
+    // Собираем иерархию
     for part in &model.parts {
         let entity = entity_map[&part.name];
         if let Some(parent_name) = &part.parent {
@@ -98,10 +107,10 @@ pub fn spawn_model_hierarchical(
                     "Parent '{}' not found for part '{}'",
                     parent_name, part.name
                 );
-                commands.entity(root_entity).add_child(entity); // fallback
+                commands.entity(visual_root).add_child(entity); // fallback
             }
         } else {
-            commands.entity(root_entity).add_child(entity);
+            commands.entity(visual_root).add_child(entity); // теперь на visual_root, не на root_entity
         }
     }
 }

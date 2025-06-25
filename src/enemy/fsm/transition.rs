@@ -22,51 +22,16 @@ pub fn enemy_state_transition_system(
         match *state {
             EnemyState::Idle => {
                 if timer.0.finished() {
-                    *state = EnemyState::Walk;
+                    *state = EnemyState::MovingToTarget;
                     timer.0.set_duration(Duration::from_secs(4));
                     timer.0.reset();
                     tracing::info!(?entity, "Idle → Walk");
                 }
             }
 
-            EnemyState::Walk => {
-                // Если память говорит «преследуй игрока», сразу в Approach
-                if memory.pursue_target.is_some() {
-                    *state = EnemyState::Attack(EnemyAttackState::Approach);
-                    timer.0.set_duration(Duration::from_secs(1));
-                    timer.0.reset();
-                    tracing::info!(?entity, "Walk → Attack(Approach)");
-                    continue;
-                }
-
-                // При первом заходе в Walk генерим patrol_target
-                if memory.patrol_target.is_none() {
-                    if let Some(tf) = maybe_tf {
-                        let offset = Vec3::new(
-                            fastrand::f32() * 8.0 - 4.0,
-                            0.0,
-                            fastrand::f32() * 8.0 - 4.0,
-                        );
-                        memory.patrol_target = Some(tf.translation + offset);
-                        tracing::info!(?entity, "Generated patrol target");
-                    }
-                }
-
-                if timer.0.finished() {
-                    // Патруль окончен
-                    *state = EnemyState::Idle;
-                    memory.patrol_target = None;
-                    timer.0.set_duration(Duration::from_secs(2));
-                    timer.0.reset();
-                    tracing::info!(?entity, "Walk → Idle");
-                }
+            EnemyState::MovingToTarget => {
             }
 
-            EnemyState::Attack(EnemyAttackState::Approach) => {
-                // Проверка на дальность атаки делается в target_generation или movement_behavior,
-                // здесь только переключаемся на конкретный вид атаки, когда доходим до цели.
-                // Логика перехода вынесена в target_generation + movement_behavior.
-            }
 
             EnemyState::Attack(EnemyAttackState::Bite | EnemyAttackState::Slash) => {
                 if timer.0.finished() {
@@ -80,8 +45,6 @@ pub fn enemy_state_transition_system(
             EnemyState::Attack(EnemyAttackState::Cooldown) => {
                 if timer.0.finished() {
                     *state = EnemyState::Idle;
-                    memory.patrol_target = None;    // сбросить и patrol, и pursue
-                    memory.pursue_target = None;
                     timer.0.set_duration(Duration::from_secs(2));
                     timer.0.reset();
                     tracing::info!(?entity, "Cooldown → Idle");

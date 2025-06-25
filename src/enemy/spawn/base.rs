@@ -34,15 +34,21 @@ pub fn spawn_enemy_base(commands: &mut Commands, pos: Vec3, kind: EnemyKind) -> 
     ));
 
     entity.insert((
-        Collider::capsule_y(0.5, 0.3),
+        Collider::capsule_y(0.3, 0.3),
         KinematicCharacterController {
             offset: CharacterLength::Absolute(0.01),
             ..default()
         },
         KinematicCharacterControllerOutput::default(),
     ));
-    entity.insert((EnemyMemory::default(),
-                SightRange(3.0)));
+    entity.insert((
+        EnemyMemory {
+                target_position: None,
+                last_position: pos,
+                stuck_timer: Timer::from_seconds(2.0, TimerMode::Once),
+            },
+        SightRange(10.0)
+    ));
 
     entity.id()
 }

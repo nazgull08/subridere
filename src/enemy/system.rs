@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use crate::enemy::component::*;
 use crate::block_bodies::animation::component::AnimationCycle;
 use crate::block_bodies::pose::BlockPose;
+use crate::unit::component::{Unit, Velocity};
 
 pub fn update_enemy_animation_on_state_change(
     mut commands: Commands,
@@ -10,11 +11,11 @@ pub fn update_enemy_animation_on_state_change(
     for (entity, state, _maybe_cycle, current_kind) in &mut query {
         let desired = match state {
             EnemyState::Idle => AnimationKind::Idle,
-            EnemyState::Walk => AnimationKind::Walk,
+            EnemyState::MovingToTarget => AnimationKind::Walk,
             EnemyState::Attack(attack_state) => match attack_state {
                 EnemyAttackState::Bite => AnimationKind::BiteAttack,
                 EnemyAttackState::Slash => AnimationKind::SlashAttack,
-                _ => continue, // не меняем анимацию для Approach/Cooldown
+                _ => continue, // не меняем анимацию для Cooldown
             },
             EnemyState::Dead => continue,
         };
@@ -52,4 +53,61 @@ fn load_poses(tag: &str) -> Vec<BlockPose> {
     files.into_iter()
         .map(|p| BlockPose::from_ron_file(p.to_str().unwrap().to_string()).unwrap())
         .collect()
+}
+
+pub fn apply_steering_intents_system(
+    time: Res<Time>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &SteeringIntent, &mut Velocity), (With<Enemy>, With<Unit>)>,
+) {
+    let dt = time.delta_secs();
+
+    for (entity, intent, mut velocity) in &mut query {
+        let desired = intent.desired_velocity;
+        velocity.0.x = velocity.0.x.lerp(desired.x, 10.0 * dt);
+        velocity.0.z = velocity.0.z.lerp(desired.z, 10.0 * dt);
+
+        commands.entity(entity).remove::<SteeringIntent>();
+    }
+}
+
+pub fn rotate_enemy_towards_velocity_system(
+    mut query: Query<(&Velocity, &mut Transform), With<Enemy>>,
+) {
+    for (vel, mut tf) in &mut query {
+        // Только горизонтальное направление
+        let flat = Vec3::new(vel.0.x, 0.0, vel.0.z);
+
+        // Не вращаемся, если скорость почти нулевая
+        if flat.length_squared() < 0.01 {
+            continue;
+        }
+
+        // Целевой поворот: вперёд = -Z в Bevy
+        let target_dir = flat.normalize();
+        let yaw = target_dir.z.atan2(target_dir.x);
+        let target_rot = Quat::from_rotation_y(-yaw);
+
+        // Проверяем, не слишком ли мал угол поворота
+        let dot = tf.rotation.dot(target_rot);
+        if dot > 0.99 {
+            continue; // почти совпадает, не трогаем
+        }
+
+        // Плавное вращение
+        tf.rotation = tf.rotation.slerp(target_rot, 0.3);
+    }
+}
+
+
+pub fn debug_enemy_axes(
+    query: Query<&Transform, With<Enemy>>,
+    mut gizmos: Gizmos,
+) {
+    for tf in &query {
+        let pos = tf.translation;
+        gizmos.arrow(pos, pos + tf.forward() * 2.0, Color::srgb(1.0, 0.0, 0.0));     // forward (-Z)
+        gizmos.arrow(pos, pos + tf.right() * 2.0, Color::srgb(0.0, 1.0, 0.0));     // right (+X)
+        gizmos.arrow(pos, pos + tf.up() * 2.0, Color::srgb(0.0, 0.0, 1.0));         // up (+Y)
+    }
 }

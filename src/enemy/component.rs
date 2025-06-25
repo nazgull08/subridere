@@ -13,7 +13,7 @@ pub enum EnemyKind {
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EnemyState {
     Idle,
-    Walk,
+    MovingToTarget,
     Attack(EnemyAttackState),
     Dead,
 }
@@ -21,16 +21,21 @@ pub enum EnemyState {
 /// Подсостояния атаки (вложенная FSM внутри Attack)
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EnemyAttackState {
-    Approach,
     Bite,
     Slash,
     Cooldown,
 }
 
+#[derive(Component, Debug)]
+pub struct SteeringIntent {
+    pub desired_velocity: Vec3,
+}
+
 #[derive(Component, Debug, Default)]
 pub struct EnemyMemory {
-    pub patrol_target: Option<Vec3>,
-    pub pursue_target: Option<Entity>
+    pub target_position: Option<Vec3>,
+    pub last_position: Vec3,
+    pub stuck_timer: Timer,
 }
 
 /// Цель атаки (например, игрок)

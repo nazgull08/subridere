@@ -30,7 +30,7 @@ pub fn spawn_jimbo_in_room(
         return;
     };
 
-    let pos = room_transform.translation + Vec3::Y * 0.1 + Vec3::X * 3.0;
+    let pos = room_transform.translation + Vec3::Y * 1.5 + Vec3::X * 3.0;
 
     let entity = spawn_enemy_base(&mut commands, pos, EnemyKind::Jimbo);
     spawn_jimbo_visuals(&mut commands, &mut meshes, &mut materials, entity);
@@ -68,7 +68,7 @@ pub fn spawn_jimbo_visuals(
     .collect::<Vec<_>>()
     .into();
 
-    let pose_duration = 1.0;
+    let pose_duration = 0.5;
     commands.entity(parent).insert(AnimationCycle {
         poses,
         current_index: 0,

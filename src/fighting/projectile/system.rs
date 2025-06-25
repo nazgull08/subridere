@@ -10,7 +10,7 @@ pub fn despawn_expired_projectiles(
         projectile.lifetime -= time.delta_secs();
         if projectile.lifetime <= 0.0 {
             commands.entity(entity).despawn();
-            println!("Projectile {:?} despawned", entity);
+            info!("Projectile {:?} despawned", entity);
         }
     }
 }

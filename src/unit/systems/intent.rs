@@ -16,6 +16,10 @@ const JUMP_SPEED: f32 = 20.0;
 const GRAVITY: f32 = 20.0;
 const DAMPING: f32 = 3.0;
 
+const ENEMY_MOVE_ACCEL: f32 = 20.0;
+const ENEMY_MAX_SPEED:  f32 = 6.0;
+const ENEMY_FRICTION:   f32 = 12.0; 
+
 /// Updates `Grounded` based on Rapier's KinematicCharacterController output.
 pub fn update_grounded_system(
     mut query: Query<(&KinematicCharacterControllerOutput, &mut Grounded), With<Unit>>,
@@ -66,6 +70,7 @@ pub fn apply_turn_intents(
     mut query: Query<(Entity, &TurnIntent, &mut Transform)>,
 ) {
     for (entity, intent, mut transform) in &mut query {
+        info!("turning");
         transform.rotation = intent.0;
         commands.entity(entity).remove::<TurnIntent>();
     }
@@ -120,10 +125,11 @@ pub fn apply_move_intents_for_enemies(
     let dt = time.delta_secs();
 
     for (entity, intent, mut velocity) in &mut query {
-        let direction = intent.0.normalize_or_zero();
-        velocity.0.x += direction.x * 4.0 * dt;
-        velocity.0.z += direction.z * 4.0 * dt;
-
+        let dir = intent.0.normalize_or_zero();
+        velocity.0 += dir * ENEMY_MOVE_ACCEL * dt;
+        // clamp:
+        velocity.0.x = velocity.0.x.clamp(-ENEMY_MAX_SPEED, ENEMY_MAX_SPEED);
+        velocity.0.z = velocity.0.z.clamp(-ENEMY_MAX_SPEED, ENEMY_MAX_SPEED);
         commands.entity(entity).remove::<MoveIntent>();
     }
 }
@@ -153,11 +159,9 @@ pub fn apply_attack_intents_for_enemies(
     for (entity, intent) in &query {
         match intent {
             AttackIntent::Bite => {
-                tracing::info!(?entity, "Jimbo tries to BITE!");
                 // TODO: play bite animation, apply hitbox, etc
             }
             AttackIntent::Slash => {
-                tracing::info!(?entity, "Jimbo tries to SLASH!");
                 // TODO: play slash animation, apply hitbox, etc
             }
         }
@@ -190,7 +194,7 @@ pub fn handle_shoot_intents(
                 direction,
             );
         } else {
-            println!("Entity {:?} has not enough mana to shoot", entity);
+            info!("Entity {:?} has not enough mana to shoot", entity);
         }
 
         commands.entity(entity).remove::<ShootIntent>();
