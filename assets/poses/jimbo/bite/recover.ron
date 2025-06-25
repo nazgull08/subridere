@@ -1,10 +1,11 @@
 BlockPose(
   parts: [
-    (name:"Neck1", rotation:(0.0, 0.0, 0.0, 1.0)),
-    (name:"Neck2", rotation:(0.0, 0.0, 0.0, 1.0)),
-    (name:"Head",  rotation:(-0.1, 0.0, 0.0, 0.99)),   // усталость, «опустил»
-    (name:"Torso", rotation:(0.0, 0.0, 0.0, 1.0)),
-    (name:"ShoulderL", rotation:(0.0, 0.0, -0.1, 0.99)),
-    (name:"ShoulderR", rotation:(0.0, 0.0,  0.1, 0.99)),
+    // медленный «спад» ‒ шея выпрямилась, голова чуть вниз
+    (name:"Neck1", rotation:( 0.00, 0.0, 0.0, 1.00)),
+    (name:"Neck2", rotation:( 0.00, 0.0, 0.0, 1.00)),
+    (name:"Head",  rotation:(-0.20, 0.0, 0.0, 0.98)),
+    (name:"Torso", rotation:(-0.05, 0.0, 0.0, 0.99)),
+    (name:"ShoulderL", rotation:( 0.00, 0.0, -0.15, 0.99)),
+    (name:"ShoulderR", rotation:( 0.00, 0.0,  0.15, 0.99)),
   ]
 )

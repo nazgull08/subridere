@@ -1,10 +1,11 @@
 BlockPose(
   parts: [
-    (name:"Neck1", rotation:(-0.2, 0.0, 0.0, 0.98)),    // голову вниз
-    (name:"Neck2", rotation:(-0.1, 0.0, 0.0, 0.99)),    // согнуться к цели
-    (name:"Head",  rotation:(0.0, 0.0, 0.0, 1.0)),      // пока прямо
-    (name:"Torso", rotation:(-0.1, 0.0, 0.0, 0.99)),    // наклон корпуса вперёд
-    (name:"ShoulderL", rotation:(0.0, 0.0, -0.15, 0.99)),
-    (name:"ShoulderR", rotation:(0.0, 0.0,  0.15, 0.99)),
+    // сильный «замах» вниз
+    (name:"Neck1", rotation:(-0.30, 0.0, 0.0, 0.95)),
+    (name:"Neck2", rotation:(-0.15, 0.0, 0.0, 0.99)),
+    (name:"Head",  rotation:( 0.00, 0.0, 0.0, 1.00)),
+    (name:"Torso", rotation:(-0.15, 0.0, 0.0, 0.98)),
+    (name:"ShoulderL", rotation:( 0.00, 0.0, -0.20, 0.98)),
+    (name:"ShoulderR", rotation:( 0.00, 0.0,  0.20, 0.98)),
   ]
 )

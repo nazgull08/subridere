@@ -24,6 +24,13 @@ pub fn update_enemy_animation_on_state_change(
             continue;
         }
 
+        let pose_duration = match desired {
+            AnimationKind::BiteAttack => 0.2, // быстро!
+            AnimationKind::SlashAttack => 0.4,
+            AnimationKind::Walk => 0.4,
+            AnimationKind::Idle => 0.5,
+        };
+
         let poses = match desired {
             AnimationKind::Idle => load_poses("idle"),
             AnimationKind::Walk => load_poses("walk"),
@@ -32,7 +39,7 @@ pub fn update_enemy_animation_on_state_change(
         };
 
         commands.entity(entity)
-            .insert(AnimationCycle::new(poses, 0.8))
+            .insert(AnimationCycle::new(poses, pose_duration))
             .insert(desired);
     }
 }

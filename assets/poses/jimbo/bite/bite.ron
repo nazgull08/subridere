@@ -1,10 +1,11 @@
 BlockPose(
   parts: [
-    (name:"Neck1", rotation:(0.3, 0.0, 0.0, 0.95)),     // голова резко вверх
-    (name:"Neck2", rotation:(0.15, 0.0, 0.0, 0.99)),
-    (name:"Head",  rotation:(0.2, 0.0, 0.0, 0.98)),
-    (name:"Torso", rotation:(-0.05, 0.0, 0.0, 1.0)),    // корпус чуть поднимается
-    (name:"ShoulderL", rotation:(0.0, 0.0, -0.25, 0.97)),
-    (name:"ShoulderR", rotation:(0.0, 0.0,  0.25, 0.97)),
+    // резкий выброс головы вперёд и чуть вверх
+    (name:"Neck1", rotation:( 0.60, 0.0, 0.0, 0.80)),
+    (name:"Neck2", rotation:( 0.30, 0.0, 0.0, 0.95)),
+    (name:"Head",  rotation:( 0.40, 0.0, 0.0, 0.92)),
+    (name:"Torso", rotation:( 0.10, 0.0, 0.0, 0.99)),
+    (name:"ShoulderL", rotation:( 0.00, 0.0, -0.25, 0.97)),
+    (name:"ShoulderR", rotation:( 0.00, 0.0,  0.25, 0.97)),
   ]
 )

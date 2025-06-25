@@ -1,6 +1,7 @@
 use std::time::Duration;
 use bevy::prelude::*;
 use crate::enemy::component::*;
+use crate::stats::damage::component::HasDealtDamage;
 use crate::unit::component::{AttackIntent, MoveIntent};
 
 /// FSM-переходы: переключаем стейты и генерируем только атаки.
@@ -30,14 +31,25 @@ pub fn enemy_state_transition_system(
             }
 
             EnemyState::MovingToTarget => {
-            }
+                if let Some(target_pos) = memory.target_position {
+                    let tf = maybe_tf.unwrap();
+                    let distance = tf.translation.distance(target_pos);
 
+                    if distance < 2.5 {
+                        *state = EnemyState::Attack(EnemyAttackState::Bite);
+                        timer.0.set_duration(Duration::from_secs_f32(0.6));
+                        timer.0.reset();
+                        tracing::info!(?entity, "Walk → Bite");
+                    }
+                }
+            }
 
             EnemyState::Attack(EnemyAttackState::Bite | EnemyAttackState::Slash) => {
                 if timer.0.finished() {
                     *state = EnemyState::Attack(EnemyAttackState::Cooldown);
                     timer.0.set_duration(Duration::from_secs(1));
                     timer.0.reset();
+                    commands.entity(entity).remove::<HasDealtDamage>();
                     tracing::info!(?entity, "Attack → Cooldown");
                 }
             }
@@ -52,7 +64,6 @@ pub fn enemy_state_transition_system(
             }
 
             EnemyState::Dead => {
-                // Можно очистить интенты здесь
                 commands.entity(entity).remove::<MoveIntent>();
                 commands.entity(entity).remove::<AttackIntent>();
             }
