@@ -1,64 +1,82 @@
 use bevy::ecs::event::Event;
 use bevy::prelude::*;
 
-
 #[derive(Event)]
 pub struct HitFlashEvent;
-
 
 #[derive(Component)]
 pub struct HitOverlay {
     pub timer: Timer,
+    pub initial_alpha: f32,
 }
-
 
 pub fn spawn_hit_overlay(
     mut commands: Commands,
     mut evr: EventReader<HitFlashEvent>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    cameras: Query<&GlobalTransform, With<Camera3d>>,
+    asset_server: Res<AssetServer>
 ) {
-    let Ok(cam_tf) = cameras.single() else { return; };
-
-    let mesh = meshes.add(Plane3d::default().mesh().size(2.0, 2.0));
-    let material = materials.add(StandardMaterial {
-        base_color: Color::srgba(1.0, 0.0, 0.0, 0.4),
-        unlit: true,
-        alpha_mode: AlphaMode::Blend,
-        ..default()
-    });
-
-    let cam_pos = cam_tf.translation();
-    let cam_forward = cam_tf.forward();
-
+    let font = asset_server.load("fonts/dogica.ttf");
+    
     for _ in evr.read() {
-        commands.spawn((
-            (   Mesh3d(mesh.clone()),
-                MeshMaterial3d(material.clone()),
-                Transform::from_translation(cam_pos + cam_forward * 0.5)
-                    .looking_at(cam_pos, Vec3::Y)
-                    .with_scale(Vec3::splat(0.5)), // тонкий экран
-            ),
-            HitOverlay {
-                timer: Timer::from_seconds(0.4, TimerMode::Once),
-            },
-            Name::new("3DHitOverlay"),
-        ));
+        let initial_alpha = 0.6; // Начальная прозрачность
+        
+        commands
+            .spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    // Покрываем весь экран
+                    top: Val::Px(0.0),
+                    left: Val::Px(0.0),
+                    width: Val::Vw(100.0),  // 100% ширины экрана
+                    height: Val::Vh(100.0), // 100% высоты экрана
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BackgroundColor(Color::srgba(1.0, 0.2, 0.2, initial_alpha)),
+                Name::new("HitOverlay"),
+                HitOverlay {
+                    timer: Timer::from_seconds(1.0, TimerMode::Once), // Увеличили время для плавности
+                    initial_alpha,
+                },
+            ))
+            .with_children(|parent| {
+                parent.spawn((
+                    Text::new("That was painful!"),
+                    TextFont {
+                        font: font.clone(),
+                        font_size: 48.0, // Увеличили размер шрифта
+                        ..default()
+                    },
+                    TextColor(Color::srgba(1.0, 1.0, 1.0, 1.0)),
+                    Node {
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                ));
+            });
     }
 }
 
 pub fn update_hit_overlay(
     time: Res<Time>,
     mut commands: Commands,
-    mut q: Query<(Entity, &mut HitOverlay)>,
+    mut q: Query<(Entity, &mut HitOverlay, &mut BackgroundColor)>,
 ) {
-    for (e, mut overlay) in &mut q {
+    for (entity, mut overlay, mut bg_color) in &mut q {
         overlay.timer.tick(time.delta());
-
-
+        
+        // Вычисляем прогресс (от 1.0 до 0.0)
+        let progress = 1.0 - overlay.timer.fraction();
+        
+        // Плавно уменьшаем прозрачность
+        let current_alpha = overlay.initial_alpha * progress;
+        bg_color.0.set_alpha(current_alpha);
+        
+        // Удаляем оверлей когда таймер закончился
         if overlay.timer.finished() {
-            commands.entity(e).despawn();
+            commands.entity(entity).despawn_recursive();
         }
     }
 }
