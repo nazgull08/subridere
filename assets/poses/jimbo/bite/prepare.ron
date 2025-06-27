@@ -1,11 +1,18 @@
 BlockPose(
   parts: [
-    // сильный «замах» вниз
-    (name:"Neck1", rotation:(-0.30, 0.0, 0.0, 0.95)),
-    (name:"Neck2", rotation:(-0.15, 0.0, 0.0, 0.99)),
-    (name:"Head",  rotation:( 0.00, 0.0, 0.0, 1.00)),
-    (name:"Torso", rotation:(-0.15, 0.0, 0.0, 0.98)),
-    (name:"ShoulderL", rotation:( 0.00, 0.0, -0.20, 0.98)),
-    (name:"ShoulderR", rotation:( 0.00, 0.0,  0.20, 0.98)),
+    // Торс чуть откидывается назад, как будто сгибается
+    (name: "Torso", rotation: (-0.15, 0.0, 0.0, 0.98), translation: (0.0, -0.05, 0.05)),
+
+    // Шея — изгиб вниз и назад
+    (name: "Neck2", rotation: (-0.20, 0.0, 0.0, 0.98), translation: (0.0, 0.0, 0.02)),
+    (name: "Neck1", rotation: (-0.30, 0.0, 0.0, 0.95), translation: (0.0, 0.0, 0.05)),
+
+    // Голова опущена вниз, почти касается груди
+    (name: "Head",  rotation: (-0.30, 0.0, 0.0, 0.95), translation: (0.0, -0.05, 0.0)),
+
+    // Плечи приподнимаются, готовясь к напряжению
+    (name: "ShoulderL", rotation: (0.00, 0.0, -0.20, 0.98), translation: (0.0, 0.0, 0.0)),
+    (name: "ShoulderR", rotation: (0.00, 0.0,  0.20, 0.98), translation: (0.0, 0.0, 0.0)),
   ]
 )
+

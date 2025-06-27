@@ -14,6 +14,7 @@ pub struct PoseToApply(pub BlockPose);
 pub struct BlockPosePart {
     pub name: String,
     pub rotation: Quat,
+    pub translation: Vec3,
 }
 
 /// Позы определяются только поворотами (rotation), а расположение берётся из модели

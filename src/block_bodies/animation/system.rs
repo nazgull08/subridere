@@ -20,6 +20,7 @@ fn extract_current_pose(
             parts.push(BlockPosePart {
                 name: name.as_str().to_owned(),
                 rotation: transform.rotation,
+                translation: transform.translation,
             });
         }
         if let Ok(children) = children_query.get(entity) {

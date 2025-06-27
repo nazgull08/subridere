@@ -27,9 +27,11 @@ pub fn lerp_pose_system(
         for name in from_map.keys() {
             if let (Some(a), Some(b)) = (from_map.get(name), to_map.get(name)) {
                 let rot = a.rotation.slerp(b.rotation, t);
+                let trans = a.translation.lerp(b.translation, t);
                 parts.push(BlockPosePart {
                     name: name.clone(),
                     rotation: rot,
+                    translation: trans,
                 });
             }
         }

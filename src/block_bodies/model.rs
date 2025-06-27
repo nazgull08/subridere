@@ -89,6 +89,7 @@ pub fn spawn_model_hierarchical(
                 Mesh3d(mesh),
                 MeshMaterial3d(part.material.clone()),
                 Transform::from_translation(part.local_offset),
+                BlockPartOffset(part.local_offset),
                 Name::new(part.name.clone()),
             ))
             .id();

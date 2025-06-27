@@ -1,19 +1,15 @@
 BlockPose(
   parts: [
-    // Зеркалим: корпус вправо
-    (name:"Torso",     rotation:( 0.000,-0.122, 0.000, 0.993)),
+    // Торс чуть влево и ниже — как при отскоке
+    (name: "Torso",     rotation: (-0.05, -0.10, 0.0, 0.995), translation: (0.05, 0.10, -0.08)),
 
-    // Хвост изгиб вправо
-    (name:"TailBase",  rotation:( 0.000,-0.190, 0.000, 0.982)),
-    (name:"TailMid",   rotation:( 0.000,-0.320, 0.000, 0.948)),
-    (name:"TailTip",   rotation:( 0.000,-0.430, 0.000, 0.903)),
+    // Хвост снова сворачивается
+    (name: "TailBase",  rotation: (0.00, -0.20, 0.0, 0.980), translation: (0.0, -0.05, -0.03)),
+    (name: "TailMid",   rotation: (0.00,  0.10, 0.0, 0.995), translation: (0.0, -0.05,  0.0)),
+    (name: "TailTip",   rotation: (0.00, -0.15, 0.0, 0.990), translation: (0.0,  0.0,  0.01)),
 
     // Плечи зеркально
-    (name:"ShoulderL", rotation:( 0.000, 0.000, -0.100, 0.995)),
-    (name:"ShoulderR", rotation:( 0.000, 0.000,  0.550, 0.835)),
-
-    // Кисти зеркально
-    (name:"HandL",     rotation:(-0.050, 0.000, 0.000, 0.999)),
-    (name:"HandR",     rotation:(-0.200, 0.000, 0.000, 0.980)),
+    (name: "ShoulderL", rotation: ( 0.0, 0.0, -0.2, 0.980), translation: (0.0, 0.0, 0.0)),
+    (name: "ShoulderR", rotation: ( 0.0, 0.0,  0.5, 0.866), translation: (0.0, 0.0, 0.0)),
   ]
 )

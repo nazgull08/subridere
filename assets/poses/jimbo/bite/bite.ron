@@ -1,11 +1,17 @@
 BlockPose(
   parts: [
-    // резкий выброс головы вперёд и чуть вверх
-    (name:"Neck1", rotation:( 0.60, 0.0, 0.0, 0.80)),
-    (name:"Neck2", rotation:( 0.30, 0.0, 0.0, 0.95)),
-    (name:"Head",  rotation:( 0.40, 0.0, 0.0, 0.92)),
-    (name:"Torso", rotation:( 0.10, 0.0, 0.0, 0.99)),
-    (name:"ShoulderL", rotation:( 0.00, 0.0, -0.25, 0.97)),
-    (name:"ShoulderR", rotation:( 0.00, 0.0,  0.25, 0.97)),
+    // Торс наклоняется немного вперёд — импульс
+    (name: "Torso", rotation: (0.10, 0.0, 0.0, 0.99), translation: (0.0, 0.05, -0.05)),
+
+    // Шея вытягивается максимально прямо вперёд (по -Z)
+    (name: "Neck2", rotation: (0.15, 0.0, 0.0, 0.99), translation: (0.0, 0.0, -0.05)),
+    (name: "Neck1", rotation: (0.25, 0.0, 0.0, 0.97), translation: (0.0, 0.0, -0.10)),
+
+    // Голова уходит далеко вперёд — ключевой момент удара
+    (name: "Head",  rotation: (0.10, 0.0, 0.0, 0.99), translation: (0.0, 0.05, -0.30)),
+
+    // Плечи напряжены — симметричный захват
+    (name: "ShoulderL", rotation: (0.0, 0.0, -0.30, 0.953), translation: (0.0, 0.0, 0.0)),
+    (name: "ShoulderR", rotation: (0.0, 0.0,  0.30, 0.953), translation: (0.0, 0.0, 0.0)),
   ]
 )

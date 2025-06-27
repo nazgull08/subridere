@@ -1,11 +1,17 @@
 BlockPose(
   parts: [
-    // медленный «спад» ‒ шея выпрямилась, голова чуть вниз
-    (name:"Neck1", rotation:( 0.00, 0.0, 0.0, 1.00)),
-    (name:"Neck2", rotation:( 0.00, 0.0, 0.0, 1.00)),
-    (name:"Head",  rotation:(-0.20, 0.0, 0.0, 0.98)),
-    (name:"Torso", rotation:(-0.05, 0.0, 0.0, 0.99)),
-    (name:"ShoulderL", rotation:( 0.00, 0.0, -0.15, 0.99)),
-    (name:"ShoulderR", rotation:( 0.00, 0.0,  0.15, 0.99)),
+    // Торс выпрямляется, но чуть подан вперёд
+    (name: "Torso", rotation: (-0.05, 0.0, 0.0, 0.995), translation: (0.0, 0.0, -0.05)),
+
+    // Шея полурасправлена — восстановление
+    (name: "Neck2", rotation: (-0.05, 0.0, 0.0, 0.998), translation: (0.0, 0.0, -0.02)),
+    (name: "Neck1", rotation: ( 0.00, 0.0, 0.0, 1.000), translation: (0.0, 0.0, -0.05)),
+
+    // Голова откинута вверх и немного назад
+    (name: "Head",  rotation: (-0.20, 0.0, 0.0, 0.98), translation: (0.0, 0.05, 0.10)),
+
+    // Плечи расслаблены, чуть ниже
+    (name: "ShoulderL", rotation: (0.00, 0.0, -0.15, 0.99), translation: (0.0, 0.0, 0.0)),
+    (name: "ShoulderR", rotation: (0.00, 0.0,  0.15, 0.99), translation: (0.0, 0.0, 0.0)),
   ]
 )

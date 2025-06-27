@@ -14,6 +14,7 @@ pub fn apply_pose_to_body_recursive(
         if let Some(part_pose) = pose.get_part(name.as_str()) {
             // Применяем только поворот, оставляя трансляцию как есть
             transform.rotation = part_pose.rotation;
+            transform.translation = part_pose.translation;
         }
     }
 
