@@ -12,6 +12,5 @@ pub enum DamageType {
     Magical,
 }
 
-
 #[derive(Component, Debug)]
 pub struct HasDealtDamage;

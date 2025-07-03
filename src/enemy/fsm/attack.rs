@@ -1,20 +1,23 @@
-use bevy::prelude::*;
 use crate::{
     enemy::component::*,
     player::component::Player,
     stats::damage::component::{Damage, DamageType, HasDealtDamage},
 };
+use bevy::prelude::*;
 
 pub fn enemy_melee_attack_system(
     mut commands: Commands,
-    mut enemies: Query<(Entity, &Transform, &EnemyState, &StateTimer), (With<Enemy>, Without<HasDealtDamage>)>,
+    mut enemies: Query<
+        (Entity, &Transform, &EnemyState, &StateTimer),
+        (With<Enemy>, Without<HasDealtDamage>),
+    >,
     players: Query<(Entity, &Transform), With<Player>>,
 ) {
     for (enemy_ent, enemy_tf, state, timer) in &mut enemies {
         if let EnemyState::Attack(EnemyAttackState::Bite) = state {
             let t = timer.0.elapsed_secs();
             if !(0.08..0.12).contains(&t) {
-                continue;           // вне окна удара
+                continue; // вне окна удара
             }
 
             for (player_ent, player_tf) in &players {

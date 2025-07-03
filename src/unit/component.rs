@@ -31,7 +31,6 @@ pub struct TurnIntent(pub Quat);
 #[derive(Component)]
 pub struct ShootIntent(pub Vec3);
 
-
 #[derive(Component)]
 pub struct LookAtIntent(pub Vec3); // повернуться в сторону
 

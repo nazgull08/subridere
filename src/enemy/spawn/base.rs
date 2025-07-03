@@ -43,11 +43,11 @@ pub fn spawn_enemy_base(commands: &mut Commands, pos: Vec3, kind: EnemyKind) -> 
     ));
     entity.insert((
         EnemyMemory {
-                target_position: None,
-                last_position: pos,
-                stuck_timer: Timer::from_seconds(2.0, TimerMode::Once),
-            },
-        SightRange(10.0)
+            target_position: None,
+            last_position: pos,
+            stuck_timer: Timer::from_seconds(2.0, TimerMode::Once),
+        },
+        SightRange(10.0),
     ));
 
     entity.id()

@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::enemy::component::{Enemy, EnemyMemory};
+use bevy::prelude::*;
 
 /// Сбрасывает target_position, если враг застрял дольше 2 секунд
 pub fn enemy_stuck_detection_system(

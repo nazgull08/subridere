@@ -1,21 +1,26 @@
 // src/enemy/fsm/target_generation.rs
-use bevy::prelude::*;
-use rand::seq::IteratorRandom;
-use rand::Rng;
 use crate::enemy::component::*;
 use crate::player::component::Player;
 use crate::world::room::types::RoomMap;
+use bevy::prelude::*;
+use rand::Rng;
+use rand::seq::IteratorRandom;
 
 /* ---------- публичный «фасад» ---------- */
 
 pub fn target_selection_system(
-    mut enemies: Query<(Entity,
-                        &Transform,
-                        &SightRange,
-                        &mut EnemyMemory,
-                        &mut EnemyState), With<Enemy>>,
-    players:   Query<&Transform,           With<Player>>,
-    room_map:  Res<RoomMap>,
+    mut enemies: Query<
+        (
+            Entity,
+            &Transform,
+            &SightRange,
+            &mut EnemyMemory,
+            &mut EnemyState,
+        ),
+        With<Enemy>,
+    >,
+    players: Query<&Transform, With<Player>>,
+    room_map: Res<RoomMap>,
 ) {
     for (e, tf, sight, mut memory, mut state) in &mut enemies {
         // 1) Пытаемся обнаружить игрока
@@ -53,11 +58,7 @@ fn detect_player(
 }
 
 /// Выбирает случайную точку внутри случайной комнаты
-fn refresh_patrol_target(
-    enemy_tf: &Transform,
-    memory: &mut EnemyMemory,
-    room_map: &RoomMap,
-) {
+fn refresh_patrol_target(enemy_tf: &Transform, memory: &mut EnemyMemory, room_map: &RoomMap) {
     let mut rng = rand::thread_rng();
     if let Some((coord, _)) = room_map.rooms.iter().choose(&mut rng) {
         let room_size = Vec3::new(10.0, 5.0, 10.0); // подстрой под свои данные

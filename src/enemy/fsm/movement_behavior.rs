@@ -1,7 +1,7 @@
 // src/enemy/fsm/movement_behavior.rs
 
-use bevy::prelude::*;
 use crate::enemy::component::*;
+use bevy::prelude::*;
 
 pub fn enemy_movement_behavior_system(
     mut commands: Commands,
@@ -12,7 +12,9 @@ pub fn enemy_movement_behavior_system(
             continue;
         }
 
-        let Some(target) = memory.target_position else { continue };
+        let Some(target) = memory.target_position else {
+            continue;
+        };
 
         let dir = (target - tf.translation).with_y(0.0);
         let dist2 = dir.length_squared();

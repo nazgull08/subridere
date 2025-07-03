@@ -1,8 +1,8 @@
-use std::time::Duration;
-use bevy::prelude::*;
 use crate::enemy::component::*;
 use crate::stats::damage::component::HasDealtDamage;
 use crate::unit::component::{AttackIntent, MoveIntent};
+use bevy::prelude::*;
+use std::time::Duration;
 
 /// FSM-переходы: переключаем стейты и генерируем только атаки.
 /// Патрульная цель хранится в EnemyMemory; переход в Attack происходит сразу, как только в памяти появился pursue_target.
