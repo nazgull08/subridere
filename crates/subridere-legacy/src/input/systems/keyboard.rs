@@ -60,9 +60,7 @@ pub fn handle_shoot_input(
     player_query: Query<Entity, With<PlayerControlled>>,
 ) {
     if buttons.just_pressed(MouseButton::Right) {
-        if let (Ok(camera), Ok(player_entity)) =
-            (camera_query.single(), player_query.single())
-        {
+        if let (Ok(camera), Ok(player_entity)) = (camera_query.single(), player_query.single()) {
             let direction = camera.forward();
             commands
                 .entity(player_entity)

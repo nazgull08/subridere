@@ -13,13 +13,13 @@ pub struct HitOverlay {
 pub fn spawn_hit_overlay(
     mut commands: Commands,
     mut evr: EventReader<HitFlashEvent>,
-    asset_server: Res<AssetServer>
+    asset_server: Res<AssetServer>,
 ) {
     let font = asset_server.load("fonts/dogica.ttf");
-    
+
     for _ in evr.read() {
         let initial_alpha = 0.6; // Начальная прозрачность
-        
+
         commands
             .spawn((
                 Node {
@@ -66,14 +66,14 @@ pub fn update_hit_overlay(
 ) {
     for (entity, mut overlay, mut bg_color) in &mut q {
         overlay.timer.tick(time.delta());
-        
+
         // Вычисляем прогресс (от 1.0 до 0.0)
         let progress = 1.0 - overlay.timer.fraction();
-        
+
         // Плавно уменьшаем прозрачность
         let current_alpha = overlay.initial_alpha * progress;
         bg_color.0.set_alpha(current_alpha);
-        
+
         // Удаляем оверлей когда таймер закончился
         if overlay.timer.finished() {
             commands.entity(entity).despawn_recursive();

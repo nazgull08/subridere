@@ -1,12 +1,20 @@
-use bevy::prelude::*;
-use crate::enemy::component::*;
 use crate::block_bodies::animation::component::AnimationCycle;
 use crate::block_bodies::pose::BlockPose;
+use crate::enemy::component::*;
 use crate::unit::component::{Unit, Velocity};
+use bevy::prelude::*;
 
 pub fn update_enemy_animation_on_state_change(
     mut commands: Commands,
-    mut query: Query<(Entity, &EnemyState, Option<&mut AnimationCycle>, Option<&AnimationKind>), Changed<EnemyState>>,
+    mut query: Query<
+        (
+            Entity,
+            &EnemyState,
+            Option<&mut AnimationCycle>,
+            Option<&AnimationKind>,
+        ),
+        Changed<EnemyState>,
+    >,
 ) {
     for (entity, state, _maybe_cycle, current_kind) in &mut query {
         let desired = match state {
@@ -38,7 +46,8 @@ pub fn update_enemy_animation_on_state_change(
             AnimationKind::SlashAttack => load_poses("slash"),
         };
 
-        commands.entity(entity)
+        commands
+            .entity(entity)
             .insert(AnimationCycle::new(poses, pose_duration))
             .insert(desired);
     }
@@ -57,7 +66,8 @@ fn load_poses(tag: &str) -> Vec<BlockPose> {
 
     files.sort(); // чтобы порядок был: prepare → attack → recover
 
-    files.into_iter()
+    files
+        .into_iter()
         .map(|p| BlockPose::from_ron_file(p.to_str().unwrap().to_string()).unwrap())
         .collect()
 }
@@ -106,15 +116,11 @@ pub fn rotate_enemy_towards_velocity_system(
     }
 }
 
-
-pub fn debug_enemy_axes(
-    query: Query<&Transform, With<Enemy>>,
-    mut gizmos: Gizmos,
-) {
+pub fn debug_enemy_axes(query: Query<&Transform, With<Enemy>>, mut gizmos: Gizmos) {
     for tf in &query {
         let pos = tf.translation;
-        gizmos.arrow(pos, pos + tf.forward() * 2.0, Color::srgb(1.0, 0.0, 0.0));     // forward (-Z)
-        gizmos.arrow(pos, pos + tf.right() * 2.0, Color::srgb(0.0, 1.0, 0.0));     // right (+X)
-        gizmos.arrow(pos, pos + tf.up() * 2.0, Color::srgb(0.0, 0.0, 1.0));         // up (+Y)
+        gizmos.arrow(pos, pos + tf.forward() * 2.0, Color::srgb(1.0, 0.0, 0.0)); // forward (-Z)
+        gizmos.arrow(pos, pos + tf.right() * 2.0, Color::srgb(0.0, 1.0, 0.0)); // right (+X)
+        gizmos.arrow(pos, pos + tf.up() * 2.0, Color::srgb(0.0, 0.0, 1.0)); // up (+Y)
     }
 }
