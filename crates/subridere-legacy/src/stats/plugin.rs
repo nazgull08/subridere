@@ -11,7 +11,12 @@ impl Plugin for StatsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (regenerate_health, regenerate_mana, regenerate_stamina, apply_damage)
+            (
+                regenerate_health,
+                regenerate_mana,
+                regenerate_stamina,
+                apply_damage,
+            ),
         );
     }
 }

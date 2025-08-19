@@ -17,8 +17,8 @@ const GRAVITY: f32 = 20.0;
 const DAMPING: f32 = 3.0;
 
 const ENEMY_MOVE_ACCEL: f32 = 20.0;
-const ENEMY_MAX_SPEED:  f32 = 6.0;
-const ENEMY_FRICTION:   f32 = 12.0; 
+const ENEMY_MAX_SPEED: f32 = 6.0;
+const ENEMY_FRICTION: f32 = 12.0;
 
 /// Updates `Grounded` based on Rapier's KinematicCharacterController output.
 pub fn update_grounded_system(
@@ -64,7 +64,6 @@ pub fn apply_jump_intents(
     }
 }
 
-
 pub fn apply_turn_intents(
     mut commands: Commands,
     mut query: Query<(Entity, &TurnIntent, &mut Transform)>,
@@ -75,7 +74,6 @@ pub fn apply_turn_intents(
         commands.entity(entity).remove::<TurnIntent>();
     }
 }
-
 
 /// Overrides horizontal velocity for dash intents.
 pub fn apply_dash_intents(
@@ -115,7 +113,6 @@ pub fn apply_velocity(
         controller.translation = Some(velocity.0 * dt);
     }
 }
-
 
 pub fn apply_move_intents_for_enemies(
     mut commands: Commands,
@@ -169,7 +166,6 @@ pub fn apply_attack_intents_for_enemies(
         commands.entity(entity).remove::<AttackIntent>();
     }
 }
-
 
 pub fn handle_shoot_intents(
     mut commands: Commands,
