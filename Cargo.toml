@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
+    "crates/block-bodies-core",
     "crates/subridere-legacy",
     "crates/subridere-skeleton", 
     "crates/subridere-core",
