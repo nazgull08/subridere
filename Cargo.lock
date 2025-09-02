@@ -4026,10 +4026,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "subridere-core"
-version = "0.1.0"
-
-[[package]]
 name = "subridere-game"
 version = "0.1.0"
 

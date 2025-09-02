@@ -1,14 +1,15 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub mod app;
+pub mod audio;
+pub mod block_bodies;
+pub mod camera;
+pub mod core;
+pub mod enemy;
+pub mod fighting;
+pub mod game_init;
+pub mod input;
+pub mod player;
+pub mod stats;
+pub mod ui;
+pub mod unit;
+pub mod utils;
+pub mod world;
