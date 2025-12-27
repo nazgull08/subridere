@@ -1,0 +1,57 @@
+BlockBodyFile(
+  parts: [
+    // 🔴 HEAD - red, slightly larger
+    (
+      name: "Head",
+      parent: None,
+      position: (0.0, 0.5, 0.0),
+      rotation: (0.0, 0.0, 0.0, 1.0),  // identity quaternion (no rotation)
+      size: (0.7, 0.7, 0.7),
+    ),
+
+    // 🟢 SEGMENT 1
+    (
+      name: "Seg1",
+      parent: Some("Head"),
+      position: (0.0, 0.0, 0.8),
+      rotation: (0.0, 0.0, 0.0, 1.0),
+      size: (0.6, 0.6, 0.6),
+    ),
+
+    // 🟢 SEGMENT 2
+    (
+      name: "Seg2",
+      parent: Some("Seg1"),
+      position: (0.0, 0.0, 0.8),
+      rotation: (0.0, 0.0, 0.0, 1.0),
+      size: (0.6, 0.6, 0.6),
+    ),
+
+    // 🟢 SEGMENT 3
+    (
+      name: "Seg3",
+      parent: Some("Seg2"),
+      position: (0.0, 0.0, 0.8),
+      rotation: (0.0, 0.0, 0.0, 1.0),
+      size: (0.5, 0.5, 0.5),
+    ),
+
+    // 🟢 SEGMENT 4
+    (
+      name: "Seg4",
+      parent: Some("Seg3"),
+      position: (0.0, 0.0, 0.8),
+      rotation: (0.0, 0.0, 0.0, 1.0),
+      size: (0.5, 0.5, 0.5),
+    ),
+
+    // 🔴 TAIL - red, smallest
+    (
+      name: "Tail",
+      parent: Some("Seg4"),
+      position: (0.0, 0.0, 0.8),
+      rotation: (0.0, 0.0, 0.0, 1.0),
+      size: (0.4, 0.4, 0.4),
+    ),
+  ]
+)

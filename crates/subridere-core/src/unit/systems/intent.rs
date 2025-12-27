@@ -1,9 +1,8 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::enemy::component::Enemy;
 use crate::stats::mana::component::Mana;
-use crate::unit::component::{AttackIntent, LookAtIntent, TurnIntent};
+use crate::unit::component::TurnIntent;
 use crate::{
     fighting::projectile::spawn::spawn_projectile,
     unit::component::{DashIntent, Grounded, JumpIntent, MoveIntent, ShootIntent, Unit, Velocity},
@@ -111,59 +110,6 @@ pub fn apply_velocity(
         }
 
         controller.translation = Some(velocity.0 * dt);
-    }
-}
-
-pub fn apply_move_intents_for_enemies(
-    mut commands: Commands,
-    time: Res<Time>,
-    mut query: Query<(Entity, &MoveIntent, &mut Velocity), (With<Enemy>, With<Unit>)>,
-) {
-    let dt = time.delta_secs();
-
-    for (entity, intent, mut velocity) in &mut query {
-        let dir = intent.0.normalize_or_zero();
-        velocity.0 += dir * ENEMY_MOVE_ACCEL * dt;
-        // clamp:
-        velocity.0.x = velocity.0.x.clamp(-ENEMY_MAX_SPEED, ENEMY_MAX_SPEED);
-        velocity.0.z = velocity.0.z.clamp(-ENEMY_MAX_SPEED, ENEMY_MAX_SPEED);
-        commands.entity(entity).remove::<MoveIntent>();
-    }
-}
-
-/// Applies look rotation based on LookAtIntent — smooth Y-axis facing.
-pub fn apply_look_intents_for_enemies(
-    mut commands: Commands,
-    mut query: Query<(Entity, &LookAtIntent, &mut Transform), (With<Enemy>, With<Unit>)>,
-) {
-    for (entity, intent, mut transform) in &mut query {
-        let direction = intent.0 - transform.translation;
-        if direction.length_squared() > 0.001 {
-            let yaw = direction.z.atan2(direction.x);
-            let target_rotation = Quat::from_rotation_y(-yaw);
-            transform.rotation = transform.rotation.slerp(target_rotation, 0.2);
-        }
-
-        commands.entity(entity).remove::<LookAtIntent>();
-    }
-}
-
-/// Processes enemy attack intents. Later: apply hit, trigger animations, sounds, etc.
-pub fn apply_attack_intents_for_enemies(
-    mut commands: Commands,
-    query: Query<(Entity, &AttackIntent), With<Enemy>>,
-) {
-    for (entity, intent) in &query {
-        match intent {
-            AttackIntent::Bite => {
-                // TODO: play bite animation, apply hitbox, etc
-            }
-            AttackIntent::Slash => {
-                // TODO: play slash animation, apply hitbox, etc
-            }
-        }
-
-        commands.entity(entity).remove::<AttackIntent>();
     }
 }
 

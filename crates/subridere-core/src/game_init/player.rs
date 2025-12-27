@@ -53,5 +53,5 @@ pub fn spawn_player(
         ));
     });
 
-    next_state.set(InitStage::PlayerReady);
+    next_state.set(InitStage::EnemiesReady);
 }

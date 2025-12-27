@@ -3,7 +3,7 @@ pub mod audio;
 pub mod block_bodies;
 pub mod camera;
 pub mod core;
-pub mod enemy;
+pub mod enemies;
 pub mod fighting;
 pub mod game_init;
 pub mod input;

@@ -1,3 +1,4 @@
+pub mod enemies;
 pub mod lighting;
 pub mod maze_rooms;
 pub mod player;
