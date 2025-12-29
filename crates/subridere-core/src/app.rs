@@ -5,7 +5,6 @@ use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
 use bevy_rapier3d::render::RapierDebugRenderPlugin;
 
 use crate::audio::plugin::SubAudioPlugin;
-use crate::block_bodies::animation::plugin::BlockAnimationPlugin;
 use crate::camera::plugin::CameraPlugin;
 use crate::core::fps_stats::FpsStatsPlugin;
 use crate::enemies::EnemiesPlugin;
@@ -47,6 +46,5 @@ pub fn run() {
         .add_plugins(ProjectilePlugin)
         .add_plugins(WorldPlugin)
         .add_plugins(EnemiesPlugin)
-        .add_plugins(BlockAnimationPlugin)
         .run();
 }

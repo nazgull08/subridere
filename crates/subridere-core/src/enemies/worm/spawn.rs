@@ -1,11 +1,13 @@
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::{CharacterLength, Collider, KinematicCharacterController, KinematicCharacterControllerOutput};
+use bevy_rapier3d::prelude::{
+    CharacterLength, Collider, KinematicCharacterController, KinematicCharacterControllerOutput,
+};
 use block_bodies_core::{PartId, serialization::BlockBodyFile};
 use std::collections::HashMap;
 
 use crate::enemies::{
     components::Enemy,
-    worm::components::{Worm, WormAI, WormState, WormHead},
+    worm::components::{Worm, WormAI, WormHead, WormState},
 };
 use crate::utils::animated_body::AnimatedBody;
 
@@ -17,14 +19,12 @@ pub fn spawn_worm(
 ) -> Entity {
     let model_path = "./assets/models/worm.ron";
     info!("loading from: {}", model_path);
-    
-    let body_file = BlockBodyFile::load_from_file(model_path)
-        .expect("Failed to load worm.ron");
-    let body = body_file.to_body()
-        .expect("Failed to parse worm body");
-    
+
+    let body_file = BlockBodyFile::load_from_file(model_path).expect("Failed to load worm.ron");
+    let body = body_file.to_body().expect("Failed to parse worm body");
+
     info!("📊 Loaded worm body with {} parts", body.parts.len());
-    
+
     // Materials
     let red_material = materials.add(StandardMaterial {
         base_color: Color::srgb(0.8, 0.2, 0.2),
@@ -32,7 +32,7 @@ pub fn spawn_worm(
         perceptual_roughness: 0.8,
         ..default()
     });
-    
+
     let green_material = materials.add(StandardMaterial {
         base_color: Color::srgb(0.2, 0.7, 0.3),
         metallic: 0.1,
@@ -41,13 +41,15 @@ pub fn spawn_worm(
     });
 
     // Create root entity (logical container)
-    let worm_id = commands.spawn((
-        Enemy,
-        Worm::default(),
-        Transform::from_translation(position),
-        Visibility::Visible,
-        Name::new("Worm"),
-    )).id();
+    let worm_id = commands
+        .spawn((
+            Enemy,
+            Worm::default(),
+            Transform::from_translation(position),
+            Visibility::Visible,
+            Name::new("Worm"),
+        ))
+        .id();
 
     let mut part_entities: HashMap<PartId, Entity> = HashMap::new();
     let mut head_entity = None;
@@ -101,7 +103,7 @@ pub fn spawn_worm(
             }
 
             part_entities.insert(part_id, entity_commands.id());
-            
+
             info!("  - Spawned {} at offset {:?}", part.name, initial_offset);
         }
     });
@@ -112,8 +114,11 @@ pub fn spawn_worm(
         part_entities,
     });
 
-    info!("🐛 Spawned worm at {:?}, head entity: {:?}", position, head_entity);
-    
+    info!(
+        "🐛 Spawned worm at {:?}, head entity: {:?}",
+        position, head_entity
+    );
+
     worm_id
 }
 

@@ -1,6 +1,7 @@
 use crate::enemies::worm::animation::animate_worm_trail;
 use crate::enemies::worm::behavior::{
-    worm_attack_behavior, worm_move_system, worm_rotate_system, worm_detect_targets, worm_update_state,
+    worm_attack_behavior, worm_detect_targets, worm_move_system, worm_rotate_system,
+    worm_update_state,
 };
 use bevy::prelude::*;
 

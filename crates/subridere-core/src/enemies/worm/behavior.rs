@@ -1,7 +1,7 @@
+use super::components::{WormAI, WormHead, WormState};
+use crate::player::component::Player;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::KinematicCharacterController;
-use crate::player::component::Player;
-use super::components::{WormAI, WormState, WormHead};
 
 // Detection - правильная версия
 pub fn worm_detect_targets(
@@ -10,11 +10,13 @@ pub fn worm_detect_targets(
 ) {
     for (head_transform, mut ai) in &mut heads {
         let mut closest: Option<(Entity, f32)> = None;
-        
+
         // Find closest player
         for (player_entity, player_transform) in &players {
-            let distance = head_transform.translation.distance(player_transform.translation);
-            
+            let distance = head_transform
+                .translation
+                .distance(player_transform.translation);
+
             if distance <= ai.detection_range {
                 match closest {
                     Some((_, current_closest)) if distance < current_closest => {
@@ -27,7 +29,7 @@ pub fn worm_detect_targets(
                 }
             }
         }
-        
+
         ai.target = closest.map(|(e, _)| e);
     }
 }
@@ -40,12 +42,18 @@ pub fn worm_update_state(
     for (head_transform, mut state, ai) in &mut heads {
         let new_state = if let Some(target_entity) = ai.target {
             if let Ok(target_transform) = targets.get(target_entity) {
-                let distance = head_transform.translation.distance(target_transform.translation);
-                
+                let distance = head_transform
+                    .translation
+                    .distance(target_transform.translation);
+
                 if distance <= ai.attack_range {
-                    WormState::Attack { target: target_entity }
+                    WormState::Attack {
+                        target: target_entity,
+                    }
                 } else {
-                    WormState::Chase { target: target_entity }
+                    WormState::Chase {
+                        target: target_entity,
+                    }
                 }
             } else {
                 WormState::Idle
@@ -54,7 +62,8 @@ pub fn worm_update_state(
             WormState::Idle
         };
 
-        if !matches!(&*state, s if std::mem::discriminant(s) == std::mem::discriminant(&new_state)) {
+        if !matches!(&*state, s if std::mem::discriminant(s) == std::mem::discriminant(&new_state))
+        {
             info!("Worm state: {:?} -> {:?}", *state, new_state);
             *state = new_state;
         }
@@ -72,7 +81,7 @@ pub fn worm_move_system(
             if let Ok(target_transform) = targets.get(*target) {
                 let to_target = target_transform.translation - head_transform.translation;
                 let direction_xz = Vec3::new(to_target.x, 0.0, to_target.z).normalize_or_zero();
-                
+
                 let move_speed = 2.0;
                 controller.translation = Some(direction_xz * move_speed * time.delta_secs());
             }
@@ -89,7 +98,7 @@ pub fn worm_rotate_system(
             if let Ok(target_transform) = targets.get(*target) {
                 let to_target = target_transform.translation - head_transform.translation;
                 let direction_xz = Vec3::new(to_target.x, 0.0, to_target.z).normalize_or_zero();
-                
+
                 if direction_xz.length_squared() > 0.001 {
                     let target_rotation = Quat::from_rotation_arc(Vec3::X, direction_xz);
                     head_transform.rotation = head_transform.rotation.lerp(target_rotation, 0.1);
@@ -109,7 +118,9 @@ pub fn worm_attack_behavior(
             if let Ok(target_transform) = targets.get(*target) {
                 info!(
                     "Worm attacking target at distance: {:.2}",
-                    head_transform.translation.distance(target_transform.translation)
+                    head_transform
+                        .translation
+                        .distance(target_transform.translation)
                 );
             }
         }
