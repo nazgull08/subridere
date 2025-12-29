@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 
 use crate::enemies::worm::{
-    attack::{worm_execute_lunge_system, worm_prepare_visual_feedback}, damage::{worm_collision_damage_system, worm_damage_cooldown_system}, detection::worm_detect_targets, movement::worm_move_forward, particles::{spawn_dust_on_landing, update_dust_particles, update_blood_particles}, rotation::worm_rotate_to_target, state::worm_update_state, health::{worm_death_system, worm_projectile_damage_system}
+    attack::{worm_execute_lunge_system, worm_prepare_visual_feedback}, damage::{worm_collision_damage_system, worm_damage_cooldown_system}, detection::worm_detect_targets, movement::worm_move_forward, particles::{spawn_dust_on_landing, update_dust_particles, update_blood_particles}, rotation::worm_rotate_to_target, state::worm_update_state, health::{worm_death_system, worm_projectile_damage_system},
+death::{spawn_blood_pool_visuals, animate_blood_pool, fade_corpse_segments},
 };
 
 /// Plugin for all enemy-related systems
@@ -36,6 +37,9 @@ impl Plugin for EnemiesPlugin {
                 worm_projectile_damage_system,
                 update_blood_particles,
                 worm_death_system,
+                spawn_blood_pool_visuals,
+                animate_blood_pool,
+                fade_corpse_segments
             )
                 .chain(),
         );

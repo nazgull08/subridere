@@ -2,6 +2,7 @@
 pub mod attack;
 pub mod components;
 pub mod damage;
+pub mod death;
 pub mod detection;
 pub mod health;
 pub mod movement;
