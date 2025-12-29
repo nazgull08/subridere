@@ -1,12 +1,14 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+use crate::audio::weapons::events::{MagicBoltFireEvent, PhysicsCubeFireEvent};
+use crate::fighting::weapon_display::component::WeaponFiredEvent;
 use crate::stats::mana::component::Mana;
 use crate::unit::component::TurnIntent;
-use crate::{
-    fighting::projectile::spawn::spawn_projectile,
-    unit::component::{DashIntent, Grounded, JumpIntent, MoveIntent, ShootIntent, Unit, Velocity},
-};
+use crate::unit::component::{DashIntent, Grounded, JumpIntent, MoveIntent, ShootIntent, Unit, Velocity};
+use crate::fighting::projectile::spawn::{spawn_magic_bolt, spawn_physical_cube};
+use crate::fighting::projectile::weapons::{CurrentWeapon, WeaponType};
+
 
 // Movement tuning constants
 const MOVE_ACCEL: f32 = 50.0;
@@ -117,26 +119,46 @@ pub fn handle_shoot_intents(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut query: Query<(Entity, &GlobalTransform, &ShootIntent, &mut Mana), With<Unit>>,
+    mut query: Query<(Entity, &GlobalTransform, &ShootIntent, &mut Mana, &CurrentWeapon), With<Unit>>,
+    mut weapon_fired: EventWriter<WeaponFiredEvent>, 
+    mut magic_bolt_event: EventWriter<MagicBoltFireEvent>,
+    mut physical_cube_event: EventWriter<PhysicsCubeFireEvent>,
 ) {
     let mana_cost = 10.0;
 
-    for (entity, transform, intent, mut mana) in &mut query {
+    for (entity, transform, intent, mut mana, weapon) in &mut query {
         if mana.current >= mana_cost {
             mana.current -= mana_cost;
 
             let origin = transform.translation() + Vec3::new(0.0, 2.0, 0.0);
             let direction = intent.0;
 
-            spawn_projectile(
-                &mut commands,
-                &mut meshes,
-                &mut materials,
-                origin + direction * 1.0,
-                direction,
-            );
+            match weapon.weapon_type {
+                WeaponType::MagicBolt => {
+                    spawn_magic_bolt(
+                        &mut commands,
+                        &mut meshes,
+                        &mut materials,
+                        origin + direction * 1.0,
+                        direction,
+                    );
+                    magic_bolt_event.send(MagicBoltFireEvent);
+                }
+                WeaponType::PhysicalCube => {
+                    spawn_physical_cube(
+                        &mut commands,
+                        &mut meshes,
+                        &mut materials,
+                        origin + direction * 1.0,
+                        direction,
+                    );
+                    physical_cube_event.send(PhysicsCubeFireEvent);
+                }
+            }
+            
+            weapon_fired.send(WeaponFiredEvent);
         } else {
-            info!("Entity {:?} has not enough mana to shoot", entity);
+            info!("Not enough mana!");
         }
 
         commands.entity(entity).remove::<ShootIntent>();

@@ -2,12 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use crate::{
-    camera::flycam::FlyCamera,
-    input::component::PlayerControlled,
-    player::component::{PLAYER_START_POS, Player, PlayerVisual},
-    player::visual::create_player_body_bundle,
-    stats::{health::component::Health, mana::component::Mana, stamina::component::Stamina},
-    unit::component::{Grounded, Unit, Velocity},
+    camera::flycam::FlyCamera, fighting::{projectile::weapons::CurrentWeapon, weapon_display::spawn::create_weapon_display}, input::component::PlayerControlled, player::{component::{Player, PlayerVisual, PLAYER_START_POS}, visual::create_player_body_bundle}, stats::{health::component::Health, mana::component::Mana, stamina::component::Stamina}, unit::component::{Grounded, Unit, Velocity}
 };
 
 use super::state::InitStage;
@@ -43,14 +38,24 @@ pub fn spawn_player(
         .insert(Health::default())
         .insert(Mana::default())
         .insert(Stamina::default())
+        .insert(CurrentWeapon::default())
         .id();
 
     commands.entity(player_id).with_children(|parent| {
+        // ✅ Правильный способ: spawn возвращает EntityCommands с методом with_children
         parent.spawn((
             Camera3d::default(),
             FlyCamera::default(),
             Name::new("PlayerCamera"),
-        ));
+        ))
+        .with_children(|camera_parent| {
+            create_weapon_display(
+                camera_parent,
+                CurrentWeapon::default().weapon_type,
+                meshes.as_mut(),  // ✅ .as_mut() для конвертации
+                materials.as_mut(),  // ✅ .as_mut() для конвертации
+            );
+        });
     });
 
     next_state.set(InitStage::EnemiesReady);

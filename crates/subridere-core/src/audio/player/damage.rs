@@ -9,7 +9,7 @@ pub fn play_player_damage_sfx(
     asset_server: Res<AssetServer>,
 ) {
     for _ in evr.read() {
-        let sound = asset_server.load("sounds/player/hurt_male_01.wav");
+        let sound = asset_server.load("./sounds/player/hurt_male_01.wav");
         audio.play(sound);
     }
 }

@@ -11,7 +11,7 @@ pub fn spawn_test_enemies(
     mut next_state: ResMut<NextState<InitStage>>,
 ) {
     // Spawn a single test worm
-    let spawn_pos = Vec3::new(2.0, 2.0, 0.0);
+    let spawn_pos = Vec3::new(20.0, 10.0, 0.0);
 
     spawn_worm(&mut commands, &mut meshes, &mut materials, spawn_pos);
 
