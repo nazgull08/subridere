@@ -1,0 +1,28 @@
+BlockBodyFile(
+  parts: [
+    (
+      name: "Head",
+      parent: None,
+      position: (0.0, 0.0, 0.0),
+      rotation: (0.0, 0.0, 0.0, 1.0),
+      size: (1.0, 1.0, 1.0),
+    ),
+    (name: "Seg1", parent: Some("Head"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg2", parent: Some("Seg1"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg3", parent: Some("Seg2"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg4", parent: Some("Seg3"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg5", parent: Some("Seg4"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg6", parent: Some("Seg5"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg7", parent: Some("Seg6"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg8", parent: Some("Seg7"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg9", parent: Some("Seg8"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg10", parent: Some("Seg9"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg11", parent: Some("Seg10"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg12", parent: Some("Seg11"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg13", parent: Some("Seg12"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg14", parent: Some("Seg13"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg15", parent: Some("Seg14"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Seg16", parent: Some("Seg15"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+    (name: "Tail", parent: Some("Seg16"), position: (0.8, 0.0, 0.0), rotation: (0.0, 0.0, 0.0, 1.0), size: (0.8, 0.8, 0.8)),
+  ]
+)

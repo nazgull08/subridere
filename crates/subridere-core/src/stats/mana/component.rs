@@ -12,7 +12,7 @@ impl Default for Mana {
         Self {
             current: 100.0,
             max: 100.0,
-            regen: 5.0,
+            regen: 10.0,
         }
     }
 }

@@ -1,0 +1,29 @@
+BlockModelFile(
+  parts: [
+    // 🟩 ТОРС — длинный, чуть наклонён вперёд
+    (name: "Torso", parent: None, local_offset: (0.0, 0.6, 0.0), size: (0.5, 1.0, 0.4), material: "green"),
+
+    // 🪜 ШЕЯ — вытянута вверх и вперёд
+    (name: "Neck2", parent: Some("Torso"), local_offset: (0.0, 0.55, -0.05), size: (0.18, 0.25, 0.18), material: "gray"),
+    (name: "Neck1", parent: Some("Neck2"), local_offset: (0.0, 0.25, -0.05), size: (0.16, 0.25, 0.16), material: "gray"),
+
+    // 🟥 ГОЛОВА — вытянута вперёд и немного вверх
+    (name: "Head", parent: Some("Neck1"), local_offset: (0.0, 0.3, -0.15), size: (0.42, 0.42, 0.42), material: "red"),
+
+    // 🔴 ЛЕВАЯ РУКА — длинная, когтистая
+    (name: "ShoulderL", parent: Some("Torso"), local_offset: (-0.5, 0.4, 0.0), size: (0.24, 0.24, 0.3), material: "red"),
+    (name: "ArmL", parent: Some("ShoulderL"), local_offset: (-0.05, -0.5, -0.05), size: (0.18, 0.6, 0.18), material: "gray"),
+    (name: "HandL", parent: Some("ArmL"), local_offset: (0.0, -0.4, -0.05), size: (0.16, 0.35, 0.16), material: "red"),
+
+    // 🔴 ПРАВАЯ РУКА — симметрична
+    (name: "ShoulderR", parent: Some("Torso"), local_offset: ( 0.5, 0.4, 0.0), size: (0.24, 0.24, 0.3), material: "red"),
+    (name: "ArmR", parent: Some("ShoulderR"), local_offset: (0.05, -0.5, -0.05), size: (0.18, 0.6, 0.18), material: "gray"),
+    (name: "HandR", parent: Some("ArmR"), local_offset: (0.0, -0.4, -0.05), size: (0.16, 0.35, 0.16), material: "red"),
+
+    // 🐍 ХВОСТ — изогнут назад по +Z
+    (name: "TailBase", parent: Some("Torso"), local_offset: (0.0, -0.6, 0.4), size: (0.5, 0.25, 0.6), material: "green"),
+    (name: "TailMid", parent: Some("TailBase"), local_offset: (0.0, -0.05, 0.55), size: (0.42, 0.2, 0.5), material: "green"),
+    (name: "TailTip", parent: Some("TailMid"), local_offset: (0.0,  0.0, 0.45), size: (0.36, 0.15, 0.4), material: "green"),
+    (name: "TailSpike", parent: Some("TailTip"), local_offset: (0.0,  0.2, 0.4), size: (0.3, 0.3, 0.3), material: "red"),
+  ]
+)

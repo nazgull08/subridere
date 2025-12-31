@@ -1,0 +1,149 @@
+BlockModelFile(
+  parts: [
+    // Тело
+    (
+      name: "Torso",
+      parent: None,
+      local_offset: (0.0, 1.0, 0.0),
+      size: (0.5, 0.6, 0.3),
+      material: "gray",
+      socket: None,
+    ),
+    (
+      name: "Neck",
+      parent: Some("Torso"),
+      local_offset: (0.0, 0.4, 0.0),
+      size: (0.2, 0.2, 0.2),
+      material: "gray",
+      socket: None,
+    ),
+    (
+      name: "Head",
+      parent: Some("Neck"),
+      local_offset: (0.0, 0.4, 0.0),
+      size: (0.4, 0.4, 0.4),
+      material: "red",
+      socket: Some(Helmet),
+    ),
+
+    // Левая рука
+    (
+      name: "ShoulderL",
+      parent: Some("Torso"),
+      local_offset: (-0.45, 0.3, 0.0),
+      size: (0.2, 0.2, 0.2),
+      material: "red",
+      socket: None,
+    ),
+    (
+      name: "ArmL",
+      parent: Some("ShoulderL"),
+      local_offset: (0.0, -0.3, 0.0),
+      size: (0.2, 0.4, 0.2),
+      material: "gray",
+      socket: None,
+    ),
+    (
+      name: "ForearmL",
+      parent: Some("ArmL"),
+      local_offset: (0.0, -0.3, 0.0),
+      size: (0.2, 0.4, 0.2),
+      material: "red",
+      socket: None,
+    ),
+    (
+      name: "HandL",
+      parent: Some("ForearmL"),
+      local_offset: (0.0, -0.2, 0.0),
+      size: (0.2, 0.2, 0.2),
+      material: "gray",
+      socket: Some(Shield),
+    ),
+
+    // Правая рука
+    (
+      name: "ShoulderR",
+      parent: Some("Torso"),
+      local_offset: (0.45, 0.3, 0.0),
+      size: (0.2, 0.2, 0.2),
+      material: "red",
+      socket: None,
+    ),
+    (
+      name: "ArmR",
+      parent: Some("ShoulderR"),
+      local_offset: (0.0, -0.3, 0.0),
+      size: (0.2, 0.4, 0.2),
+      material: "gray",
+      socket: None,
+    ),
+    (
+      name: "ForearmR",
+      parent: Some("ArmR"),
+      local_offset: (0.0, -0.3, 0.0),
+      size: (0.2, 0.4, 0.2),
+      material: "red",
+      socket: None,
+    ),
+    (
+      name: "HandR",
+      parent: Some("ForearmR"),
+      local_offset: (0.0, -0.2, 0.0),
+      size: (0.2, 0.2, 0.2),
+      material: "gray",
+      socket: Some(WeaponMain),
+    ),
+
+    // Левая нога
+    (
+      name: "ThighL",
+      parent: Some("Torso"),
+      local_offset: (-0.15, -0.4, 0.0),
+      size: (0.2, 0.3, 0.2),
+      material: "red",
+      socket: None,
+    ),
+    (
+      name: "ShinL",
+      parent: Some("ThighL"),
+      local_offset: (0.0, -0.3, 0.0),
+      size: (0.2, 0.3, 0.2),
+      material: "gray",
+      socket: None,
+    ),
+    (
+      name: "FootL",
+      parent: Some("ShinL"),
+      local_offset: (0.0, -0.2, 0.1),
+      size: (0.25, 0.1, 0.3),
+      material: "red",
+      socket: None,
+    ),
+
+    // Правая нога
+    (
+      name: "ThighR",
+      parent: Some("Torso"),
+      local_offset: (0.15, -0.4, 0.0),
+      size: (0.2, 0.3, 0.2),
+      material: "red",
+      socket: None,
+    ),
+    (
+      name: "ShinR",
+      parent: Some("ThighR"),
+      local_offset: (0.0, -0.3, 0.0),
+      size: (0.2, 0.3, 0.2),
+      material: "gray",
+      socket: None,
+    ),
+    (
+      name: "FootR",
+      parent: Some("ShinR"),
+      local_offset: (0.0, -0.2, 0.1),
+      size: (0.25, 0.1, 0.3),
+      material: "red",
+      socket: None,
+    ),
+  ]
+)
