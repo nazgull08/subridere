@@ -1,5 +1,6 @@
 use super::shape::{PrimitiveShape, VisualPart};
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 /// Spawn visual parts as children of a parent entity
 ///
@@ -69,6 +70,52 @@ fn create_mesh_for_shape(
             // size.x = radius
             // Icosphere with 5 subdivisions for decent quality
             meshes.add(Sphere::new(size.x).mesh().ico(5).unwrap())
+        }
+    }
+}
+
+/// Spawn item visual with physics colliders (for world items)
+pub fn spawn_item_visual_with_colliders(
+    spawner: &mut ChildSpawnerCommands,
+    parts: &[VisualPart],
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+) {
+    for part in parts {
+        let mesh = create_mesh_for_shape(&part.shape, part.size, meshes);
+        let material = materials.add(StandardMaterial {
+            base_color: part.bevy_color(),
+            ..default()
+        });
+
+        // Create collider based on shape
+        let collider = create_collider_for_shape(&part.shape, part.size);
+
+        spawner.spawn((
+            Mesh3d(mesh),
+            MeshMaterial3d(material),
+            Transform::from_translation(part.offset),
+            collider, // Add collider to each part
+        ));
+    }
+}
+
+/// Create a collider matching the primitive shape
+fn create_collider_for_shape(shape: &PrimitiveShape, size: Vec3) -> Collider {
+    match shape {
+        PrimitiveShape::Cube => {
+            // Cuboid takes half-extents
+            Collider::cuboid(size.x / 2.0, size.y / 2.0, size.z / 2.0)
+        }
+
+        PrimitiveShape::Cylinder => {
+            // Cylinder: half_height, radius
+            Collider::cylinder(size.y / 2.0, size.x)
+        }
+
+        PrimitiveShape::Sphere | PrimitiveShape::Icosphere => {
+            // Ball: radius
+            Collider::ball(size.x)
         }
     }
 }

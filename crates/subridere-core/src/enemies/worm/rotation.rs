@@ -35,7 +35,7 @@ pub fn worm_rotate_to_target(
     targets: Query<&Transform, (With<Player>, Without<WormHead>)>,
     time: Res<Time>,
 ) {
-    for ((head_transform, state, ai), mut force) in heads.iter().zip(forces.iter_mut()) {
+    for ((head_transform, state, _ai), mut force) in heads.iter().zip(forces.iter_mut()) {
         // ✅ Don't rotate during attack states
         match state {
             WormState::PrepareAttack { .. }

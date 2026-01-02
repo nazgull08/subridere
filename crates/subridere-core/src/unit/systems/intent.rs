@@ -18,10 +18,6 @@ const JUMP_SPEED: f32 = 20.0;
 const GRAVITY: f32 = 20.0;
 const DAMPING: f32 = 3.0;
 
-const ENEMY_MOVE_ACCEL: f32 = 20.0;
-const ENEMY_MAX_SPEED: f32 = 6.0;
-const ENEMY_FRICTION: f32 = 12.0;
-
 /// Updates `Grounded` based on Rapier's KinematicCharacterController output.
 pub fn update_grounded_system(
     mut query: Query<(&KinematicCharacterControllerOutput, &mut Grounded), With<Unit>>,
@@ -152,7 +148,7 @@ pub fn handle_shoot_intents(
                         origin + direction * 1.0,
                         direction,
                     );
-                    magic_bolt_event.send(MagicBoltFireEvent);
+                    magic_bolt_event.write(MagicBoltFireEvent);
                 }
                 WeaponType::PhysicalCube => {
                     spawn_physical_cube(
@@ -162,11 +158,11 @@ pub fn handle_shoot_intents(
                         origin + direction * 1.0,
                         direction,
                     );
-                    physical_cube_event.send(PhysicsCubeFireEvent);
+                    physical_cube_event.write(PhysicsCubeFireEvent);
                 }
             }
 
-            weapon_fired.send(WeaponFiredEvent);
+            weapon_fired.write(WeaponFiredEvent);
         } else {
             info!("Not enough mana!");
         }

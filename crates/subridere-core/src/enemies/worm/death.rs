@@ -1,4 +1,3 @@
-use super::components::{Worm, WormHead, WormSegment};
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 

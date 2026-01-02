@@ -1,4 +1,4 @@
-use super::component::{Damage, DamageType};
+use super::component::Damage;
 use crate::{
     audio::player::events::PlayerDamageEvent, player::component::Player,
     stats::health::component::Health, ui::hud::hitflash::HitFlashEvent,

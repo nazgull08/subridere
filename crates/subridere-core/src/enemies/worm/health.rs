@@ -20,7 +20,6 @@ pub fn worm_projectile_damage_system(
     mut hurt_event: EventWriter<WormHurtEvent>,
     projectiles: Query<(&Transform, &Velocity), With<DamageProjectile>>, // ✅ Добавить Transform и Velocity
     worm_segments: Query<(&Transform, &WormHead)>,                       // ✅ Добавить Transform
-    worms: Query<Entity, With<Worm>>,
 ) {
     for event in collision_events.read() {
         if let CollisionEvent::Started(e1, e2, _) = event {
@@ -35,9 +34,7 @@ pub fn worm_projectile_damage_system(
                 };
 
             // Get projectile info
-            if let Ok((projectile_transform, projectile_velocity)) =
-                projectiles.get(projectile_entity)
-            {
+            if let Ok((_, projectile_velocity)) = projectiles.get(projectile_entity) {
                 // Get worm head info
                 if let Ok((head_transform, head)) = worm_segments.get(worm_head_entity) {
                     let worm_root = head.worm_root;
@@ -57,7 +54,7 @@ pub fn worm_projectile_damage_system(
                         damage_type: DamageType::Magical,
                     });
 
-                    hurt_event.send(WormHurtEvent);
+                    hurt_event.write(WormHurtEvent);
 
                     // Despawn projectile
                     commands.entity(projectile_entity).despawn();

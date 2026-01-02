@@ -2,9 +2,9 @@ use super::state::InventoryState;
 use super::systems::*;
 use bevy::prelude::*;
 
-pub struct InventoryPlugin;
+pub struct UiInventoryPlugin;
 
-impl Plugin for InventoryPlugin {
+impl Plugin for UiInventoryPlugin {
     fn build(&self, app: &mut App) {
         app
             // Register state
@@ -24,9 +24,13 @@ impl Plugin for InventoryPlugin {
                 Update,
                 (
                     sync_inventory_to_ui,
-                    handle_slot_hover,           // ДОБАВИТЬ
-                    handle_slot_click,           // ДОБАВИТЬ
-                    update_selected_slot_visual, // ДОБАВИТЬ
+                    sync_stats_to_ui,
+                    sync_equipment_to_ui,
+                    handle_slot_hover,
+                    handle_slot_click,
+                    handle_equip_slot_click,
+                    handle_equip_slot_hover,
+                    update_selected_slot_visual,
                 )
                     .run_if(in_state(InventoryState::Open)),
             );

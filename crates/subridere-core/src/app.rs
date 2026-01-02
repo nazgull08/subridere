@@ -2,7 +2,7 @@ use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy_kira_audio::AudioPlugin;
 use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
-use bevy_rapier3d::render::RapierDebugRenderPlugin;
+//use bevy_rapier3d::render::RapierDebugRenderPlugin;
 
 use crate::audio::plugin::SubAudioPlugin;
 use crate::camera::plugin::CameraPlugin;
@@ -11,11 +11,12 @@ use crate::enemies::EnemiesPlugin;
 use crate::fighting::projectile::plugin::ProjectilePlugin;
 use crate::game_init::plugin::GameInitPlugin;
 use crate::input::plugin::InputPlugin;
+use crate::inventory::InventoryPlugin;
 use crate::items::plugin::ItemsPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::stats::plugin::StatsPlugin;
 use crate::ui::hud::plugin::HudUiPlugin;
-use crate::ui::inventory::InventoryPlugin;
+use crate::ui::inventory::UiInventoryPlugin;
 use crate::unit::plugin::UnitPlugin;
 use crate::world::plugin::WorldPlugin;
 
@@ -41,11 +42,12 @@ pub fn run() {
         .add_plugins(InputPlugin)
         .add_plugins(FpsStatsPlugin)
         .add_plugins(HudUiPlugin)
-        .add_plugins(InventoryPlugin)
+        .add_plugins(UiInventoryPlugin)
         // ── Game logic ───────────────────────────
         .add_plugins(StatsPlugin)
         .add_plugins(UnitPlugin)
         .add_plugins(PlayerPlugin)
+        //        .add_plugins(InventoryPlugin)
         .add_plugins(ProjectilePlugin)
         .add_plugins(WorldPlugin)
         .add_plugins(EnemiesPlugin)

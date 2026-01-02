@@ -5,12 +5,12 @@ use crate::{
     camera::flycam::FlyCamera,
     fighting::{projectile::weapons::CurrentWeapon, weapon_display::spawn::create_weapon_display},
     input::component::PlayerControlled,
+    inventory::{Equipment, Inventory},
     player::{
         component::{PLAYER_START_POS, Player, PlayerVisual},
         visual::create_player_body_bundle,
     },
     stats::{health::component::Health, mana::component::Mana, stamina::component::Stamina},
-    ui::inventory::data::Inventory,
     unit::component::{Grounded, Unit, Velocity},
 };
 
@@ -49,10 +49,10 @@ pub fn spawn_player(
         .insert(Stamina::default())
         .insert(CurrentWeapon::default())
         .insert(Inventory::default())
+        .insert(Equipment::default())
         .id();
 
     commands.entity(player_id).with_children(|parent| {
-        // ✅ Правильный способ: spawn возвращает EntityCommands с методом with_children
         parent
             .spawn((
                 Camera3d::default(),
@@ -63,8 +63,8 @@ pub fn spawn_player(
                 create_weapon_display(
                     camera_parent,
                     CurrentWeapon::default().weapon_type,
-                    meshes.as_mut(),    // ✅ .as_mut() для конвертации
-                    materials.as_mut(), // ✅ .as_mut() для конвертации
+                    meshes.as_mut(),
+                    materials.as_mut(),
                 );
             });
     });

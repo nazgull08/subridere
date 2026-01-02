@@ -85,8 +85,6 @@ fn spawn_dust_cloud(
             Name::new("DustParticle"),
         ));
     }
-
-    info!("💨 Spawned dust cloud");
 }
 
 /// Fades out and despawns dust particles

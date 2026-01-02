@@ -6,6 +6,7 @@ pub mod enemies;
 pub mod fighting;
 pub mod game_init;
 pub mod input;
+pub mod inventory;
 pub mod items;
 pub mod player;
 pub mod stats;

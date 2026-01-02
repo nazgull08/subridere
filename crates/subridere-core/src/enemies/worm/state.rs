@@ -15,7 +15,7 @@ pub fn worm_update_state(
             // ============================================
             WormState::Idle => {
                 if let Some(target_entity) = ai.target {
-                    if let Ok(target_transform) = targets.get(target_entity) {
+                    if let Ok(_) = targets.get(target_entity) {
                         info!("🔄 Idle -> Chase");
                         WormState::Chase {
                             target: target_entity,
@@ -31,7 +31,7 @@ pub fn worm_update_state(
             // ============================================
             // CHASE - преследуем цель
             // ============================================
-            WormState::Chase { target } => {
+            WormState::Chase { target: _ } => {
                 if let Some(target_entity) = ai.target {
                     if let Ok(target_transform) = targets.get(target_entity) {
                         let distance = head_transform

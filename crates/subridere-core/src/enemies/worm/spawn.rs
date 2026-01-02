@@ -61,7 +61,7 @@ pub fn spawn_worm(
 
     let mut segment_entities = Vec::new();
 
-    for (part_id, part) in body.parts.iter() {
+    for (_part_id, part) in body.parts.iter() {
         let material = if part.name == "Head" || part.name == "Tail" {
             red_material.clone()
         } else {

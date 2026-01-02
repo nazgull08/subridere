@@ -1,0 +1,11 @@
+ItemDefinition(
+    id: "iron_helmet",
+    name: "Iron Helmet",
+    visual_ref: "iron_helmet_visual",
+    icon: "textures/items/iron_helmet_icon.png",
+    properties: Armor((
+        slot: Helmet,
+        defense: 10.0,
+        weight: 5.0,
+    )),
+)

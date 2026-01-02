@@ -1,11 +1,14 @@
 use super::ui::InventorySlotUI;
-use crate::ui::inventory::layout::SLOT_BORDER_COLOR;
+use crate::ui::inventory::{layout::SLOT_BORDER_COLOR, systems::EquipmentSlotUI};
 use bevy::prelude::*;
 
 /// Colors for slot states
 const BORDER_NORMAL: Color = SLOT_BORDER_COLOR;
 const BORDER_HOVERED: Color = Color::srgb(0.7, 0.7, 0.7); // Brighter
 const BORDER_SELECTED: Color = Color::srgb(1.0, 0.8, 0.3); // Golden
+
+const EQUIP_BORDER_NORMAL: Color = Color::srgb(0.35, 0.35, 0.35);
+const EQUIP_BORDER_HOVERED: Color = Color::srgb(0.6, 0.6, 0.6);
 
 /// Resource to track selected inventory slot
 #[derive(Resource, Default)]
@@ -22,7 +25,6 @@ pub fn handle_slot_hover(
     >,
     selected_slot: Res<SelectedSlot>,
 ) {
-    info!("🟢 handle_slot_hover RUNNING");
     for (interaction, mut border_color, slot_ui) in &mut slot_query {
         // Check if this slot is selected
         let is_selected = selected_slot.slot_index == Some(slot_ui.slot_index);
@@ -54,7 +56,6 @@ pub fn handle_slot_click(
     >,
     mut selected_slot: ResMut<SelectedSlot>,
 ) {
-    info!("🟢 handle_slot_click RUNNING");
     for (interaction, slot_ui) in &mut slot_query {
         if *interaction == Interaction::Pressed {
             // Toggle selection
@@ -77,7 +78,6 @@ pub fn update_selected_slot_visual(
     selected_slot: Res<SelectedSlot>,
 ) {
     // Only run if selection changed
-    info!("🟢 update_selected_slot_visual RUNNING");
     if !selected_slot.is_changed() {
         return;
     }
@@ -89,6 +89,37 @@ pub fn update_selected_slot_visual(
         } else {
             // Not selected - normal border
             *border_color = BorderColor(BORDER_NORMAL);
+        }
+    }
+}
+
+/// Handle hover effect on equipment slots
+pub fn handle_equip_slot_hover(
+    mut slot_query: Query<(&Interaction, &mut BorderColor, &EquipmentSlotUI), Changed<Interaction>>,
+) {
+    for (interaction, mut border_color, _slot_ui) in &mut slot_query {
+        match *interaction {
+            Interaction::Hovered => {
+                *border_color = BorderColor(EQUIP_BORDER_HOVERED);
+            }
+            Interaction::None => {
+                *border_color = BorderColor(EQUIP_BORDER_NORMAL);
+            }
+            Interaction::Pressed => {
+                // Handled by click system
+            }
+        }
+    }
+}
+
+/// Handle click on equipment slots (for unequipping)
+pub fn handle_equip_slot_click(
+    slot_query: Query<(&Interaction, &EquipmentSlotUI), Changed<Interaction>>,
+) {
+    for (interaction, slot_ui) in &slot_query {
+        if *interaction == Interaction::Pressed {
+            info!("🎯 Clicked equipment slot: {:?}", slot_ui.slot_type);
+            // TODO: Unequip logic later
         }
     }
 }

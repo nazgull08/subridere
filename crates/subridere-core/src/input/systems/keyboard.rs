@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::window::CursorGrabMode;
 
 use crate::input::component::PlayerControlled;
 use crate::input::resources::InputSettings;

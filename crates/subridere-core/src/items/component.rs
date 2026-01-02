@@ -18,6 +18,22 @@ pub struct Item {
 #[derive(Component, Debug)]
 pub struct Pickupable;
 
+/// Item in the world (can be picked up)
+#[derive(Component, Clone, Debug)]
+pub struct WorldItem {
+    /// Item identifier (e.g. "wooden_staff", "iron_helmet")
+    pub item_id: String,
+
+    /// Quantity in this stack
+    pub quantity: u32,
+}
+
+impl WorldItem {
+    pub fn new(item_id: String, quantity: u32) -> Self {
+        Self { item_id, quantity }
+    }
+}
+
 /// Component for items currently in an inventory slot
 #[derive(Component, Debug)]
 pub struct InInventory {

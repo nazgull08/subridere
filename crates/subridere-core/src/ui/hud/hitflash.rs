@@ -76,7 +76,7 @@ pub fn update_hit_overlay(
 
         // Удаляем оверлей когда таймер закончился
         if overlay.timer.finished() {
-            commands.entity(entity).despawn_recursive();
+            commands.entity(entity).despawn();
         }
     }
 }

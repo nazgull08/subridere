@@ -11,7 +11,11 @@ pub fn worm_execute_lunge_system(
 ) {
     for ((head_transform, mut state, ai), mut impulse) in heads.iter_mut().zip(impulses.iter_mut())
     {
-        if let WormState::Lunging { target, target_pos } = *state {
+        if let WormState::Lunging {
+            target: _,
+            target_pos,
+        } = *state
+        {
             // Calculate direction to target (запомненная позиция)
             let to_target = target_pos - head_transform.translation;
             let horizontal_dir = Vec3::new(to_target.x, 0.0, to_target.z).normalize_or_zero();
@@ -33,7 +37,7 @@ pub fn worm_execute_lunge_system(
             // Apply impulse
             impulse.impulse = total_impulse;
 
-            bite_event.send(WormBiteEvent);
+            bite_event.write(WormBiteEvent);
 
             info!(
                 "🚀 LUNGE! impulse=[{:.0},{:.0},{:.0}] to target at [{:.1},{:.1},{:.1}]",

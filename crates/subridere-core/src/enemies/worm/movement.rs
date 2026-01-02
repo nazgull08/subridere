@@ -12,7 +12,7 @@ pub fn worm_move_forward(
     targets: Query<&Transform, (With<Player>, Without<WormHead>)>,
     time: Res<Time>,
 ) {
-    for ((head_transform, state, ai, velocity), mut force) in heads.iter().zip(forces.iter_mut()) {
+    for ((head_transform, state, ai, _velocity), mut force) in heads.iter().zip(forces.iter_mut()) {
         // ✅ Don't move during attack states
         match state {
             WormState::PrepareAttack { .. }
@@ -43,7 +43,7 @@ pub fn worm_move_forward(
                         if elapsed % 2 == 0 && time.delta_secs() < 0.02 {
                             let forward = Vec3::NEG_X;
                             let current_forward = head_transform.rotation * forward;
-                            let fwd_xz = Vec3::new(current_forward.x, 0.0, current_forward.z)
+                            let _fwd_xz = Vec3::new(current_forward.x, 0.0, current_forward.z)
                                 .normalize_or_zero();
                             /*
                                 info!(

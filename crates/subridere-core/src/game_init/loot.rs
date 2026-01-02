@@ -1,9 +1,13 @@
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
+
 use rand::Rng;
 
+use crate::items::WorldItem;
 use crate::items::component::Pickupable;
 use crate::items::visual::definition::VisualDefinition;
-use crate::items::visual::spawn::spawn_item_visual;
+use crate::items::visual::shape::VisualPart;
+use crate::items::visual::spawn_item_visual_with_colliders;
 use crate::world::room::types::RoomMap;
 
 use super::assets::GameAssets;
@@ -34,53 +38,31 @@ pub fn spawn_loot(
         return;
     }
 
-    // Get the staff visual (guaranteed to be loaded at this stage)
+    // Get visuals (guaranteed to be loaded at this stage)
     let staff_visual = visuals
         .get(&game_assets.wooden_staff_visual)
         .expect("Wooden staff visual should be loaded by now!");
+    let helmet_visual = visuals
+        .get(&game_assets.iron_helmet_visual)
+        .expect("Iron helmet visual should be loaded by now!");
 
-    // Spawn 2 wooden staffs in random rooms
-    let staff_count = 2;
+    info!("🪄 Spawning loot across {} rooms", room_positions.len());
 
-    info!(
-        "🪄 Spawning {} wooden staffs across {} rooms",
-        staff_count,
-        room_positions.len()
-    );
-
-    for i in 0..staff_count {
-        // Pick random room
+    // Spawn 2 wooden staffs
+    for i in 0..2 {
         let room_idx = rng.gen_range(0..room_positions.len());
         let room_pos = room_positions[room_idx];
+        let final_pos = calculate_spawn_position(&room_pos, &room_size, spawn_height, &mut rng);
 
-        // Calculate world position (center of room)
-        let world_pos = Vec3::new(
-            room_pos.x as f32 * room_size.x,
-            spawn_height,
-            room_pos.z as f32 * room_size.z,
+        spawn_item(
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            "wooden_staff",
+            "Wooden Staff",
+            &staff_visual.parts,
+            final_pos,
         );
-
-        // Random offset within room
-        let offset = Vec3::new(
-            rng.gen_range(-2.0..2.0), // ±2m in X
-            0.0,
-            rng.gen_range(-2.0..2.0), // ±2m in Z
-        );
-
-        let final_pos = world_pos + offset;
-
-        // Spawn the staff
-        commands
-            .spawn((
-                Transform::from_translation(final_pos),
-                GlobalTransform::default(),
-                Visibility::default(),
-                Pickupable,
-                Name::new("Wooden Staff"),
-            ))
-            .with_children(|parent| {
-                spawn_item_visual(parent, &staff_visual.parts, &mut meshes, &mut materials);
-            });
 
         info!(
             "  🪄 Staff {} spawned at room {:?} (world: {:?})",
@@ -90,5 +72,79 @@ pub fn spawn_loot(
         );
     }
 
+    // Spawn 2 iron helmets
+    for i in 0..2 {
+        let room_idx = rng.gen_range(0..room_positions.len());
+        let room_pos = room_positions[room_idx];
+        let final_pos = calculate_spawn_position(&room_pos, &room_size, spawn_height, &mut rng);
+
+        spawn_item(
+            &mut commands,
+            &mut meshes,
+            &mut materials,
+            "iron_helmet",
+            "Iron Helmet",
+            &helmet_visual.parts,
+            final_pos,
+        );
+
+        info!(
+            "  ⚔️ Helmet {} spawned at room {:?} (world: {:?})",
+            i + 1,
+            room_pos,
+            final_pos
+        );
+    }
+
     next_state.set(InitStage::Done);
+}
+
+/// Calculate random spawn position within a room
+fn calculate_spawn_position(
+    room_pos: &IVec3,
+    room_size: &Vec3,
+    spawn_height: f32,
+    rng: &mut impl Rng,
+) -> Vec3 {
+    let world_pos = Vec3::new(
+        room_pos.x as f32 * room_size.x,
+        spawn_height,
+        room_pos.z as f32 * room_size.z,
+    );
+
+    let offset = Vec3::new(rng.gen_range(-2.0..2.0), 0.0, rng.gen_range(-2.0..2.0));
+
+    world_pos + offset
+}
+
+/// Spawn a single item in the world
+fn spawn_item(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+    item_id: &str,
+    name: &str,
+    visual_parts: &[VisualPart],
+    position: Vec3,
+) {
+    commands
+        .spawn((
+            Transform::from_translation(position),
+            GlobalTransform::default(),
+            Visibility::default(),
+            // Physics
+            RigidBody::Dynamic,
+            Damping {
+                linear_damping: 2.0,  // Stops sliding quickly
+                angular_damping: 1.5, // Stops spinning
+            },
+            GravityScale(1.0),
+            // Item data
+            WorldItem::new(item_id.to_string(), 1),
+            Pickupable,
+            Name::new(name.to_string()),
+        ))
+        .with_children(|parent| {
+            spawn_item_visual_with_colliders(parent, visual_parts, meshes, materials);
+        });
 }

@@ -61,7 +61,7 @@ pub fn animate_weapon_display(
 
 /// Hides weapon display when shooting
 pub fn hide_weapon_on_shoot(mut weapons: Query<(&mut Visibility, &mut WeaponDisplay)>) {
-    for (mut visibility, mut display) in &mut weapons {
+    for (mut visibility, display) in &mut weapons {
         if display.forming && display.cooldown.elapsed_secs() < 0.01 {
             // Just started forming - hide it
             *visibility = Visibility::Hidden;

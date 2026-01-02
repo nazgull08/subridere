@@ -1,5 +1,4 @@
 use bevy::prelude::Color;
-/// Layout constants for inventory UI
 
 /// Size of a single inventory slot (square)
 pub const SLOT_SIZE: f32 = 64.0;

@@ -1,8 +1,7 @@
-// ui/inventory/data.rs
-
+// inventory/component.rs
 use bevy::prelude::*;
 
-/// Player inventory component
+/// Player inventory - storage for items
 #[derive(Component, Clone)]
 pub struct Inventory {
     /// Inventory slots (None = empty slot)
@@ -65,6 +64,62 @@ impl Inventory {
             self.slots[slot_index].take()
         } else {
             None
+        }
+    }
+}
+
+/// Equipment worn by character (Morrowind style)
+#[derive(Component, Clone, Debug)]
+pub struct Equipment {
+    // Head
+    pub helmet: Option<String>,
+
+    // Shoulders
+    pub left_pauldron: Option<String>,
+    pub right_pauldron: Option<String>,
+
+    // Body
+    pub chest: Option<String>,
+
+    // Hands
+    pub left_glove: Option<String>,
+    pub right_glove: Option<String>,
+
+    // Legs
+    pub greaves: Option<String>,
+    pub left_boot: Option<String>,
+    pub right_boot: Option<String>,
+
+    // Weapons
+    pub main_hand: Option<String>,
+    pub off_hand: Option<String>,
+}
+
+impl Default for Equipment {
+    fn default() -> Self {
+        Self {
+            // Head
+            helmet: None,
+
+            // Shoulders
+            left_pauldron: None,
+            right_pauldron: None,
+
+            // Body
+            chest: None,
+
+            // Hands
+            left_glove: None,
+            right_glove: None,
+
+            // Legs
+            greaves: None,
+            left_boot: None,
+            right_boot: None,
+
+            // Weapons - добавим тестовый посох
+            main_hand: Some("wooden_staff".to_string()),
+            off_hand: None,
         }
     }
 }

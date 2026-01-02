@@ -1,7 +1,6 @@
 use bevy::asset::io::Reader;
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::prelude::*;
-use serde::de::DeserializeOwned;
 use thiserror::Error;
 
 use super::definition::ItemDefinition;
