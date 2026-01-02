@@ -1,14 +1,14 @@
-use bevy::prelude::*;
+use super::component::WeaponDisplay;
+use super::spawn::create_weapon_display;
 use crate::camera::flycam::FlyCamera;
 use crate::fighting::projectile::weapons::CurrentWeapon;
 use crate::fighting::weapon_display::component::WeaponFiredEvent;
 use crate::input::component::PlayerControlled;
-use super::component::WeaponDisplay;
-use super::spawn::create_weapon_display;
+use bevy::prelude::*;
 
 /// Triggers cooldown on weapon display after player shoots
 pub fn trigger_weapon_cooldown(
-    mut weapon_fired: EventReader<WeaponFiredEvent>,  // ✅ ИЗМЕНИТЬ на EventReader
+    mut weapon_fired: EventReader<WeaponFiredEvent>, // ✅ ИЗМЕНИТЬ на EventReader
     players: Query<&Children, With<PlayerControlled>>,
     cameras: Query<&Children, With<FlyCamera>>,
     mut displays: Query<&mut WeaponDisplay>,
@@ -52,16 +52,19 @@ pub fn update_weapon_display_on_switch(
                         info!("🗑️ Despawned old weapon display");
                     }
                 }
-                
+
                 // Spawn new weapon display
                 commands.entity(camera_entity).with_children(|parent| {
                     create_weapon_display(
                         parent,
                         current_weapon.weapon_type,
-                        meshes.as_mut(),  // ✅ Добавить .as_mut()
-                        materials.as_mut(),  // ✅ Добавить .as_mut()
+                        meshes.as_mut(),    // ✅ Добавить .as_mut()
+                        materials.as_mut(), // ✅ Добавить .as_mut()
                     );
-                    info!("✨ Spawned new weapon display: {:?}", current_weapon.weapon_type);
+                    info!(
+                        "✨ Spawned new weapon display: {:?}",
+                        current_weapon.weapon_type
+                    );
                 });
             }
         }
@@ -85,5 +88,5 @@ pub fn check_weapon_ready(
             }
         }
     }
-    true  // Default: allow shooting if no display found
+    true // Default: allow shooting if no display found
 }

@@ -9,18 +9,18 @@ use serde::Deserialize;
 pub struct VisualPart {
     /// Type of primitive shape
     pub shape: PrimitiveShape,
-    
+
     /// Size of the shape (interpretation depends on shape type)
     /// - Cube: (width, height, depth)
     /// - Cylinder: (radius, height, radius)
     /// - Sphere: (radius, radius, radius)
     pub size: Vec3,
-    
+
     /// Position offset relative to parent entity
     pub offset: Vec3,
-    
+
     /// Color as RGBA (red, green, blue, alpha) - each 0.0 to 1.0
-    pub color: (f32, f32, f32, f32), 
+    pub color: (f32, f32, f32, f32),
 }
 
 /// Primitive shape types for item visuals
@@ -28,13 +28,13 @@ pub struct VisualPart {
 pub enum PrimitiveShape {
     /// Box/Cube shape
     Cube,
-    
+
     /// Cylinder (useful for staffs, handles, etc)
     Cylinder,
-    
+
     /// Smooth sphere
     Sphere,
-    
+
     /// Low-poly sphere (icosphere)
     Icosphere,
 }

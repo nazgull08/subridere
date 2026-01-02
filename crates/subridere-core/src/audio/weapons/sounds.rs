@@ -1,6 +1,6 @@
+use super::events::{MagicBoltFireEvent, PhysicsCubeFireEvent};
 use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
-use super::events::{MagicBoltFireEvent, PhysicsCubeFireEvent};
 
 /// Plays sound when magic bolt is fired
 pub fn play_magic_bolt_fire_sfx(

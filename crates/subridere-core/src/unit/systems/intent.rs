@@ -2,13 +2,14 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use crate::audio::weapons::events::{MagicBoltFireEvent, PhysicsCubeFireEvent};
+use crate::fighting::projectile::spawn::{spawn_magic_bolt, spawn_physical_cube};
+use crate::fighting::projectile::weapons::{CurrentWeapon, WeaponType};
 use crate::fighting::weapon_display::component::WeaponFiredEvent;
 use crate::stats::mana::component::Mana;
 use crate::unit::component::TurnIntent;
-use crate::unit::component::{DashIntent, Grounded, JumpIntent, MoveIntent, ShootIntent, Unit, Velocity};
-use crate::fighting::projectile::spawn::{spawn_magic_bolt, spawn_physical_cube};
-use crate::fighting::projectile::weapons::{CurrentWeapon, WeaponType};
-
+use crate::unit::component::{
+    DashIntent, Grounded, JumpIntent, MoveIntent, ShootIntent, Unit, Velocity,
+};
 
 // Movement tuning constants
 const MOVE_ACCEL: f32 = 50.0;
@@ -119,8 +120,17 @@ pub fn handle_shoot_intents(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut query: Query<(Entity, &GlobalTransform, &ShootIntent, &mut Mana, &CurrentWeapon), With<Unit>>,
-    mut weapon_fired: EventWriter<WeaponFiredEvent>, 
+    mut query: Query<
+        (
+            Entity,
+            &GlobalTransform,
+            &ShootIntent,
+            &mut Mana,
+            &CurrentWeapon,
+        ),
+        With<Unit>,
+    >,
+    mut weapon_fired: EventWriter<WeaponFiredEvent>,
     mut magic_bolt_event: EventWriter<MagicBoltFireEvent>,
     mut physical_cube_event: EventWriter<PhysicsCubeFireEvent>,
 ) {
@@ -155,7 +165,7 @@ pub fn handle_shoot_intents(
                     physical_cube_event.send(PhysicsCubeFireEvent);
                 }
             }
-            
+
             weapon_fired.send(WeaponFiredEvent);
         } else {
             info!("Not enough mana!");

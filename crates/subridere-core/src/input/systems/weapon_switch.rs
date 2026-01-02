@@ -1,7 +1,7 @@
-use bevy::prelude::*;
-use bevy::input::mouse::MouseWheel;
 use crate::fighting::projectile::weapons::{CurrentWeapon, WeaponType};
 use crate::input::component::PlayerControlled;
+use bevy::input::mouse::MouseWheel;
+use bevy::prelude::*;
 
 /// Handles weapon switching via mouse wheel
 pub fn weapon_switch_system(
@@ -9,7 +9,8 @@ pub fn weapon_switch_system(
     mut players: Query<&mut CurrentWeapon, With<PlayerControlled>>,
 ) {
     for event in scroll_events.read() {
-        if event.y.abs() > 0.1 {  // Ignore tiny movements
+        if event.y.abs() > 0.1 {
+            // Ignore tiny movements
             for mut weapon in &mut players {
                 weapon.weapon_type = match weapon.weapon_type {
                     WeaponType::MagicBolt => {

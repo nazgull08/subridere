@@ -1,6 +1,6 @@
-use bevy::prelude::*;
-use crate::player::component::Player;
 use super::components::{WormAI, WormHead, WormState};
+use crate::player::component::Player;
+use bevy::prelude::*;
 
 /// Updates worm state machine with attack logic
 pub fn worm_update_state(
@@ -17,7 +17,9 @@ pub fn worm_update_state(
                 if let Some(target_entity) = ai.target {
                     if let Ok(target_transform) = targets.get(target_entity) {
                         info!("🔄 Idle -> Chase");
-                        WormState::Chase { target: target_entity }
+                        WormState::Chase {
+                            target: target_entity,
+                        }
                     } else {
                         WormState::Idle
                     }
@@ -46,7 +48,9 @@ pub fn worm_update_state(
                             }
                         } else {
                             // Продолжаем преследовать
-                            WormState::Chase { target: target_entity }
+                            WormState::Chase {
+                                target: target_entity,
+                            }
                         }
                     } else {
                         // Потеряли цель

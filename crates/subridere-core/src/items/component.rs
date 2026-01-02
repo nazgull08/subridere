@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use super::definition::ItemDefinition;
+use bevy::prelude::*;
 
 /// Runtime component for an item instance in the game
 ///
@@ -40,8 +40,6 @@ pub enum EquipSlot {
 
     /// Off hand (shield, secondary weapon, etc.)
     OffHand,
-
     // Future slots can be added here:
     // Head, Chest, Legs, Feet, Ring1, Ring2, etc.
 }
-

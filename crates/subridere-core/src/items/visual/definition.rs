@@ -1,6 +1,6 @@
+use super::shape::VisualPart;
 use bevy::prelude::*;
 use serde::Deserialize;
-use super::shape::VisualPart;
 
 /// Visual definition loaded from RON files
 ///
@@ -10,7 +10,7 @@ use super::shape::VisualPart;
 pub struct VisualDefinition {
     /// Unique identifier for this visual
     pub id: String,
-    
+
     /// List of visual parts that compose this item's appearance
     pub parts: Vec<VisualPart>,
 }

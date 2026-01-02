@@ -1,6 +1,6 @@
-use bevy::prelude::*;
 use crate::items::visual::definition::VisualDefinition;
 use crate::items::visual::loader::VisualDefinitionLoader;
+use bevy::prelude::*;
 
 use super::definition::ItemDefinition;
 use super::loader::ItemDefinitionLoader;
@@ -22,7 +22,7 @@ impl Plugin for ItemsPlugin {
             .init_asset_loader::<VisualDefinitionLoader>();
 
         info!("✅ Items plugin initialized");
-        
+
         // TODO: Add systems for item spawning, pickup, etc.
     }
 }

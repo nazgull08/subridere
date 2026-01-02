@@ -1,6 +1,6 @@
+use super::super::state::InventoryState;
 use bevy::prelude::*;
 use bevy::window::CursorGrabMode;
-use super::super::state::InventoryState;
 
 /// Toggle inventory on Tab or I key
 pub fn toggle_inventory_input(
@@ -20,7 +20,7 @@ pub fn toggle_inventory_input(
             }
         }
     }
-    
+
     // ESC also closes inventory
     if keys.just_pressed(KeyCode::Escape) && *state.get() == InventoryState::Open {
         info!("📦 Closing inventory (ESC)");
@@ -33,8 +33,10 @@ pub fn manage_cursor_on_inventory(
     state: Res<State<InventoryState>>,
     mut windows: Query<&mut Window>,
 ) {
-    let Ok(mut window) = windows.single_mut() else { return };
-    
+    let Ok(mut window) = windows.single_mut() else {
+        return;
+    };
+
     match state.get() {
         InventoryState::Open => {
             window.cursor_options.grab_mode = CursorGrabMode::None;

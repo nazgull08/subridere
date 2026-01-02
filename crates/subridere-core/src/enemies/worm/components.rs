@@ -22,7 +22,7 @@ pub struct WormAI {
     pub target: Option<Entity>,
     pub move_force: f32,
     pub detection_range: f32,
-    
+
     // ✅ НОВОЕ - параметры прыжка:
     pub jump_range: f32,         // Радиус для начала атаки (3.0м)
     pub jump_prepare_time: f32,  // Время подготовки (0.8 сек)
@@ -49,13 +49,15 @@ impl Default for WormAI {
 #[derive(Component, Clone)]
 pub enum WormState {
     Idle,
-    Chase { target: Entity },
-    
+    Chase {
+        target: Entity,
+    },
+
     // ✅ НОВОЕ:
     PrepareAttack {
         target: Entity,
         prepare_timer: f32,
-        target_pos: Vec3,  // Запомненная позиция игрока
+        target_pos: Vec3, // Запомненная позиция игрока
     },
     Lunging {
         target: Entity,
@@ -65,7 +67,6 @@ pub enum WormState {
         recovery_timer: f32,
     },
 }
-
 
 impl Default for WormState {
     fn default() -> Self {

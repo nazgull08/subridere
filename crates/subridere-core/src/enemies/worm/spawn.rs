@@ -2,15 +2,18 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use block_bodies_core::serialization::BlockBodyFile;
 
-use crate::{enemies::{
-    components::Enemy,
-    worm::components::{Worm, WormAI, WormHead, WormSegment, WormState},
-}, stats::health::component::Health};
+use crate::{
+    enemies::{
+        components::Enemy,
+        worm::components::{Worm, WormAI, WormHead, WormSegment, WormState},
+    },
+    stats::health::component::Health,
+};
 
 /// Physics - HEAD (active, controlled)
 const HEAD_MASS: f32 = 4.0;
 const HEAD_LINEAR_DAMPING: f32 = 4.0;
-const HEAD_ANGULAR_DAMPING: f32 = 1.5;  // ✅ СНИЖЕН (было 3.0) - легче повернуть
+const HEAD_ANGULAR_DAMPING: f32 = 1.5; // ✅ СНИЖЕН (было 3.0) - легче повернуть
 
 /// Physics - BODY (passive, follows)
 const BODY_MASS: f32 = 0.5;
@@ -26,10 +29,8 @@ pub fn spawn_worm(
     let model_path = "./assets/models/worm.ron";
     info!("🐛 Spawning worm with forward=+X orientation");
 
-    let body_file = BlockBodyFile::load_from_file(model_path)
-        .expect("Failed to load worm.ron");
-    let body = body_file.to_body()
-        .expect("Failed to parse worm body");
+    let body_file = BlockBodyFile::load_from_file(model_path).expect("Failed to load worm.ron");
+    let body = body_file.to_body().expect("Failed to parse worm body");
 
     // Materials
     let red_material = materials.add(StandardMaterial {
@@ -81,7 +82,7 @@ pub fn spawn_worm(
         let world_pos = position + Vec3::new(segment_index as f32 * spacing, 0.0, 0.0);
 
         let mesh = meshes.add(Cuboid::new(part.size.x, part.size.y, part.size.z));
-        
+
         let is_head = part.name == "Head";
         let (mass, lin_damp, ang_damp) = if is_head {
             (HEAD_MASS, HEAD_LINEAR_DAMPING, HEAD_ANGULAR_DAMPING)
@@ -121,8 +122,11 @@ pub fn spawn_worm(
                 ExternalImpulse::default(),
                 ActiveEvents::COLLISION_EVENTS,
             ));
-            
-            info!("  ✓ HEAD at {:?} | ang_damp={} (easy to turn)", world_pos, ang_damp);
+
+            info!(
+                "  ✓ HEAD at {:?} | ang_damp={} (easy to turn)",
+                world_pos, ang_damp
+            );
         } else {
             segment_cmd.insert(WormSegment {
                 worm_root: worm_id,
@@ -147,13 +151,18 @@ pub fn spawn_worm(
             .local_anchor1(anchor_on_parent)
             .local_anchor2(anchor_on_child)
             .limits(JointAxis::AngX, [-1.0, 1.0])
-            .limits(JointAxis::AngY, [-1.2, 1.2])  // Wide for side-to-side flex
+            .limits(JointAxis::AngY, [-1.2, 1.2]) // Wide for side-to-side flex
             .limits(JointAxis::AngZ, [-1.0, 1.0])
             .build();
 
-        commands.entity(child).insert(ImpulseJoint::new(parent, joint));
+        commands
+            .entity(child)
+            .insert(ImpulseJoint::new(parent, joint));
     }
 
-    info!("✅ Spawned worm with 1 head + {} body segments", segment_entities.len() - 1);
+    info!(
+        "✅ Spawned worm with 1 head + {} body segments",
+        segment_entities.len() - 1
+    );
     worm_id
 }

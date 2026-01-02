@@ -40,15 +40,15 @@ impl AssetLoader for ItemDefinitionLoader {
         // Read file contents
         let mut bytes = Vec::new();
         reader.read_to_end(&mut bytes).await?;
-        
+
         // Convert to string
         let content = String::from_utf8(bytes)?;
-        
+
         // Parse RON
         let definition: ItemDefinition = ron::from_str(&content)?;
-        
+
         info!("✅ Loaded item: {} ({})", definition.name, definition.id);
-        
+
         Ok(definition)
     }
 

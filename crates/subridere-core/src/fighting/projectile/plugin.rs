@@ -14,7 +14,6 @@ impl Plugin for ProjectilePlugin {
         app
             // ✅ Register event
             .add_event::<WeaponFiredEvent>()
-            
             // ✅ Add systems
             .add_systems(
                 Update,

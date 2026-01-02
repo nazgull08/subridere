@@ -39,15 +39,15 @@ impl AssetLoader for VisualDefinitionLoader {
         // Read file contents
         let mut bytes = Vec::new();
         reader.read_to_end(&mut bytes).await?;
-        
+
         // Convert to string
         let content = String::from_utf8(bytes)?;
-        
+
         // Parse RON
         let definition: VisualDefinition = ron::from_str(&content)?;
-        
+
         info!("✅ Loaded visual: {}", definition.id);
-        
+
         Ok(definition)
     }
 

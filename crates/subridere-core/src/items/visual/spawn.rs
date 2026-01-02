@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use super::shape::{PrimitiveShape, VisualPart};
+use bevy::prelude::*;
 
 /// Spawn visual parts as children of a parent entity
 ///
@@ -31,13 +31,13 @@ fn spawn_visual_part(
 ) {
     // Create mesh based on shape type
     let mesh = create_mesh_for_shape(&part.shape, part.size, meshes);
-    
+
     // Create material with specified color
     let material = materials.add(StandardMaterial {
         base_color: part.bevy_color(),
         ..default()
     });
-    
+
     // Spawn entity with mesh and material
     spawner.spawn((
         Mesh3d(mesh),
@@ -53,20 +53,18 @@ fn create_mesh_for_shape(
     meshes: &mut Assets<Mesh>,
 ) -> Handle<Mesh> {
     match shape {
-        PrimitiveShape::Cube => {
-            meshes.add(Cuboid::new(size.x, size.y, size.z))
-        }
-        
+        PrimitiveShape::Cube => meshes.add(Cuboid::new(size.x, size.y, size.z)),
+
         PrimitiveShape::Cylinder => {
             // size.x = radius, size.y = height
             meshes.add(Cylinder::new(size.x, size.y))
         }
-        
+
         PrimitiveShape::Sphere => {
             // size.x = radius
             meshes.add(Sphere::new(size.x))
         }
-        
+
         PrimitiveShape::Icosphere => {
             // size.x = radius
             // Icosphere with 5 subdivisions for decent quality

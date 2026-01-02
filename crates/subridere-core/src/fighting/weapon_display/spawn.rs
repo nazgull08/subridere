@@ -1,6 +1,6 @@
-use bevy::prelude::*;
-use crate::fighting::projectile::weapons::WeaponType;
 use super::component::WeaponDisplay;
+use crate::fighting::projectile::weapons::WeaponType;
+use bevy::prelude::*;
 
 /// Spawns weapon display mesh based on weapon type
 pub fn spawn_weapon_display_mesh(
@@ -35,14 +35,14 @@ pub fn spawn_weapon_display_mesh(
 
 /// Creates a complete weapon display entity as a child of camera
 pub fn create_weapon_display<'w>(
-    parent: &mut ChildSpawnerCommands<'w>,  // ✅ Правильный тип из Bevy 0.16
+    parent: &mut ChildSpawnerCommands<'w>, // ✅ Правильный тип из Bevy 0.16
     weapon_type: WeaponType,
-    meshes: &mut Assets<Mesh>, 
+    meshes: &mut Assets<Mesh>,
     materials: &mut Assets<StandardMaterial>,
 ) {
     let (mesh, material) = spawn_weapon_display_mesh(weapon_type, meshes, materials);
     let display = WeaponDisplay::default();
-    
+
     parent.spawn((
         mesh,
         material,

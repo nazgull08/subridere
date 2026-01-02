@@ -1,8 +1,8 @@
-use bevy::prelude::*;
-use bevy_rapier3d::prelude::*;
+use super::components::WormHead;
 use crate::player::component::Player;
 use crate::stats::damage::component::{Damage, DamageType};
-use super::components::WormHead;
+use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 #[derive(Component)]
 pub struct WormDamageCooldown {
@@ -26,7 +26,7 @@ pub fn worm_collision_damage_system(
 ) {
     for event in collision_events.read() {
         if let CollisionEvent::Started(e1, e2, _) = event {
-            let (worm_entity, player_entity) = 
+            let (worm_entity, player_entity) =
                 if worm_heads.get(*e1).is_ok() && players.get(*e2).is_ok() {
                     (*e1, *e2)
                 } else if worm_heads.get(*e2).is_ok() && players.get(*e1).is_ok() {
@@ -45,7 +45,9 @@ pub fn worm_collision_damage_system(
                     damage_type: DamageType::Physical,
                 });
 
-                commands.entity(worm_e).insert(WormDamageCooldown::default());
+                commands
+                    .entity(worm_e)
+                    .insert(WormDamageCooldown::default());
 
                 info!("🦷 Worm bit player! 15 damage");
             }
@@ -60,7 +62,7 @@ pub fn worm_damage_cooldown_system(
 ) {
     for (entity, mut cooldown) in &mut worms {
         cooldown.timer.tick(time.delta());
-        
+
         if cooldown.timer.finished() {
             commands.entity(entity).remove::<WormDamageCooldown>();
         }

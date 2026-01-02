@@ -1,6 +1,6 @@
-use bevy::prelude::*;
-use crate::player::component::Player;
 use super::components::{WormAI, WormHead};
+use crate::player::component::Player;
+use bevy::prelude::*;
 
 /// Detects nearest player within detection range
 pub fn worm_detect_targets(

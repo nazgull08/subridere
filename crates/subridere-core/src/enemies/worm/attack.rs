@@ -1,7 +1,7 @@
-use bevy::prelude::*;
-use bevy_rapier3d::prelude::*;
 use super::components::{WormAI, WormHead, WormState};
 use crate::audio::worm::events::WormBiteEvent;
+use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 /// Executes the lunge attack - applies impulse and transitions to Recovering
 pub fn worm_execute_lunge_system(
@@ -9,12 +9,13 @@ pub fn worm_execute_lunge_system(
     mut impulses: Query<&mut ExternalImpulse, With<WormHead>>,
     mut bite_event: EventWriter<WormBiteEvent>,
 ) {
-    for ((head_transform, mut state, ai), mut impulse) in heads.iter_mut().zip(impulses.iter_mut()) {
+    for ((head_transform, mut state, ai), mut impulse) in heads.iter_mut().zip(impulses.iter_mut())
+    {
         if let WormState::Lunging { target, target_pos } = *state {
             // Calculate direction to target (запомненная позиция)
             let to_target = target_pos - head_transform.translation;
             let horizontal_dir = Vec3::new(to_target.x, 0.0, to_target.z).normalize_or_zero();
-            
+
             if horizontal_dir.length_squared() < 0.001 {
                 // Invalid direction - skip lunge
                 info!("⚠️ Lunge canceled - invalid direction");
@@ -61,7 +62,7 @@ pub fn worm_prepare_visual_feedback(
         if let WormState::PrepareAttack { prepare_timer, .. } = state {
             // Calculate progress (0.0 at start → 1.0 when ready to jump)
             let progress = 1.0 - (prepare_timer / ai.jump_prepare_time);
-            
+
             // Get material and update emissive
             if let Some(material) = materials.get_mut(&material_handle.0) {
                 // Red glow that intensifies (0 → 8)

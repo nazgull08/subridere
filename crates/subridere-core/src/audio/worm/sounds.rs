@@ -1,6 +1,6 @@
+use super::events::{WormBiteEvent, WormHurtEvent};
 use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
-use super::events::{WormBiteEvent, WormHurtEvent};
 
 /// Plays bite sound when worm attacks player
 pub fn play_worm_bite_sfx(

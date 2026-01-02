@@ -14,15 +14,15 @@ pub fn spawn_magic_bolt(
     direction: Vec3,
 ) {
     let size = 0.3;
-    let speed = 30.0;  // ✅ Быстрее чем кубы!
-    let lifetime = 3.0;  // ✅ Короткоживущий
+    let speed = 30.0; // ✅ Быстрее чем кубы!
+    let lifetime = 3.0; // ✅ Короткоживущий
 
     let velocity = direction.normalize() * speed;
 
-    let mesh = meshes.add(Sphere::new(size));  // ✅ Сфера вместо куба
+    let mesh = meshes.add(Sphere::new(size)); // ✅ Сфера вместо куба
     let material = materials.add(StandardMaterial {
-        base_color: Color::srgba(0.3, 0.6, 1.0, 0.9),  // ✅ Синий
-        emissive: LinearRgba::rgb(2.0, 4.0, 8.0),  // ✅ Светится!
+        base_color: Color::srgba(0.3, 0.6, 1.0, 0.9), // ✅ Синий
+        emissive: LinearRgba::rgb(2.0, 4.0, 8.0),     // ✅ Светится!
         ..default()
     });
 
@@ -38,10 +38,10 @@ pub fn spawn_magic_bolt(
             angvel: Vec3::ZERO,
         },
         Collider::ball(size),
-        Sensor,  // ✅ Не создает физических столкновений
+        Sensor, // ✅ Не создает физических столкновений
         ActiveEvents::COLLISION_EVENTS,
         Projectile::new(size, lifetime, velocity),
-        DamageProjectile,  // ✅ МАРКЕР - наносит урон!
+        DamageProjectile, // ✅ МАРКЕР - наносит урон!
         PointLight {
             intensity: 50000.0,
             radius: 30.0,
@@ -62,8 +62,8 @@ pub fn spawn_physical_cube(
     direction: Vec3,
 ) {
     let size = 0.9;
-    let speed = 10.0;  // Медленнее
-    let lifetime = 10.0;  // Долгоживущий
+    let speed = 10.0; // Медленнее
+    let lifetime = 10.0; // Долгоживущий
 
     let velocity = direction.normalize() * speed;
 
@@ -83,7 +83,7 @@ pub fn spawn_physical_cube(
         },
         Collider::cuboid(size / 2.0, size / 2.0, size / 2.0),
         Projectile::new(size, lifetime, velocity),
-        PhysicalCube,  // ✅ МАРКЕР - физический объект!
+        PhysicalCube, // ✅ МАРКЕР - физический объект!
         PointLight {
             intensity: 30000.0,
             radius: 25.0,

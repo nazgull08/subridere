@@ -24,7 +24,7 @@ pub struct CurrentWeapon {
 impl Default for CurrentWeapon {
     fn default() -> Self {
         Self {
-            weapon_type: WeaponType::MagicBolt,  // По умолчанию - прямые снаряды
+            weapon_type: WeaponType::MagicBolt, // По умолчанию - прямые снаряды
         }
     }
 }

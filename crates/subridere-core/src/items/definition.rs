@@ -51,6 +51,5 @@ pub struct WeaponProperties {
 pub struct ConsumableProperties {
     /// Maximum items that can stack in one slot
     pub max_stack: u32,
-
     // TODO: Add effect system later
 }

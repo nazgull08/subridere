@@ -1,26 +1,31 @@
+use super::components::{Worm, WormHead, WormSegment};
+use crate::audio::worm::events::WormHurtEvent;
+use crate::{
+    enemies::worm::{death::spawn_corpse_on_death, particles::spawn_blood_splatter},
+    fighting::projectile::weapons::DamageProjectile,
+    stats::{
+        damage::component::{Damage, DamageType},
+        health::component::Health,
+    },
+};
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-use crate::{enemies::worm::{death::spawn_corpse_on_death, particles::spawn_blood_splatter}, fighting::projectile::weapons::DamageProjectile, stats::{
-    damage::component::{Damage, DamageType}, health::component::Health
-}};
-use super::components::{Worm, WormSegment, WormHead};
-use crate::audio::worm::events::WormHurtEvent;
 
 /// Detects projectile hits on worm and applies damage
 pub fn worm_projectile_damage_system(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,  // ✅ ДОБАВИТЬ
-    mut materials: ResMut<Assets<StandardMaterial>>,  // ✅ ДОБАВИТЬ
+    mut meshes: ResMut<Assets<Mesh>>,                // ✅ ДОБАВИТЬ
+    mut materials: ResMut<Assets<StandardMaterial>>, // ✅ ДОБАВИТЬ
     mut collision_events: EventReader<CollisionEvent>,
     mut hurt_event: EventWriter<WormHurtEvent>,
-    projectiles: Query<(&Transform, &Velocity), With<DamageProjectile>>,  // ✅ Добавить Transform и Velocity
-    worm_segments: Query<(&Transform, &WormHead)>,  // ✅ Добавить Transform
+    projectiles: Query<(&Transform, &Velocity), With<DamageProjectile>>, // ✅ Добавить Transform и Velocity
+    worm_segments: Query<(&Transform, &WormHead)>,                       // ✅ Добавить Transform
     worms: Query<Entity, With<Worm>>,
 ) {
     for event in collision_events.read() {
         if let CollisionEvent::Started(e1, e2, _) = event {
             // Check if collision involves projectile and worm head
-            let (projectile_entity, worm_head_entity) = 
+            let (projectile_entity, worm_head_entity) =
                 if projectiles.get(*e1).is_ok() && worm_segments.get(*e2).is_ok() {
                     (*e1, *e2)
                 } else if projectiles.get(*e2).is_ok() && worm_segments.get(*e1).is_ok() {
@@ -30,7 +35,9 @@ pub fn worm_projectile_damage_system(
                 };
 
             // Get projectile info
-            if let Ok((projectile_transform, projectile_velocity)) = projectiles.get(projectile_entity) {
+            if let Ok((projectile_transform, projectile_velocity)) =
+                projectiles.get(projectile_entity)
+            {
                 // Get worm head info
                 if let Ok((head_transform, head)) = worm_segments.get(worm_head_entity) {
                     let worm_root = head.worm_root;
@@ -40,8 +47,8 @@ pub fn worm_projectile_damage_system(
                         &mut commands,
                         &mut meshes,
                         &mut materials,
-                        head_transform.translation,  // Hit position
-                        projectile_velocity.linvel,  // Hit direction
+                        head_transform.translation, // Hit position
+                        projectile_velocity.linvel, // Hit direction
                     );
 
                     // Apply damage to worm root
@@ -68,8 +75,18 @@ pub fn worm_death_system(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     worms: Query<(Entity, &Health), With<Worm>>,
-    worm_heads: Query<(Entity, &Transform, &WormHead, &MeshMaterial3d<StandardMaterial>)>,
-    worm_segments: Query<(Entity, &Transform, &WormSegment, &MeshMaterial3d<StandardMaterial>)>,
+    worm_heads: Query<(
+        Entity,
+        &Transform,
+        &WormHead,
+        &MeshMaterial3d<StandardMaterial>,
+    )>,
+    worm_segments: Query<(
+        Entity,
+        &Transform,
+        &WormSegment,
+        &MeshMaterial3d<StandardMaterial>,
+    )>,
     // ❌ УБРАТЬ: existing_materials: Res<Assets<StandardMaterial>>,
 ) {
     for (worm_entity, health) in &worms {
@@ -77,7 +94,7 @@ pub fn worm_death_system(
             info!("💀 Worm died!");
 
             let mut segment_data = Vec::new();
-            
+
             // Collect head data
             for (_seg_entity, transform, head, material_handle) in &worm_heads {
                 if head.worm_root == worm_entity {
@@ -87,7 +104,7 @@ pub fn worm_death_system(
                     } else {
                         Color::srgba(0.8, 0.2, 0.2, 1.0)
                     };
-                    
+
                     segment_data.push((
                         transform.translation,
                         transform.rotation,
@@ -96,7 +113,7 @@ pub fn worm_death_system(
                     ));
                 }
             }
-            
+
             // Collect segment data
             for (_seg_entity, transform, segment, material_handle) in &worm_segments {
                 if segment.worm_root == worm_entity {
@@ -106,7 +123,7 @@ pub fn worm_death_system(
                     } else {
                         Color::srgba(0.2, 0.7, 0.3, 1.0)
                     };
-                    
+
                     segment_data.push((
                         transform.translation,
                         transform.rotation,
@@ -117,12 +134,7 @@ pub fn worm_death_system(
             }
 
             // Spawn corpse
-            spawn_corpse_on_death(
-                &mut commands,
-                &mut meshes,
-                &mut materials,
-                segment_data,
-            );
+            spawn_corpse_on_death(&mut commands, &mut meshes, &mut materials, segment_data);
 
             // Despawn all segments
             for (seg_entity, _transform, head, _) in &worm_heads {
@@ -130,7 +142,7 @@ pub fn worm_death_system(
                     commands.entity(seg_entity).despawn();
                 }
             }
-            
+
             for (seg_entity, _transform, segment, _) in &worm_segments {
                 if segment.worm_root == worm_entity {
                     commands.entity(seg_entity).despawn();

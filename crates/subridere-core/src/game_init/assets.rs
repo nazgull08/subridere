@@ -19,21 +19,21 @@ pub fn load_game_assets(
     mut next_state: ResMut<NextState<InitStage>>,
 ) {
     info!("📦 Loading game assets...");
-    
+
     // Load visual definitions
     let wooden_staff_visual = asset_server.load("visuals/items/wooden_staff.visual.ron");
     let wooden_staff_def = asset_server.load("items/weapons/wooden_staff.item.ron");
     let wooden_staff_icon = asset_server.load("textures/items/wooden_staff_icon.png");
-    
+
     // Store handles in resource
     commands.insert_resource(GameAssets {
         wooden_staff_visual,
         wooden_staff_def,
-        wooden_staff_icon
+        wooden_staff_icon,
     });
-    
+
     info!("✅ Asset handles created, waiting for loading...");
-    
+
     // Move to next stage immediately
     // We'll check if they're loaded in the next system
     next_state.set(InitStage::AssetsLoading);
@@ -47,7 +47,7 @@ pub fn wait_for_assets(
 ) {
     // Check if all assets are loaded
     let staff_loaded = visuals.get(&game_assets.wooden_staff_visual).is_some();
-    
+
     if staff_loaded {
         info!("✅ All assets loaded!");
         next_state.set(InitStage::MazeReady);
