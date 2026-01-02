@@ -67,11 +67,6 @@ pub fn worm_prepare_visual_feedback(
                 // Red glow that intensifies (0 → 8)
                 let intensity = 8.0 * progress;
                 material.emissive = LinearRgba::rgb(intensity, 0.0, 0.0);
-                
-                // Debug
-                if *prepare_timer < 0.1 || (*prepare_timer * 5.0) as i32 % 2 == 0 {
-                    info!("⚡ Charging... {:.1}s (glow: {:.1})", prepare_timer, intensity);
-                }
             }
         } else {
             // Reset emissive when not preparing

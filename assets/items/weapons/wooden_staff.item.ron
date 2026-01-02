@@ -1,0 +1,11 @@
+ItemDefinition(
+    id: "wooden_staff",
+    name: "Wooden Staff",
+    visual_ref: "wooden_staff_visual",
+    
+    properties: Weapon((
+        damage: 5.0,
+        attack_speed: 1.0,
+        mana_cost: 8.0,
+    )),
+)

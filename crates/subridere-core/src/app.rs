@@ -11,6 +11,7 @@ use crate::enemies::EnemiesPlugin;
 use crate::fighting::projectile::plugin::ProjectilePlugin;
 use crate::game_init::plugin::GameInitPlugin;
 use crate::input::plugin::InputPlugin;
+use crate::items::plugin::ItemsPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::stats::plugin::StatsPlugin;
 use crate::ui::hud::plugin::HudUiPlugin;
@@ -46,5 +47,6 @@ pub fn run() {
         .add_plugins(ProjectilePlugin)
         .add_plugins(WorldPlugin)
         .add_plugins(EnemiesPlugin)
+        .add_plugins(ItemsPlugin)
         .run();
 }

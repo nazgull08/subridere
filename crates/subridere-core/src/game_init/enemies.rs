@@ -59,5 +59,5 @@ pub fn spawn_test_enemies(
         info!("  🐛 Worm {} spawned at room {:?} (world: {:?})", i + 1, room_pos, final_pos);
     }
     
-    next_state.set(InitStage::Done);
+    next_state.set(InitStage::ItemsReady);
 }

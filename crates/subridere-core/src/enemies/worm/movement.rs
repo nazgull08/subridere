@@ -45,7 +45,7 @@ pub fn worm_move_forward(
                             let forward = Vec3::NEG_X;
                             let current_forward = head_transform.rotation * forward;
                             let fwd_xz = Vec3::new(current_forward.x, 0.0, current_forward.z).normalize_or_zero();
-                            
+                            /*
                             info!(
                                 "→ Moving vel={:.1} force={:.0} | fwd=[{:.2},{:.2}] dir=[{:.2},{:.2}]",
                                 velocity.linvel.length(),
@@ -55,6 +55,7 @@ pub fn worm_move_forward(
                                 direction.x,
                                 direction.z
                             );
+                        */
                         }
                     }
                 } else {

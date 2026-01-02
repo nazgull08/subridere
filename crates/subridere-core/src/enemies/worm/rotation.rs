@@ -84,6 +84,7 @@ pub fn worm_rotate_to_target(
 
                 let elapsed = time.elapsed_secs() as i32;
                 if elapsed % 2 == 0 && time.delta_secs() < 0.02 {
+                    /*
                     info!(
                         "↻ angle={:.1}° torque={:.0} | fwd=[{:.2},{:.2}] tgt=[{:.2},{:.2}]",
                         angle.to_degrees(),
@@ -93,6 +94,7 @@ pub fn worm_rotate_to_target(
                         target_dir.x,
                         target_dir.z
                     );
+*/
                 }
             }
         }
