@@ -69,16 +69,3 @@ pub fn handle_shoot_input(
         }
     }
 }
-
-/// Toggles mouse grab with Escape/Tab keys.
-pub fn cursor_grab_system(mut windows: Query<&mut Window>, keys: Res<ButtonInput<KeyCode>>) {
-    if let Ok(mut window) = windows.single_mut() {
-        if keys.just_pressed(KeyCode::Escape) {
-            window.cursor_options.grab_mode = CursorGrabMode::None;
-            window.cursor_options.visible = true;
-        } else if keys.just_pressed(KeyCode::Tab) {
-            window.cursor_options.grab_mode = CursorGrabMode::Confined;
-            window.cursor_options.visible = false;
-        }
-    }
-}

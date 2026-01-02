@@ -17,6 +17,8 @@ pub struct ItemDefinition {
     /// For now just a string, later can be a proper asset handle
     pub visual_ref: String,
 
+    pub icon: String,
+
     /// Type-specific properties
     pub properties: ItemProperties,
 }

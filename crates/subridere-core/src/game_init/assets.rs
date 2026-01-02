@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::items::visual::definition::VisualDefinition;
+use crate::items::{definition::ItemDefinition, visual::definition::VisualDefinition};
 
 use super::state::InitStage;
 
@@ -8,6 +8,8 @@ use super::state::InitStage;
 #[derive(Resource)]
 pub struct GameAssets {
     pub wooden_staff_visual: Handle<VisualDefinition>,
+    pub wooden_staff_def: Handle<ItemDefinition>,
+    pub wooden_staff_icon: Handle<Image>,
 }
 
 /// Load all game assets
@@ -20,10 +22,14 @@ pub fn load_game_assets(
     
     // Load visual definitions
     let wooden_staff_visual = asset_server.load("visuals/items/wooden_staff.visual.ron");
+    let wooden_staff_def = asset_server.load("items/weapons/wooden_staff.item.ron");
+    let wooden_staff_icon = asset_server.load("textures/items/wooden_staff_icon.png");
     
     // Store handles in resource
     commands.insert_resource(GameAssets {
         wooden_staff_visual,
+        wooden_staff_def,
+        wooden_staff_icon
     });
     
     info!("✅ Asset handles created, waiting for loading...");
