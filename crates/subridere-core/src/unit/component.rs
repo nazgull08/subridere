@@ -32,10 +32,8 @@ pub struct TurnIntent(pub Quat);
 pub struct ShootIntent(pub Vec3);
 
 #[derive(Component)]
-pub struct LookAtIntent(pub Vec3); // повернуться в сторону
+pub struct LookAtIntent(pub Vec3);
 
+/// Intent to pick up targeted item
 #[derive(Component)]
-pub enum AttackIntent {
-    Bite,
-    Slash,
-}
+pub struct PickupIntent;

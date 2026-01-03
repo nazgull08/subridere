@@ -3,6 +3,8 @@ use bevy_rapier3d::prelude::*;
 
 use rand::Rng;
 
+use crate::items::definition::ItemDefinition;
+use crate::items::spawn::{spawn_world_item, WorldItemSpawnConfig};
 use crate::items::WorldItem;
 use crate::items::component::Pickupable;
 use crate::items::visual::definition::VisualDefinition;
@@ -22,6 +24,7 @@ pub fn spawn_loot(
     room_map: Res<RoomMap>,
     game_assets: Res<GameAssets>,
     visuals: Res<Assets<VisualDefinition>>,
+    item_defs: Res<Assets<ItemDefinition>>,
 ) {
     let mut rng = rand::thread_rng();
 
@@ -54,14 +57,19 @@ pub fn spawn_loot(
         let room_pos = room_positions[room_idx];
         let final_pos = calculate_spawn_position(&room_pos, &room_size, spawn_height, &mut rng);
 
-        spawn_item(
+        spawn_world_item(
             &mut commands,
+            WorldItemSpawnConfig {
+                item_id: "wooden_staff".to_string(),
+                quantity: 1,
+                position: final_pos,
+                initial_velocity: None,  // Static loot, no velocity
+            },
+            &game_assets,
+            &visuals,
+            &item_defs,
             &mut meshes,
             &mut materials,
-            "wooden_staff",
-            "Wooden Staff",
-            &staff_visual.parts,
-            final_pos,
         );
 
         info!(
@@ -78,18 +86,23 @@ pub fn spawn_loot(
         let room_pos = room_positions[room_idx];
         let final_pos = calculate_spawn_position(&room_pos, &room_size, spawn_height, &mut rng);
 
-        spawn_item(
+        spawn_world_item(
             &mut commands,
+            WorldItemSpawnConfig {
+                item_id: "iron_helmet".to_string(),
+                quantity: 1,
+                position: final_pos,
+                initial_velocity: None,  // Static loot, no velocity
+            },
+            &game_assets,
+            &visuals,
+            &item_defs,
             &mut meshes,
             &mut materials,
-            "iron_helmet",
-            "Iron Helmet",
-            &helmet_visual.parts,
-            final_pos,
         );
 
         info!(
-            "  ⚔️ Helmet {} spawned at room {:?} (world: {:?})",
+            "  Helmet {} spawned at room {:?} (world: {:?})",
             i + 1,
             room_pos,
             final_pos
@@ -115,36 +128,4 @@ fn calculate_spawn_position(
     let offset = Vec3::new(rng.gen_range(-2.0..2.0), 0.0, rng.gen_range(-2.0..2.0));
 
     world_pos + offset
-}
-
-/// Spawn a single item in the world
-fn spawn_item(
-    commands: &mut Commands,
-    meshes: &mut Assets<Mesh>,
-    materials: &mut Assets<StandardMaterial>,
-    item_id: &str,
-    name: &str,
-    visual_parts: &[VisualPart],
-    position: Vec3,
-) {
-    commands
-        .spawn((
-            Transform::from_translation(position),
-            GlobalTransform::default(),
-            Visibility::default(),
-            // Physics
-            RigidBody::Dynamic,
-            Damping {
-                linear_damping: 2.0,  // Stops sliding quickly
-                angular_damping: 1.5, // Stops spinning
-            },
-            GravityScale(1.0),
-            // Item data
-            WorldItem::new(item_id.to_string(), 1),
-            Pickupable,
-            Name::new(name.to_string()),
-        ))
-        .with_children(|parent| {
-            spawn_item_visual_with_colliders(parent, visual_parts, meshes, materials);
-        });
 }

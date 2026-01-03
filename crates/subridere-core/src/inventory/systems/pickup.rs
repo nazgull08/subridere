@@ -1,7 +1,7 @@
 use crate::{
     inventory::Inventory,
     items::component::{Pickupable, WorldItem},
-    player::component::Player,
+    player::component::Player, unit::component::PickupIntent,
 };
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -107,43 +107,41 @@ fn clear_target(targeted: &mut TargetedItem) {
     targeted.name = None;
 }
 
-/// Handle E key press to pickup targeted item
-pub fn handle_pickup_input(
-    keys: Res<ButtonInput<KeyCode>>,
-    targeted: Res<TargetedItem>,
-    mut inventory_query: Query<&mut Inventory, With<Player>>,
+/// Process PickupIntent to actually pick up the item
+///
+/// This system handles the game logic side - adding to inventory,
+/// despawning world items, etc. The input handling is in the
+/// input module (handle_pickup_input system).
+pub fn process_pickup_intent(
     mut commands: Commands,
+    targeted: Res<TargetedItem>,
+    mut player_query: Query<(Entity, &mut Inventory), (With<Player>, With<PickupIntent>)>,
 ) {
-    // Early return if E not pressed
-    if !keys.just_pressed(KeyCode::KeyE) {
-        return;
-    }
+    // Process each player that has PickupIntent
+    for (player_entity, mut inventory) in &mut player_query {
+        // Remove the intent immediately (consume it)
+        commands.entity(player_entity).remove::<PickupIntent>();
 
-    // Check if we have a targeted item
-    let Some(target_entity) = targeted.entity else {
-        info!("❌ No item targeted");
-        return;
-    };
+        // Verify we have a valid target
+        let Some(target_entity) = targeted.entity else {
+            warn!(" PickupIntent but no valid target!");
+            return;
+        };
 
-    let Some(item_id) = &targeted.item_id else {
-        warn!("⚠️ Targeted entity has no item_id!");
-        return;
-    };
+        let Some(item_id) = &targeted.item_id else {
+            warn!(" Target entity has no item_id!");
+            return;
+        };
 
-    // Get player inventory
-    let Ok(mut inventory) = inventory_query.single_mut() else {
-        warn!("⚠️ Player inventory not found!");
-        return;
-    };
-
-    // Try to add item to inventory
-    if inventory.add_item(item_id.clone(), 1) {
-        // Success! Despawn the item from world
-        commands.entity(target_entity).despawn();
-        info!("✅ Picked up: {}", item_id);
-    } else {
-        // Inventory full
-        info!("❌ Inventory full!");
-        // TODO: Show UI message
+        // Try to add item to player's inventory
+        if inventory.add_item(item_id.clone(), 1) {
+            // Success! Remove item from world
+            commands.entity(target_entity).despawn();
+            info!("✅ Picked up: {}", item_id);
+        } else {
+            // Inventory is full
+            info!("❌ Inventory full!");
+            // TODO: Show UI message to player
+        }
     }
 }

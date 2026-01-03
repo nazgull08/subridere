@@ -62,7 +62,7 @@ impl Inventory {
     }
 }
 
-/// Equipment worn by character (Morrowind style)
+/// Equipment worn by character
 #[derive(Component, Default, Clone, Debug)]
 pub struct Equipment {
     // Head
@@ -89,3 +89,42 @@ pub struct Equipment {
     pub off_hand: Option<String>,
 }
 
+impl Equipment {
+    /// Get mutable reference to equipment slot by type
+    pub fn get_slot_mut(&mut self, slot_type: crate::ui::inventory::systems::EquipmentSlotType) -> &mut Option<String> {
+        use crate::ui::inventory::systems::EquipmentSlotType;
+        
+        match slot_type {
+            EquipmentSlotType::Helmet => &mut self.helmet,
+            EquipmentSlotType::LeftPauldron => &mut self.left_pauldron,
+            EquipmentSlotType::RightPauldron => &mut self.right_pauldron,
+            EquipmentSlotType::Chest => &mut self.chest,
+            EquipmentSlotType::LeftGlove => &mut self.left_glove,
+            EquipmentSlotType::RightGlove => &mut self.right_glove,
+            EquipmentSlotType::Greaves => &mut self.greaves,
+            EquipmentSlotType::LeftBoot => &mut self.left_boot,
+            EquipmentSlotType::RightBoot => &mut self.right_boot,
+            EquipmentSlotType::MainHand => &mut self.main_hand,
+            EquipmentSlotType::OffHand => &mut self.off_hand,
+        }
+    }
+    
+    /// Get immutable reference to equipment slot by type
+    pub fn get_slot(&self, slot_type: crate::ui::inventory::systems::EquipmentSlotType) -> &Option<String> {
+        use crate::ui::inventory::systems::EquipmentSlotType;
+        
+        match slot_type {
+            EquipmentSlotType::Helmet => &self.helmet,
+            EquipmentSlotType::LeftPauldron => &self.left_pauldron,
+            EquipmentSlotType::RightPauldron => &self.right_pauldron,
+            EquipmentSlotType::Chest => &self.chest,
+            EquipmentSlotType::LeftGlove => &self.left_glove,
+            EquipmentSlotType::RightGlove => &self.right_glove,
+            EquipmentSlotType::Greaves => &self.greaves,
+            EquipmentSlotType::LeftBoot => &self.left_boot,
+            EquipmentSlotType::RightBoot => &self.right_boot,
+            EquipmentSlotType::MainHand => &self.main_hand,
+            EquipmentSlotType::OffHand => &self.off_hand,
+        }
+    }
+}

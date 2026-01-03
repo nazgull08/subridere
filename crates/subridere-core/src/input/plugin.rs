@@ -5,6 +5,7 @@ use crate::ui::inventory::inventory_closed;
 
 use super::systems::keyboard::{handle_keyboard_input, handle_shoot_input};
 use super::systems::weapon_switch::weapon_switch_system;
+use super::systems::pickup::handle_pickup_input;
 
 pub struct InputPlugin;
 
@@ -16,6 +17,7 @@ impl Plugin for InputPlugin {
                 handle_keyboard_input.run_if(inventory_closed),
                 handle_shoot_input.run_if(inventory_closed),
                 weapon_switch_system.run_if(inventory_closed),
+                handle_pickup_input.run_if(inventory_closed),
             ),
         );
     }
