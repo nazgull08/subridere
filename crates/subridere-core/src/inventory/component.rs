@@ -23,13 +23,7 @@ pub struct InventorySlot {
 
 impl Default for Inventory {
     fn default() -> Self {
-        let mut slots = vec![None; 20];
-
-        // Add test item in slot 0
-        slots[0] = Some(InventorySlot {
-            item_id: "wooden_staff".to_string(),
-            quantity: 1,
-        });
+        let slots = vec![None; 20];
 
         Self {
             slots,
@@ -69,7 +63,7 @@ impl Inventory {
 }
 
 /// Equipment worn by character (Morrowind style)
-#[derive(Component, Clone, Debug)]
+#[derive(Component, Default, Clone, Debug)]
 pub struct Equipment {
     // Head
     pub helmet: Option<String>,
@@ -95,31 +89,3 @@ pub struct Equipment {
     pub off_hand: Option<String>,
 }
 
-impl Default for Equipment {
-    fn default() -> Self {
-        Self {
-            // Head
-            helmet: None,
-
-            // Shoulders
-            left_pauldron: None,
-            right_pauldron: None,
-
-            // Body
-            chest: None,
-
-            // Hands
-            left_glove: None,
-            right_glove: None,
-
-            // Legs
-            greaves: None,
-            left_boot: None,
-            right_boot: None,
-
-            // Weapons - добавим тестовый посох
-            main_hand: Some("wooden_staff".to_string()),
-            off_hand: None,
-        }
-    }
-}

@@ -61,7 +61,7 @@ pub fn wait_for_assets(
     let staff_loaded = visuals.get(&game_assets.wooden_staff_visual).is_some();
     let helmet_loaded = visuals.get(&game_assets.iron_helmet_visual).is_some();
 
-    if staff_loaded {
+    if staff_loaded && helmet_loaded {
         info!("✅ All assets loaded!");
         next_state.set(InitStage::MazeReady);
     } else {

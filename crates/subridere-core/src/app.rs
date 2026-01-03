@@ -47,7 +47,7 @@ pub fn run() {
         .add_plugins(StatsPlugin)
         .add_plugins(UnitPlugin)
         .add_plugins(PlayerPlugin)
-        //        .add_plugins(InventoryPlugin)
+        .add_plugins(InventoryPlugin)
         .add_plugins(ProjectilePlugin)
         .add_plugins(WorldPlugin)
         .add_plugins(EnemiesPlugin)
