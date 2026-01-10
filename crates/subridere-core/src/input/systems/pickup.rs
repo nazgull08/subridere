@@ -1,9 +1,8 @@
-use bevy::prelude::*;
 use crate::{
-    input::component::PlayerControlled,
-    inventory::systems::TargetedItem,
+    input::component::PlayerControlled, inventory::systems::TargetedItem,
     unit::component::PickupIntent,
 };
+use bevy::prelude::*;
 
 /// Handle E key press to create PickupIntent
 ///

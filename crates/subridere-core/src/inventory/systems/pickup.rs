@@ -1,7 +1,8 @@
 use crate::{
     inventory::Inventory,
     items::component::{Pickupable, WorldItem},
-    player::component::Player, unit::component::PickupIntent,
+    player::component::Player,
+    unit::component::PickupIntent,
 };
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -42,7 +43,7 @@ pub fn detect_pickupable_items(
     };
 
     let ray_dir = camera_transform.forward();
-    
+
     let ray_origin = camera_transform.translation() + *ray_dir * 0.5;
     let max_distance = 3.0;
 
@@ -65,10 +66,10 @@ pub fn detect_pickupable_items(
     }
 
     let item_entity = find_item_entity(hit_entity, &items_query, &parent_query);
-    
+
     if let Some(entity) = item_entity {
         let (world_item, name) = items_query.get(entity).unwrap();
-        
+
         targeted.entity = Some(entity);
         targeted.item_id = Some(world_item.item_id.clone());
         targeted.name = Some(name.to_string());
@@ -87,7 +88,7 @@ fn find_item_entity(
     if items_query.contains(hit_entity) {
         return Some(hit_entity);
     }
-    
+
     // Check parent (for hitting visual children)
     if let Ok(parent) = parent_query.get(hit_entity) {
         let parent_entity = parent.parent();
@@ -95,7 +96,7 @@ fn find_item_entity(
             return Some(parent_entity);
         }
     }
-    
+
     None
 }
 

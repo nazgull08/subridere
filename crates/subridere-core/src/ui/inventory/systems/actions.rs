@@ -1,11 +1,11 @@
-use bevy::prelude::*;
+use super::{EquipmentSlotType, EquipmentSlotUI, InventorySlotUI, SelectedSlot};
 use crate::{
+    game_init::assets::GameAssets,
     inventory::{Equipment, Inventory},
     items::definition::{ItemDefinition, ItemProperties},
     player::component::Player,
-    game_init::assets::GameAssets,
 };
-use super::{EquipmentSlotType, InventorySlotUI, EquipmentSlotUI, SelectedSlot};
+use bevy::prelude::*;
 
 /// Process item movement when clicking with a selection active
 ///
@@ -30,7 +30,7 @@ pub fn process_item_actions(
         if *interaction != Interaction::Pressed {
             continue;
         }
-        
+
         // If we have an equipment slot selected, try to unequip
         if let Some(equip_slot_type) = selected_slot.equipment_slot {
             handle_unequip(
@@ -42,7 +42,9 @@ pub fn process_item_actions(
             );
         }
         // If we have another inventory slot selected, try to swap
-        else if let Some(source_slot) = selected_slot.inventory_slot && source_slot != target_slot.slot_index {
+        else if let Some(source_slot) = selected_slot.inventory_slot
+            && source_slot != target_slot.slot_index
+        {
             handle_inventory_swap(
                 &mut inventory,
                 source_slot,
@@ -57,7 +59,7 @@ pub fn process_item_actions(
         if *interaction != Interaction::Pressed {
             continue;
         }
-        
+
         // If we have an inventory slot selected, try to equip
         if let Some(inv_slot) = selected_slot.inventory_slot {
             handle_equip(
@@ -127,7 +129,14 @@ fn handle_equip(
     game_assets: &GameAssets,
     item_defs: &Assets<ItemDefinition>,
 ) {
-    equip_item_core(inventory, equipment, inv_slot, equip_slot_type, game_assets, item_defs);
+    equip_item_core(
+        inventory,
+        equipment,
+        inv_slot,
+        equip_slot_type,
+        game_assets,
+        item_defs,
+    );
     selected.clear();
 }
 
@@ -205,7 +214,10 @@ fn can_equip_in_slot(
     match &item_def.properties {
         ItemProperties::Weapon(_) => {
             // Weapons go in MainHand or OffHand
-            matches!(equip_slot_type, EquipmentSlotType::MainHand | EquipmentSlotType::OffHand)
+            matches!(
+                equip_slot_type,
+                EquipmentSlotType::MainHand | EquipmentSlotType::OffHand
+            )
         }
         ItemProperties::Armor(armor_props) => {
             // Check if armor slot matches equipment slot
@@ -217,5 +229,3 @@ fn can_equip_in_slot(
         }
     }
 }
-
-

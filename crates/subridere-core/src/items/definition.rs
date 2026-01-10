@@ -53,20 +53,23 @@ pub enum ArmorSlot {
 
 impl ArmorSlot {
     /// Check if this armor slot matches an equipment slot type
-    pub fn matches_equipment_slot(&self, equipment_slot: &crate::ui::inventory::systems::EquipmentSlotType) -> bool {
+    pub fn matches_equipment_slot(
+        &self,
+        equipment_slot: &crate::ui::inventory::systems::EquipmentSlotType,
+    ) -> bool {
         use crate::ui::inventory::systems::EquipmentSlotType;
-        
+
         matches!(
             (self, equipment_slot),
-            (ArmorSlot::Helmet, EquipmentSlotType::Helmet) |
-            (ArmorSlot::LeftPauldron, EquipmentSlotType::LeftPauldron) |
-            (ArmorSlot::RightPauldron, EquipmentSlotType::RightPauldron) |
-            (ArmorSlot::Chest, EquipmentSlotType::Chest) |
-            (ArmorSlot::LeftGlove, EquipmentSlotType::LeftGlove) |
-            (ArmorSlot::RightGlove, EquipmentSlotType::RightGlove) |
-            (ArmorSlot::Greaves, EquipmentSlotType::Greaves) |
-            (ArmorSlot::LeftBoot, EquipmentSlotType::LeftBoot) |
-            (ArmorSlot::RightBoot, EquipmentSlotType::RightBoot)
+            (ArmorSlot::Helmet, EquipmentSlotType::Helmet)
+                | (ArmorSlot::LeftPauldron, EquipmentSlotType::LeftPauldron)
+                | (ArmorSlot::RightPauldron, EquipmentSlotType::RightPauldron)
+                | (ArmorSlot::Chest, EquipmentSlotType::Chest)
+                | (ArmorSlot::LeftGlove, EquipmentSlotType::LeftGlove)
+                | (ArmorSlot::RightGlove, EquipmentSlotType::RightGlove)
+                | (ArmorSlot::Greaves, EquipmentSlotType::Greaves)
+                | (ArmorSlot::LeftBoot, EquipmentSlotType::LeftBoot)
+                | (ArmorSlot::RightBoot, EquipmentSlotType::RightBoot)
         )
     }
 }

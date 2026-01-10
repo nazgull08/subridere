@@ -1,5 +1,8 @@
 use super::ui::InventorySlotUI;
-use crate::ui::inventory::{layout::SLOT_BORDER_COLOR, systems::{ContextMenuState, EquipmentSlotType, EquipmentSlotUI}};
+use crate::ui::inventory::{
+    layout::SLOT_BORDER_COLOR,
+    systems::{ContextMenuState, EquipmentSlotType, EquipmentSlotUI},
+};
 use bevy::prelude::*;
 
 /// Colors for slot states
@@ -15,11 +18,10 @@ const EQUIP_BORDER_HOVERED: Color = Color::srgb(0.6, 0.6, 0.6);
 pub struct SelectedSlot {
     /// Selected inventory slot index
     pub inventory_slot: Option<usize>,
-    
+
     /// Selected equipment slot type
     pub equipment_slot: Option<EquipmentSlotType>,
 }
-
 
 impl SelectedSlot {
     /// Clear all selections
@@ -27,17 +29,17 @@ impl SelectedSlot {
         self.inventory_slot = None;
         self.equipment_slot = None;
     }
-    
+
     /// Check if anything is selected
     pub fn has_selection(&self) -> bool {
         self.inventory_slot.is_some() || self.equipment_slot.is_some()
     }
-    
+
     /// Check if inventory slot is selected
     pub fn is_inventory_selected(&self, slot: usize) -> bool {
         self.inventory_slot == Some(slot)
     }
-    
+
     /// Check if equipment slot is selected
     pub fn is_equipment_selected(&self, slot: EquipmentSlotType) -> bool {
         self.equipment_slot == Some(slot)
@@ -85,7 +87,7 @@ pub fn handle_slot_click(
     let Ok(inventory) = inventory_query.single() else {
         return;
     };
-    
+
     for (interaction, slot_ui) in &mut slot_query {
         if *interaction == Interaction::Pressed {
             // If clicking the same slot, deselect
@@ -96,7 +98,9 @@ pub fn handle_slot_click(
             // If NOTHING is selected AND slot has an item, select it
             else if !selected_slot.has_selection() {
                 // Check if slot actually has an item
-                if inventory.slots.get(slot_ui.slot_index)
+                if inventory
+                    .slots
+                    .get(slot_ui.slot_index)
                     .and_then(|s| s.as_ref())
                     .is_some()
                 {
@@ -132,7 +136,7 @@ pub fn update_selected_slot_visual(
             *border_color = BorderColor(BORDER_NORMAL);
         }
     }
-    
+
     // Update equipment slot borders
     for (slot_ui, mut border_color) in &mut equipment_query {
         if selected_slot.is_equipment_selected(slot_ui.slot_type) {
@@ -146,12 +150,12 @@ pub fn update_selected_slot_visual(
 /// Handle hover effect on equipment slots
 pub fn handle_equip_slot_hover(
     mut slot_query: Query<(&Interaction, &mut BorderColor, &EquipmentSlotUI), Changed<Interaction>>,
-    selected_slot: Res<SelectedSlot>,  // ← ADD THIS
+    selected_slot: Res<SelectedSlot>, // ← ADD THIS
 ) {
     for (interaction, mut border_color, slot_ui) in &mut slot_query {
         // Check if this slot is selected
         let is_selected = selected_slot.is_equipment_selected(slot_ui.slot_type);
-        
+
         match *interaction {
             Interaction::Hovered => {
                 // Don't change color if slot is selected
@@ -182,7 +186,7 @@ pub fn handle_equip_slot_click(
     let Ok(equipment) = equipment_query.single() else {
         return;
     };
-    
+
     for (interaction, slot_ui) in &slot_query {
         if *interaction == Interaction::Pressed {
             // If clicking the same slot, deselect
@@ -198,7 +202,10 @@ pub fn handle_equip_slot_click(
                     selected_slot.equipment_slot = Some(slot_ui.slot_type);
                 } else {
                     // Slot is empty, don't select
-                    info!("❌ Cannot select empty equipment slot {:?}", slot_ui.slot_type);
+                    info!(
+                        "❌ Cannot select empty equipment slot {:?}",
+                        slot_ui.slot_type
+                    );
                 }
             }
             // If something ELSE is selected, do nothing
@@ -229,7 +236,9 @@ pub fn detect_inventory_right_click(
     for (interaction, slot_ui) in &slot_query {
         if *interaction == Interaction::Hovered {
             // Check if slot has an item
-            if inventory.slots.get(slot_ui.slot_index)
+            if inventory
+                .slots
+                .get(slot_ui.slot_index)
                 .and_then(|s| s.as_ref())
                 .is_some()
             {
@@ -239,7 +248,8 @@ pub fn detect_inventory_right_click(
                     // Despawn will happen next frame
                 }
 
-                let cursor_pos = windows.single()
+                let cursor_pos = windows
+                    .single()
                     .ok()
                     .and_then(|w| w.cursor_position())
                     .unwrap_or(Vec2::new(400.0, 300.0));
@@ -286,7 +296,8 @@ pub fn detect_equipment_right_click(
                 }
 
                 // Get current cursor position
-                let cursor_pos = windows.single()
+                let cursor_pos = windows
+                    .single()
                     .ok()
                     .and_then(|w| w.cursor_position())
                     .unwrap_or(Vec2::new(400.0, 300.0));
@@ -348,9 +359,7 @@ pub fn close_menu_on_outside_click(
 }
 
 /// Force close menu when inventory is closing
-pub fn force_close_menu_on_inventory_exit(
-    mut menu_state: ResMut<ContextMenuState>,
-) {
+pub fn force_close_menu_on_inventory_exit(mut menu_state: ResMut<ContextMenuState>) {
     if menu_state.is_open {
         info!("📋 Force closing menu (inventory closing)");
         menu_state.close();

@@ -3,10 +3,10 @@ use bevy_rapier3d::prelude::*;
 
 use rand::Rng;
 
-use crate::items::definition::ItemDefinition;
-use crate::items::spawn::{spawn_world_item, WorldItemSpawnConfig};
 use crate::items::WorldItem;
 use crate::items::component::Pickupable;
+use crate::items::definition::ItemDefinition;
+use crate::items::spawn::{WorldItemSpawnConfig, spawn_world_item};
 use crate::items::visual::definition::VisualDefinition;
 use crate::items::visual::shape::VisualPart;
 use crate::items::visual::spawn_item_visual_with_colliders;
@@ -63,7 +63,7 @@ pub fn spawn_loot(
                 item_id: "wooden_staff".to_string(),
                 quantity: 1,
                 position: final_pos,
-                initial_velocity: None,  // Static loot, no velocity
+                initial_velocity: None, // Static loot, no velocity
             },
             &game_assets,
             &visuals,
@@ -92,7 +92,7 @@ pub fn spawn_loot(
                 item_id: "iron_helmet".to_string(),
                 quantity: 1,
                 position: final_pos,
-                initial_velocity: None,  // Static loot, no velocity
+                initial_velocity: None, // Static loot, no velocity
             },
             &game_assets,
             &visuals,

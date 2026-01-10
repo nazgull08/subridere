@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use super::state::*;
+use bevy::prelude::*;
 
 /// Handle menu button clicks and execute corresponding actions
 pub fn handle_menu_button_clicks(
@@ -10,7 +10,11 @@ pub fn handle_menu_button_clicks(
     mut commands: Commands,
     camera_query: Query<&GlobalTransform, With<crate::camera::flycam::FlyCamera>>,
     mut player_query: Query<
-        (&GlobalTransform, &mut crate::inventory::Inventory, &mut crate::inventory::Equipment),
+        (
+            &GlobalTransform,
+            &mut crate::inventory::Inventory,
+            &mut crate::inventory::Equipment,
+        ),
         With<crate::player::component::Player>,
     >,
     game_assets: Res<crate::game_init::assets::GameAssets>,
@@ -31,12 +35,7 @@ pub fn handle_menu_button_clicks(
     // Check Equip button
     for interaction in &equip_button {
         if *interaction == Interaction::Pressed {
-            handle_equip_action(
-                &mut menu_state,
-                &mut player_query,
-                &game_assets,
-                &item_defs,
-            );
+            handle_equip_action(&mut menu_state, &mut player_query, &game_assets, &item_defs);
             return;
         }
     }
@@ -64,7 +63,11 @@ pub fn handle_menu_button_clicks(
 fn handle_equip_action(
     menu_state: &mut ContextMenuState,
     player_query: &mut Query<
-        (&GlobalTransform, &mut crate::inventory::Inventory, &mut crate::inventory::Equipment),
+        (
+            &GlobalTransform,
+            &mut crate::inventory::Inventory,
+            &mut crate::inventory::Equipment,
+        ),
         With<crate::player::component::Player>,
     >,
     game_assets: &crate::game_init::assets::GameAssets,
@@ -90,7 +93,8 @@ fn handle_equip_action(
     };
 
     // Determine which equipment slot to use based on item type
-    let Some(equip_slot_type) = determine_equipment_slot(&item.item_id, game_assets, item_defs) else {
+    let Some(equip_slot_type) = determine_equipment_slot(&item.item_id, game_assets, item_defs)
+    else {
         info!("❌ Cannot determine equipment slot for this item");
         menu_state.close();
         return;
@@ -115,7 +119,11 @@ fn handle_drop_action(
     commands: &mut Commands,
     camera_query: &Query<&GlobalTransform, With<crate::camera::flycam::FlyCamera>>,
     player_query: &mut Query<
-        (&GlobalTransform, &mut crate::inventory::Inventory, &mut crate::inventory::Equipment),
+        (
+            &GlobalTransform,
+            &mut crate::inventory::Inventory,
+            &mut crate::inventory::Equipment,
+        ),
         With<crate::player::component::Player>,
     >,
     game_assets: &crate::game_init::assets::GameAssets,
