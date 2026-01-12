@@ -1,5 +1,7 @@
 use super::state::*;
+use super::actions::*;
 use bevy::prelude::*;
+use bevy_ui_actions::prelude::*;
 
 /// Spawn context menu when state changes to open
 pub fn spawn_context_menu(
@@ -47,39 +49,55 @@ pub fn spawn_context_menu(
             Name::new("ContextMenu"),
         ))
         .with_children(|menu| {
-            // Determine which buttons to show based on what was clicked
-            let show_equip = menu_state.inventory_slot.is_some();
-            let show_unequip = menu_state.equipment_slot.is_some();
-
             // Equip button (only for inventory items)
-            if show_equip {
-                spawn_menu_button(menu, "Equip", EquipButton, &font);
+            if let Some(slot_index) = menu_state.inventory_slot {
+                spawn_menu_button(
+                    menu,
+                    "Equip",
+                    EquipItemAction { slot_index },
+                    &font,
+                );
             }
 
-            // Unequip button (only for equipped items)
-            if show_unequip {
-                spawn_menu_button(menu, "Unequip", EquipButton, &font);
-            }
+            // Unequip button (only for equipped items) — TODO: UnequipAction
+            // if let Some(slot_type) = menu_state.equipment_slot {
+            //     spawn_menu_button(menu, "Unequip", UnequipAction { slot_type }, &font);
+            // }
 
-            // Drop button (always available)
-            spawn_menu_button(menu, "Drop", DropButton, &font);
+            // Drop button (context-aware)
+            if let Some(slot_index) = menu_state.inventory_slot {
+                spawn_menu_button(
+                    menu,
+                    "Drop",
+                    DropFromInventoryAction { slot_index },
+                    &font,
+                );
+            } else if let Some(slot_type) = menu_state.equipment_slot {
+                spawn_menu_button(
+                    menu,
+                    "Drop",
+                    DropFromEquipmentAction { slot_type },
+                    &font,
+                );
+            }
 
             // Cancel button (always available)
-            spawn_menu_button(menu, "Cancel", CancelButton, &font);
+            spawn_menu_button(menu, "Cancel", CloseMenuAction, &font);
         });
 
     info!("📋 Context menu spawned at {:?}", cursor_pos);
 }
 
-/// Helper to spawn a menu button
+/// Helper to spawn a menu button with ActionButton
 fn spawn_menu_button(
     parent: &mut ChildSpawnerCommands,
     label: &str,
-    marker: impl Component,
+    action: impl UiAction,
     font: &Handle<Font>,
 ) {
     parent
         .spawn((
+            Button,
             Node {
                 width: Val::Px(120.0),
                 height: Val::Px(32.0),
@@ -90,8 +108,7 @@ fn spawn_menu_button(
             },
             BackgroundColor(Color::srgb(0.25, 0.25, 0.25)),
             BorderColor(Color::srgb(0.4, 0.4, 0.4)),
-            Interaction::default(),
-            marker,
+            ActionButton::new(action),
             Name::new(format!("{}Button", label)),
         ))
         .with_children(|button| {
@@ -127,31 +144,6 @@ pub fn despawn_context_menu(
     for entity in &menu_query {
         commands.entity(entity).despawn();
         info!("📋 Context menu despawned");
-    }
-}
-
-/// Handle hover effect on menu buttons
-pub fn handle_menu_button_hover(
-    mut button_query: Query<
-        (&Interaction, &mut BackgroundColor),
-        (
-            Changed<Interaction>,
-            Or<(With<EquipButton>, With<DropButton>, With<CancelButton>)>,
-        ),
-    >,
-) {
-    for (interaction, mut bg_color) in &mut button_query {
-        match *interaction {
-            Interaction::Hovered => {
-                *bg_color = BackgroundColor(Color::srgb(0.4, 0.4, 0.4));
-            }
-            Interaction::None => {
-                *bg_color = BackgroundColor(Color::srgb(0.25, 0.25, 0.25));
-            }
-            Interaction::Pressed => {
-                *bg_color = BackgroundColor(Color::srgb(0.5, 0.5, 0.5));
-            }
-        }
     }
 }
 

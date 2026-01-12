@@ -4,6 +4,7 @@ use crate::ui::inventory::{
     systems::{ContextMenuState, EquipmentSlotType, EquipmentSlotUI},
 };
 use bevy::prelude::*;
+use bevy_ui_actions::ActionButton;
 
 /// Colors for slot states
 const BORDER_NORMAL: Color = SLOT_BORDER_COLOR;
@@ -318,20 +319,16 @@ pub fn detect_equipment_right_click(
 /// Close context menu on clicks outside menu buttons
 pub fn close_menu_on_outside_click(
     mouse_buttons: Res<ButtonInput<MouseButton>>,
-    // Check if clicked on menu buttons
-    menu_button_query: Query<
-        &Interaction,
-        Or<(
-            With<super::context_menu::EquipButton>,
-            With<super::context_menu::DropButton>,
-            With<super::context_menu::CancelButton>,
-        )>,
-    >,
-    // Check if clicked on inventory/equipment slots (valid targets)
-    mut menu_state: ResMut<super::context_menu::ContextMenuState>,
+    menu_button_query: Query<&Interaction, With<ActionButton>>,
+    menu_state: ResMut<super::context_menu::ContextMenuState>,
 ) {
     // If menu is not open, nothing to do
     if !menu_state.is_open {
+        return;
+    }
+
+    // Если меню только что открыли — не закрываем в этом же frame
+    if menu_state.is_changed() {
         return;
     }
 
@@ -355,7 +352,7 @@ pub fn close_menu_on_outside_click(
 
     // Any other click (on slots, on empty space, etc.) closes menu
     info!("📋 Closing menu (clicked outside)");
-    menu_state.close();
+    menu_state.into_inner().close();
 }
 
 /// Force close menu when inventory is closing

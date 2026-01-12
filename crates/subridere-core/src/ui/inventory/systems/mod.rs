@@ -8,7 +8,7 @@ pub mod ui;
 // Re-exports
 pub use actions::process_item_actions;
 pub use context_menu::{
-    ContextMenuState, despawn_context_menu, handle_menu_button_clicks, handle_menu_button_hover,
+    ContextMenuState, despawn_context_menu,
     spawn_context_menu,
 };
 pub use input::{inventory_closed, manage_cursor_on_inventory, toggle_inventory_input};

@@ -1,18 +1,10 @@
 use bevy::prelude::*;
 
+use crate::ui::inventory::systems::EquipmentSlotType;
+
 /// Marker component for context menu root
 #[derive(Component)]
 pub struct ContextMenu;
-
-/// Marker components for menu buttons
-#[derive(Component)]
-pub struct EquipButton;
-
-#[derive(Component)]
-pub struct DropButton;
-
-#[derive(Component)]
-pub struct CancelButton;
 
 /// Resource to track context menu state
 #[derive(Resource, Default)]
@@ -24,7 +16,7 @@ pub struct ContextMenuState {
     pub inventory_slot: Option<usize>,
 
     /// Which equipment slot was right-clicked (if any)
-    pub equipment_slot: Option<super::super::EquipmentSlotType>,
+    pub equipment_slot: Option<EquipmentSlotType>,
 
     /// Mouse position where menu was opened (fixed position)
     pub spawn_position: Vec2,

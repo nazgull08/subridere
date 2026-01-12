@@ -1,15 +1,16 @@
-use crate::{ActionButton, ButtonStyle, OnHover, OnPress};
 use bevy::prelude::*;
+use crate::button::{ActionButton, OnHover, OnPress};
+use crate::style::ButtonStyle;
 
-/// Observer для кликов.
-pub(crate) fn on_action_button_click(
-    trigger: Trigger<Pointer<Click>>,
-    query: Query<&ActionButton>,
+/// Система для обработки кликов на ActionButton.
+pub(crate) fn handle_action_button_clicks(
+    query: Query<(&Interaction, &ActionButton), Changed<Interaction>>,
     mut commands: Commands,
 ) {
-    let target = trigger.target();
-    if let Ok(button) = query.get(target) {
-        button.execute(&mut commands);
+    for (interaction, button) in &query {
+        if *interaction == Interaction::Pressed {
+            button.execute(&mut commands);
+        }
     }
 }
 
@@ -40,7 +41,10 @@ pub(crate) fn handle_press_actions(
 /// Система для визуального feedback.
 pub(crate) fn update_button_visuals(
     style: Res<ButtonStyle>,
-    mut query: Query<(&Interaction, &mut BackgroundColor, &ActionButton), Changed<Interaction>>,
+    mut query: Query<
+        (&Interaction, &mut BackgroundColor, &ActionButton),
+        Changed<Interaction>,
+    >,
 ) {
     for (interaction, mut bg, button) in &mut query {
         *bg = BackgroundColor(match (button.enabled, interaction) {

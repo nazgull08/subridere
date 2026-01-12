@@ -1,12 +1,15 @@
 use super::state::InventoryState;
 use super::systems::*;
 use bevy::prelude::*;
+use bevy_ui_actions::UiActionsPlugin;
 
 pub struct UiInventoryPlugin;
 
 impl Plugin for UiInventoryPlugin {
     fn build(&self, app: &mut App) {
         app
+            // UI Actions plugin (для ActionButton)
+            .add_plugins(UiActionsPlugin)
             // Register state
             .init_state::<InventoryState>()
             // Register resources
@@ -55,10 +58,10 @@ impl Plugin for UiInventoryPlugin {
                     (
                         despawn_context_menu,      // 1. Despawn if state changed to closed
                         spawn_context_menu,        // 2. Spawn if state changed to open
-                        handle_menu_button_hover,  // 3. Handle hover effects
-                        handle_menu_button_clicks, // 4. Handle button clicks
+                        // handle_menu_button_hover — УДАЛЕНО, теперь в UiActionsPlugin
+                        // handle_menu_button_clicks — УДАЛЕНО, теперь через ActionButton
                     )
-                        .chain(), // ← Force exact order for menu lifecycle!
+                        .chain(),
                 )
                     .run_if(in_state(InventoryState::Open)),
             );
