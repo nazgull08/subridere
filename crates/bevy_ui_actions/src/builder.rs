@@ -1,15 +1,11 @@
-use bevy::prelude::*;
 use crate::action::UiAction;
-use crate::button::{ActionButton, OnHover, OnPress};
+use crate::button::ActionButton;
+use bevy::prelude::*;
 
 /// Extension trait для удобного создания кнопок с действиями.
 pub trait SpawnActionButton {
     /// Создать кнопку с дефолтными настройками.
-    fn spawn_action_button(
-        &mut self,
-        action: impl UiAction,
-        label: impl Into<String>,
-    ) -> Entity;
+    fn spawn_action_button(&mut self, action: impl UiAction, label: impl Into<String>) -> Entity;
 
     /// Создать кнопку с кастомными настройками.
     fn spawn_action_button_with(
@@ -43,11 +39,7 @@ impl Default for ButtonConfig {
 }
 
 impl SpawnActionButton for ChildSpawnerCommands<'_> {
-    fn spawn_action_button(
-        &mut self,
-        action: impl UiAction,
-        label: impl Into<String>,
-    ) -> Entity {
+    fn spawn_action_button(&mut self, action: impl UiAction, label: impl Into<String>) -> Entity {
         self.spawn_action_button_with(action, label, ButtonConfig::default())
     }
 
@@ -82,22 +74,5 @@ impl SpawnActionButton for ChildSpawnerCommands<'_> {
             ));
         })
         .id()
-    }
-}
-
-pub trait ActionButtonExt {
-    fn with_on_hover(self, action: impl UiAction) -> Self;
-    fn with_on_press(self, action: impl UiAction) -> Self;
-}
-
-impl ActionButtonExt for EntityCommands<'_> {
-    fn with_on_hover(mut self, action: impl UiAction) -> Self {
-        self.insert(OnHover::new(action));
-        self
-    }
-
-    fn with_on_press(mut self, action: impl UiAction) -> Self {
-        self.insert(OnPress::new(action));
-        self
     }
 }

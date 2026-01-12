@@ -1,6 +1,6 @@
-use std::sync::Arc;
-use bevy::prelude::*;
 use crate::action::UiAction;
+use bevy::prelude::*;
+use std::sync::Arc;
 
 /// Component для кнопки с привязанным действием.
 ///

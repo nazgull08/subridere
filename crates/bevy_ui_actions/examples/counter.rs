@@ -8,7 +8,7 @@
 //! Запуск: `cargo run --example counter -p bevy_ui_actions`
 
 use bevy::prelude::*;
-use bevy_ui_actions::{prelude::*, OnHover, OnPress};
+use bevy_ui_actions::prelude::*;
 
 fn main() {
     App::new()

@@ -208,10 +208,7 @@ fn update_status_text(state: Res<State<GameState>>, mut query: Query<&mut Text, 
     }
 }
 
-fn update_hover_text(
-    hover_info: Res<HoverInfo>,
-    mut query: Query<&mut Text, With<HoverText>>,
-) {
+fn update_hover_text(hover_info: Res<HoverInfo>, mut query: Query<&mut Text, With<HoverText>>) {
     if hover_info.is_changed() {
         for mut text in &mut query {
             **text = hover_info

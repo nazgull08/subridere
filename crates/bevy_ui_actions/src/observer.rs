@@ -1,7 +1,5 @@
+use crate::{ActionButton, ButtonStyle, OnHover, OnPress};
 use bevy::prelude::*;
-use bevy::picking::prelude::*;
-use crate::button::{ActionButton, OnHover, OnPress};
-use crate::style::ButtonStyle;
 
 /// Observer для кликов.
 pub(crate) fn on_action_button_click(
@@ -42,10 +40,7 @@ pub(crate) fn handle_press_actions(
 /// Система для визуального feedback.
 pub(crate) fn update_button_visuals(
     style: Res<ButtonStyle>,
-    mut query: Query<
-        (&Interaction, &mut BackgroundColor, &ActionButton),
-        Changed<Interaction>,
-    >,
+    mut query: Query<(&Interaction, &mut BackgroundColor, &ActionButton), Changed<Interaction>>,
 ) {
     for (interaction, mut bg, button) in &mut query {
         *bg = BackgroundColor(match (button.enabled, interaction) {

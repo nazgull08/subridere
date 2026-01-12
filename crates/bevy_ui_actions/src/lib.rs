@@ -22,16 +22,16 @@
 //! ```
 
 mod action;
+mod builder;
 mod button;
 mod observer;
-mod builder;
-mod style;
 mod plugin;
+mod style;
 
 pub mod prelude;
 
 pub use action::UiAction;
+pub use builder::{ButtonConfig, SpawnActionButton};
 pub use button::{ActionButton, OnHover, OnPress};
-pub use builder::{ButtonConfig, SpawnActionButton, ActionButtonExt};
 pub use plugin::UiActionsPlugin;
 pub use style::ButtonStyle;
