@@ -12,6 +12,7 @@ bevy = { workspace = true, default-features = false, features = [
     "bevy_sprite",       # For 2D if needed
     "bevy_text",         # Text rendering
     "bevy_picking",      # Observers + Pointer events (NEW in 0.16!)
+    "bevy_window",      # Observers + Pointer events (NEW in 0.16!)
 ] }
 
 [dev-dependencies]

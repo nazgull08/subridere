@@ -1,37 +1,26 @@
-//! Event-driven UI pattern for Bevy using Observers.
-//!
-//! # Пример
-//!
-//! ```rust,ignore
-//! use bevy::prelude::*;
-//! use bevy_ui_actions::prelude::*;
-//!
-//! struct MyAction;
-//!
-//! impl UiAction for MyAction {
-//!     fn execute(&self, world: &mut World) {
-//!         info!("Clicked!");
-//!     }
-//! }
-//!
-//! fn setup(mut commands: Commands) {
-//!     commands.spawn(Node::default()).with_children(|parent| {
-//!         parent.spawn_action_button(MyAction, "Click me");
-//!     });
-//! }
-//! ```
+//! Event-driven UI actions for Bevy.
 
 mod action;
-mod builder;
-mod button;
-mod observer;
+mod click;
+mod drag;
+mod helpers;
+mod hover;
 mod plugin;
+mod right_click;
 mod style;
+mod systems;
+mod tooltip; 
+mod visual;
 
 pub mod prelude;
 
 pub use action::UiAction;
-pub use builder::{ButtonConfig, SpawnActionButton};
-pub use button::{ActionButton, OnHover, OnPress};
+pub use click::OnClick;
+pub use drag::{Draggable, DropTarget, OnDragStart, OnDrop, OnDragCancel, DragState};
+pub use helpers::{ButtonConfig, SpawnActionButton, SpawnUiExt};
+pub use hover::{OnHover, OnHoverExit, OnPress};
 pub use plugin::UiActionsPlugin;
+pub use right_click::OnRightClick;
 pub use style::ButtonStyle;
+pub use tooltip::{Tooltip, TooltipState, TooltipStyle, TooltipUI};
+pub use visual::{InteractiveVisual, Disabled};
