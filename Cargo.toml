@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "crates/block-bodies-core",
+    "crates/bevy_ui_actions",
     "crates/subridere-skeleton", 
     "crates/subridere-core",
     "crates/subridere-game"
