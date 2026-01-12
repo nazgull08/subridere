@@ -91,9 +91,12 @@ pub struct Equipment {
 
 impl Equipment {
     /// Get mutable reference to equipment slot by type
-    pub fn get_slot_mut(&mut self, slot_type: crate::ui::inventory::systems::EquipmentSlotType) -> &mut Option<String> {
+    pub fn get_slot_mut(
+        &mut self,
+        slot_type: crate::ui::inventory::systems::EquipmentSlotType,
+    ) -> &mut Option<String> {
         use crate::ui::inventory::systems::EquipmentSlotType;
-        
+
         match slot_type {
             EquipmentSlotType::Helmet => &mut self.helmet,
             EquipmentSlotType::LeftPauldron => &mut self.left_pauldron,
@@ -108,11 +111,14 @@ impl Equipment {
             EquipmentSlotType::OffHand => &mut self.off_hand,
         }
     }
-    
+
     /// Get immutable reference to equipment slot by type
-    pub fn get_slot(&self, slot_type: crate::ui::inventory::systems::EquipmentSlotType) -> &Option<String> {
+    pub fn get_slot(
+        &self,
+        slot_type: crate::ui::inventory::systems::EquipmentSlotType,
+    ) -> &Option<String> {
         use crate::ui::inventory::systems::EquipmentSlotType;
-        
+
         match slot_type {
             EquipmentSlotType::Helmet => &self.helmet,
             EquipmentSlotType::LeftPauldron => &self.left_pauldron,

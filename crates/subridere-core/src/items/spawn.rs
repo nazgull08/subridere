@@ -11,13 +11,13 @@ use crate::{game_init::assets::GameAssets, items::definition::ItemDefinition};
 pub struct WorldItemSpawnConfig {
     /// Item identifier (e.g. "wooden_staff")
     pub item_id: String,
-    
+
     /// Quantity in this stack
     pub quantity: u32,
-    
+
     /// World position
     pub position: Vec3,
-    
+
     /// Initial velocity (optional, for throwing/dropping)
     pub initial_velocity: Option<Vec3>,
 }
@@ -60,11 +60,11 @@ pub fn spawn_world_item(
             return None;
         }
     };
-    let name  = item_defs
+    let name = item_defs
         .get(def_handle)
         .map(|def| Name::new(def.name.clone()))
         .unwrap_or_else(|| Name::new(config.item_id.clone()));
-    
+
     // Build physics components
     let mut entity_commands = commands.spawn((
         Transform::from_translation(config.position),
@@ -80,7 +80,7 @@ pub fn spawn_world_item(
         // Item data
         WorldItem::new(config.item_id.clone(), config.quantity),
         Pickupable,
-        name
+        name,
     ));
 
     // Add velocity if specified (for throwing/dropping)

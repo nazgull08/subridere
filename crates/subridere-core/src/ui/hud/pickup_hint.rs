@@ -1,19 +1,16 @@
-use bevy::prelude::*;
 use crate::inventory::systems::TargetedItem;
+use bevy::prelude::*;
 
 /// Marker component for pickup hint text
 #[derive(Component)]
 pub struct PickupHintText;
 
 /// Spawn pickup hint UI element (called once at startup)
-pub fn spawn_pickup_hint(
-    mut commands: Commands, 
-    asset_server: Res<AssetServer>
-) {
+pub fn spawn_pickup_hint(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/dogica.ttf");
 
     commands.spawn((
-        Text::new(""),  // Start empty
+        Text::new(""), // Start empty
         TextFont {
             font,
             font_size: 20.0,

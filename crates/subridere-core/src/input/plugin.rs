@@ -4,8 +4,8 @@ use crate::input::resources::InputSettings;
 use crate::ui::inventory::inventory_closed;
 
 use super::systems::keyboard::{handle_keyboard_input, handle_shoot_input};
-use super::systems::weapon_switch::weapon_switch_system;
 use super::systems::pickup::handle_pickup_input;
+use super::systems::weapon_switch::weapon_switch_system;
 
 pub struct InputPlugin;
 

@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use super::state::*;
+use bevy::prelude::*;
 
 /// Spawn context menu when state changes to open
 pub fn spawn_context_menu(
@@ -12,20 +12,20 @@ pub fn spawn_context_menu(
     if !menu_state.is_changed() {
         return;
     }
-    
+
     // If menu should be closed, don't spawn
     if !menu_state.is_open {
         return;
     }
-    
+
     // If menu already exists, don't spawn another
     if !existing_menu.is_empty() {
         return;
     }
-    
+
     // Use the saved spawn position (not current cursor!)
     let cursor_pos = menu_state.spawn_position;
-    
+
     let font = asset_server.load("fonts/dogica.ttf");
 
     // Spawn menu container
@@ -117,12 +117,12 @@ pub fn despawn_context_menu(
     if !menu_state.is_changed() {
         return;
     }
-    
+
     // If menu is still open, don't despawn
     if menu_state.is_open {
         return;
     }
-    
+
     // Despawn all menu entities (should only be one)
     for entity in &menu_query {
         commands.entity(entity).despawn();
@@ -134,7 +134,10 @@ pub fn despawn_context_menu(
 pub fn handle_menu_button_hover(
     mut button_query: Query<
         (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, Or<(With<EquipButton>, With<DropButton>, With<CancelButton>)>),
+        (
+            Changed<Interaction>,
+            Or<(With<EquipButton>, With<DropButton>, With<CancelButton>)>,
+        ),
     >,
 ) {
     for (interaction, mut bg_color) in &mut button_query {
@@ -153,9 +156,7 @@ pub fn handle_menu_button_hover(
 }
 
 /// Force close menu when inventory is closing
-pub fn force_close_menu_on_inventory_exit(
-    mut menu_state: ResMut<ContextMenuState>,
-) {
+pub fn force_close_menu_on_inventory_exit(mut menu_state: ResMut<ContextMenuState>) {
     if menu_state.is_open {
         info!("📋 Force closing menu (inventory closing)");
         menu_state.close();

@@ -19,13 +19,13 @@ pub struct CancelButton;
 pub struct ContextMenuState {
     /// Is menu currently open
     pub is_open: bool,
-    
+
     /// Which inventory slot was right-clicked (if any)
     pub inventory_slot: Option<usize>,
-    
+
     /// Which equipment slot was right-clicked (if any)
     pub equipment_slot: Option<super::super::EquipmentSlotType>,
-    
+
     /// Mouse position where menu was opened (fixed position)
     pub spawn_position: Vec2,
 }

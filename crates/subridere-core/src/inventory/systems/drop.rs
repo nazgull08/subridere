@@ -1,7 +1,13 @@
 use bevy::prelude::*;
 
 use crate::{
-    game_init::assets::GameAssets, inventory::{Equipment, Inventory}, items::{definition::ItemDefinition, spawn::{spawn_world_item, WorldItemSpawnConfig}, visual::definition::VisualDefinition}
+    game_init::assets::GameAssets,
+    inventory::{Equipment, Inventory},
+    items::{
+        definition::ItemDefinition,
+        spawn::{WorldItemSpawnConfig, spawn_world_item},
+        visual::definition::VisualDefinition,
+    },
 };
 
 /// Drop an item from inventory slot into the world
@@ -40,7 +46,10 @@ pub fn drop_from_inventory(
     );
 
     if spawned.is_some() {
-        info!("📤 Dropped {} (x{}) from inventory slot {}", item.item_id, item.quantity, slot_index);
+        info!(
+            "📤 Dropped {} (x{}) from inventory slot {}",
+            item.item_id, item.quantity, slot_index
+        );
         true
     } else {
         // Failed to spawn, return item to inventory
