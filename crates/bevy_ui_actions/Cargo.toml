@@ -1,0 +1,26 @@
+[package]
+name = "bevy_ui_actions"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Event-driven UI pattern for Bevy using Observers"
+
+[dependencies]
+bevy = { workspace = true, default-features = false, features = [
+    "bevy_ui",           # UI components
+    "bevy_render",       # Rendering
+    "bevy_sprite",       # For 2D if needed
+    "bevy_text",         # Text rendering
+    "bevy_picking",      # Observers + Pointer events (NEW in 0.16!)
+] }
+
+[dev-dependencies]
+bevy = { workspace = true, features = ["default"] }  # Full Bevy для примеров
+
+[[example]]
+name = "counter"
+path = "examples/counter.rs"
+
+[[example]]
+name = "menu"
+path = "examples/menu.rs"
