@@ -13,9 +13,8 @@ pub use core::{ButtonConfig, ButtonStyle, SpawnActionButton, SpawnUiExt, UiActio
 
 // Re-export interactions
 pub use interactions::{
-    DragGhost, DragGhostStyle, DragPhase, DragState, Draggable, DropTarget,
-    OnClick, OnDragCancel, OnDragStart, OnDrop, OnHover, OnHoverExit, OnPress,
-    OnRightClick, PreviousInteraction,
+    DragGhost, DragGhostStyle, DragPhase, DragState, Draggable, DropTarget, OnClick, OnDragCancel,
+    OnDragStart, OnDrop, OnHover, OnHoverExit, OnPress, OnRightClick, PreviousInteraction,
 };
 
 // Re-export widgets

@@ -4,8 +4,8 @@ use crate::interactions::{
     handle_press_actions, handle_right_clicks, has_draggables, DragGhostStyle, DragState,
 };
 use crate::widgets::{
-    hide_tooltip, show_tooltip, update_interactive_visuals, update_tooltip_hover,
-    TooltipState, TooltipStyle,
+    hide_tooltip, show_tooltip, update_interactive_visuals, update_tooltip_hover, TooltipState,
+    TooltipStyle,
 };
 use bevy::prelude::*;
 

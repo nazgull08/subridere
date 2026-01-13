@@ -160,7 +160,7 @@ pub fn process_pickup_intent(
 }
 
 /// System: Handle E key press to create PickupIntent
-/// 
+///
 /// Note: This should be in input module, but included here for completeness.
 /// Move to input/systems/pickup.rs when integrating.
 pub fn handle_pickup_input(

@@ -50,11 +50,13 @@ impl UiAction for DropAction {
         // Откуда тащили?
         let source = {
             let drag_state = world.resource::<DragState>();
-            drag_state.dragging.and_then(|e| world.get::<Slot>(e).map(|s| s.0))
+            drag_state
+                .dragging
+                .and_then(|e| world.get::<Slot>(e).map(|s| s.0))
         };
 
         let Some(source) = source else { return };
-        
+
         if source == self.target {
             return;
         }
@@ -62,7 +64,7 @@ impl UiAction for DropAction {
         // Swap
         let mut inv = world.resource_mut::<Inventory>();
         inv.slots.swap(source, self.target);
-        
+
         info!("Moved: slot {} -> slot {}", source, self.target);
     }
 }
@@ -104,10 +106,7 @@ fn setup(mut commands: Commands) {
 
 // ============ Sync ============
 
-fn sync_visuals(
-    inventory: Res<Inventory>,
-    mut query: Query<(&Slot, &mut BackgroundColor)>,
-) {
+fn sync_visuals(inventory: Res<Inventory>, mut query: Query<(&Slot, &mut BackgroundColor)>) {
     if !inventory.is_changed() {
         return;
     }

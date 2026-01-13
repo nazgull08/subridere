@@ -1,10 +1,10 @@
-// items/slots.rs — Equipment slots (Morrowind-style)
+// items/slots.rs — Equipment slots
 
 use serde::{Deserialize, Serialize};
 
 /// All possible equipment slots
-/// 
-/// Morrowind-style: separate slots for left/right pauldrons, gloves, boots
+///
+/// separate slots for left/right pauldrons, gloves, boots
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
 pub enum EquipmentSlot {
     // === Weapons ===

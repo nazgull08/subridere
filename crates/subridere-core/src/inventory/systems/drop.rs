@@ -18,13 +18,13 @@ pub struct DropIntent {
 pub enum DropSource {
     /// From inventory slot
     InventorySlot(usize),
-    
+
     /// From equipment slot  
     EquipmentSlot(crate::items::EquipmentSlot),
 }
 
 /// Spawn a world item at position
-/// 
+///
 /// Creates entity with WorldItem, Pickupable, physics, and visual.
 /// Returns the spawned entity.
 pub fn spawn_world_item(
@@ -89,12 +89,8 @@ fn spawn_item_visual(
             let mesh = match part.shape {
                 VisualShape::Cube => Mesh::from(Cuboid::new(part.size.0, part.size.1, part.size.2)),
                 VisualShape::Sphere => Mesh::from(Sphere::new(part.size.0)),
-                VisualShape::Cylinder => {
-                    Mesh::from(Cylinder::new(part.size.0, part.size.1))
-                }
-                VisualShape::Capsule => {
-                    Mesh::from(Capsule3d::new(part.size.0, part.size.1))
-                }
+                VisualShape::Cylinder => Mesh::from(Cylinder::new(part.size.0, part.size.1)),
+                VisualShape::Capsule => Mesh::from(Capsule3d::new(part.size.0, part.size.1)),
             };
 
             let material = StandardMaterial {
@@ -138,7 +134,10 @@ pub fn drop_from_inventory(
         materials,
     );
 
-    info!("📤 Dropped {} (x{}) from inventory slot {}", stack.id, stack.quantity, slot_index);
+    info!(
+        "📤 Dropped {} (x{}) from inventory slot {}",
+        stack.id, stack.quantity, slot_index
+    );
     true
 }
 

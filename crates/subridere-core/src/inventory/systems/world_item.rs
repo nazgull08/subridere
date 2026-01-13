@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use crate::items::ItemId;
 
 /// An item entity that exists in the game world
-/// 
+///
 /// Can be picked up by player.
 #[derive(Component, Clone, Debug)]
 pub struct WorldItem {

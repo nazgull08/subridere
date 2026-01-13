@@ -1,6 +1,6 @@
-use crate::interactions::{OnClick, Draggable, DropTarget, OnDrop, OnRightClick};
-use crate::widgets::{InteractiveVisual, Tooltip};
 use crate::core::action::UiAction;
+use crate::interactions::{Draggable, DropTarget, OnClick, OnDrop, OnRightClick};
+use crate::widgets::{InteractiveVisual, Tooltip};
 use bevy::prelude::*;
 
 /// Конфигурация кнопки

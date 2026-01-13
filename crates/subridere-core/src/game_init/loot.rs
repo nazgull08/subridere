@@ -44,7 +44,7 @@ pub fn spawn_loot(
         spawn_world_item(
             &mut commands,
             &registry,
-            ItemId::WoodenStaff,  // ← Типобезопасно!
+            ItemId::WoodenStaff, // ← Типобезопасно!
             1,
             pos,
             None,
@@ -64,7 +64,7 @@ pub fn spawn_loot(
         spawn_world_item(
             &mut commands,
             &registry,
-            ItemId::IronHelmet,  // ← Типобезопасно!
+            ItemId::IronHelmet, // ← Типобезопасно!
             1,
             pos,
             None,
@@ -84,7 +84,7 @@ pub fn spawn_loot(
         spawn_world_item(
             &mut commands,
             &registry,
-            ItemId::HealthPotion,  // ← Типобезопасно!
+            ItemId::HealthPotion, // ← Типобезопасно!
             1,
             pos,
             None,

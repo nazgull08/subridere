@@ -3,10 +3,7 @@
 use bevy::prelude::*;
 
 use super::systems::pickup::{
-    TargetedItem, 
-    detect_pickupable_items, 
-    handle_pickup_input,
-    process_pickup_intent,
+    TargetedItem, detect_pickupable_items, handle_pickup_input, process_pickup_intent,
 };
 use crate::items::registry::registry_loaded;
 

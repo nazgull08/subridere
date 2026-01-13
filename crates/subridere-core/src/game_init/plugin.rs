@@ -7,7 +7,7 @@ use super::{
     assets::{load_game_assets, wait_for_assets},
     enemies::spawn_test_enemies,
     lighting::setup_ambient_light,
-    loot::spawn_loot,  // ← Вернули
+    loot::spawn_loot, // ← Вернули
     maze_rooms::{spawn_maze_rooms, spawn_room_lights},
     state::InitStage,
 };

@@ -3,11 +3,11 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
 
-use super::definition::ItemDefinition;
 use super::ItemId;
+use super::definition::ItemDefinition;
 
 /// Central registry for all item definitions
-/// 
+///
 /// Loaded once at startup. Provides O(1) access to item data.
 #[derive(Resource, Default)]
 pub struct ItemRegistry {
@@ -44,7 +44,7 @@ impl ItemRegistry {
     }
 
     /// Get item definition
-    /// 
+    ///
     /// # Panics
     /// Panics if item not found (should never happen after loading)
     pub fn get(&self, id: ItemId) -> &ItemDefinition {

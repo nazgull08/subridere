@@ -14,14 +14,10 @@ pub enum ItemVisual {
     None,
 
     /// Built from primitive shapes (for prototyping)
-    Primitive {
-        parts: Vec<VisualPart>,
-    },
+    Primitive { parts: Vec<VisualPart> },
 
     /// 3D model file (future)
-    Model {
-        path: String,
-    },
+    Model { path: String },
 }
 
 impl ItemVisual {

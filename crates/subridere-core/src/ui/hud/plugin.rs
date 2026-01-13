@@ -1,6 +1,8 @@
 use super::{
+    crosshair::CrosshairPlugin,
     fps::UiFpsPlugin,
     hitflash::{HitFlashEvent, spawn_hit_overlay, update_hit_overlay},
+    pickup_hint::{spawn_pickup_hint, update_pickup_hint},
     stats::UiStatsPlugin,
 };
 use bevy::prelude::*;
@@ -11,7 +13,12 @@ impl Plugin for HudUiPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(UiFpsPlugin)
             .add_plugins(UiStatsPlugin)
+            .add_plugins(CrosshairPlugin)
             .add_event::<HitFlashEvent>()
-            .add_systems(Update, (spawn_hit_overlay, update_hit_overlay));
+            .add_systems(Startup, spawn_pickup_hint)
+            .add_systems(
+                Update,
+                (spawn_hit_overlay, update_hit_overlay, update_pickup_hint),
+            );
     }
 }

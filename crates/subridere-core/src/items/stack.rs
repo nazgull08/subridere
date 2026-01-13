@@ -5,8 +5,7 @@ use serde::{Deserialize, Serialize};
 use super::ItemId;
 
 /// A stack of items in inventory
-/// 
-/// Morrowind-style: no random modifiers.
+///
 /// ItemId is enough to get all properties from registry.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ItemStack {

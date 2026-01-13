@@ -8,7 +8,7 @@ use super::slots::{AccessorySlot, ArmorSlot, WeaponSlot};
 use super::visual::ItemVisual;
 
 /// Complete item definition — loaded from a single RON file
-/// 
+///
 /// One file = complete truth about an item.
 /// No data fragmentation, no hardcoded mappings.
 #[derive(Asset, TypePath, Debug, Clone, Deserialize)]
@@ -151,7 +151,6 @@ pub struct ArmorData {
 pub struct AccessoryData {
     /// Equipment slot
     pub slot: AccessorySlot,
-
     // Future: effects, bonuses, etc.
 }
 
@@ -173,7 +172,6 @@ pub enum ConsumableEffect {
 
     /// Restore stamina
     RestoreStamina(f32),
-
     // Buff (future)
     // Buff { stat: String, amount: f32, duration: f32 },
 }

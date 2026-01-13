@@ -5,8 +5,8 @@ mod right_click;
 
 pub use click::OnClick;
 pub use drag::{
-    DragGhost, DragGhostStyle, DragPhase, DragState, Draggable, DropTarget,
-    OnDragCancel, OnDragStart, OnDrop,
+    DragGhost, DragGhostStyle, DragPhase, DragState, Draggable, DropTarget, OnDragCancel,
+    OnDragStart, OnDrop,
 };
 pub use hover::{OnHover, OnHoverExit, OnPress, PreviousInteraction};
 pub use right_click::OnRightClick;

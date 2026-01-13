@@ -138,7 +138,10 @@ fn generate_enum(items: &[(String, String)]) -> String {
     code.push_str("        match s {\n");
     for (id, _) in items {
         let variant = to_pascal_case(id);
-        code.push_str(&format!("            \"{}\" => Some(Self::{}),\n", id, variant));
+        code.push_str(&format!(
+            "            \"{}\" => Some(Self::{}),\n",
+            id, variant
+        ));
     }
     code.push_str("            _ => None,\n");
     code.push_str("        }\n");

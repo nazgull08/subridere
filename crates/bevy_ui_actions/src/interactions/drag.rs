@@ -335,31 +335,27 @@ fn spawn_ghost(
     };
 
     match visual {
-        GhostVisual::Image(handle) => {
-            commands
-                .spawn((
-                    DragGhost,
-                    base_node,
-                    ImageNode {
-                        image: handle,
-                        ..default()
-                    },
-                    GlobalZIndex(999),
-                    FocusPolicy::Pass,
-                ))
-                .id()
-        }
-        GhostVisual::Color(color) => {
-            commands
-                .spawn((
-                    DragGhost,
-                    base_node,
-                    BackgroundColor(color),
-                    GlobalZIndex(999),
-                    FocusPolicy::Pass,
-                ))
-                .id()
-        }
+        GhostVisual::Image(handle) => commands
+            .spawn((
+                DragGhost,
+                base_node,
+                ImageNode {
+                    image: handle,
+                    ..default()
+                },
+                GlobalZIndex(999),
+                FocusPolicy::Pass,
+            ))
+            .id(),
+        GhostVisual::Color(color) => commands
+            .spawn((
+                DragGhost,
+                base_node,
+                BackgroundColor(color),
+                GlobalZIndex(999),
+                FocusPolicy::Pass,
+            ))
+            .id(),
     }
 }
 

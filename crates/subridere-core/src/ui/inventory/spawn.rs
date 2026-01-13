@@ -59,10 +59,7 @@ pub fn spawn_inventory_ui(mut commands: Commands, asset_server: Res<AssetServer>
 }
 
 /// Despawn inventory UI
-pub fn despawn_inventory_ui(
-    mut commands: Commands,
-    query: Query<Entity, With<InventoryRoot>>,
-) {
+pub fn despawn_inventory_ui(mut commands: Commands, query: Query<Entity, With<InventoryRoot>>) {
     for entity in &query {
         commands.entity(entity).despawn_recursive();
     }
@@ -97,7 +94,7 @@ fn spawn_equipment_panel(parent: &mut ChildSpawnerCommands, font: &Handle<Font>)
                 TextColor(TEXT_COLOR),
             ));
 
-            // Equipment layout (Morrowind-style)
+            // Equipment layout
             // Row 1: Helmet
             spawn_equip_row(col, font, &[EquipmentSlot::Helmet]);
 
@@ -155,7 +152,11 @@ fn spawn_equipment_panel(parent: &mut ChildSpawnerCommands, font: &Handle<Font>)
         });
 }
 
-fn spawn_equip_row(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, slots: &[EquipmentSlot]) {
+fn spawn_equip_row(
+    parent: &mut ChildSpawnerCommands,
+    font: &Handle<Font>,
+    slots: &[EquipmentSlot],
+) {
     parent
         .spawn(Node {
             flex_direction: FlexDirection::Row,
@@ -169,7 +170,11 @@ fn spawn_equip_row(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, slots
         });
 }
 
-fn spawn_equipment_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, slot: EquipmentSlot) {
+fn spawn_equipment_slot(
+    parent: &mut ChildSpawnerCommands,
+    font: &Handle<Font>,
+    slot: EquipmentSlot,
+) {
     parent
         .spawn((
             Node {
@@ -183,7 +188,6 @@ fn spawn_equipment_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, 
             BackgroundColor(EQUIP_EMPTY),
             BorderColor(EQUIP_BORDER),
             EquipmentSlotUI { slot },
-            // bevy_ui_actions components
             Draggable,
             DropTarget,
             OnDrop::new(DropToEquipmentSlot { target_slot: slot }),
@@ -191,19 +195,23 @@ fn spawn_equipment_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, 
             Name::new(format!("Equip: {:?}", slot)),
         ))
         .with_children(|slot_node| {
-            // Icon (hidden by default)
+            // Icon — absolute positioned, centered
             slot_node.spawn((
                 ImageNode::default(),
                 Node {
                     width: Val::Px(EQUIP_SLOT_SIZE - 8.0),
                     height: Val::Px(EQUIP_SLOT_SIZE - 8.0),
+                    position_type: PositionType::Absolute,
+                    // Center the absolute element
+                    left: Val::Px(4.0),
+                    top: Val::Px(4.0),
                     ..default()
                 },
                 Visibility::Hidden,
                 SlotIcon,
             ));
 
-            // Label (shown when empty)
+            // Label — stays in flex flow, centered by parent
             slot_node.spawn((
                 Text::new(slot_short_name(slot)),
                 TextFont {
@@ -301,7 +309,9 @@ fn spawn_inventory_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, 
             // bevy_ui_actions components
             Draggable,
             DropTarget,
-            OnDrop::new(DropToInventorySlot { target_index: index }),
+            OnDrop::new(DropToInventorySlot {
+                target_index: index,
+            }),
             Interaction::None,
             Name::new(format!("Slot {}", index)),
         ))

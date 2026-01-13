@@ -22,7 +22,7 @@ impl UiAction for DropToInventorySlot {
     fn execute(&self, world: &mut World) {
         // Get source from drag state
         let source = get_drag_source(world);
-        
+
         let Some(source) = source else {
             return;
         };
@@ -53,7 +53,7 @@ pub struct DropToEquipmentSlot {
 impl UiAction for DropToEquipmentSlot {
     fn execute(&self, world: &mut World) {
         let source = get_drag_source(world);
-        
+
         let Some(source) = source else {
             return;
         };
@@ -90,7 +90,7 @@ impl UiAction for UseItemAction {
             let Ok(inventory) = query.get_single(world) else {
                 return;
             };
-            
+
             inventory.get(self.slot_index).map(|stack| stack.id)
         };
 
@@ -112,7 +112,7 @@ impl UiAction for UseItemAction {
 
         // Apply effect and remove from inventory
         apply_consumable_effect(world, id);
-        
+
         // Remove one from inventory
         let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
         if let Ok(mut inventory) = query.get_single_mut(world) {
@@ -148,7 +148,7 @@ impl UiAction for QuickEquipAction {
             let Ok(inventory) = query.get_single(world) else {
                 return;
             };
-            
+
             inventory.get(self.slot_index).map(|stack| stack.id)
         };
 
@@ -185,8 +185,9 @@ impl UiAction for QuickUnequipAction {
             let Ok(inventory) = query.get_single(world) else {
                 return;
             };
-            
-            inventory.iter()
+
+            inventory
+                .iter()
                 .find(|(_, item)| item.is_none())
                 .map(|(i, _)| i)
         };
@@ -229,7 +230,7 @@ fn get_drag_source(world: &mut World) -> Option<DragSource> {
 
 fn swap_inventory_slots(world: &mut World, a: usize, b: usize) {
     let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
-    
+
     if let Ok(mut inventory) = query.get_single_mut(world) {
         inventory.swap(a, b);
         info!("🔄 Swapped inventory slots {} ↔ {}", a, b);
@@ -243,7 +244,7 @@ fn equip_from_inventory(world: &mut World, inv_slot: usize, equip_slot: Equipmen
         let Ok(inventory) = query.get_single(world) else {
             return;
         };
-        
+
         inventory.get(inv_slot).map(|stack| stack.id)
     };
 
@@ -265,17 +266,17 @@ fn equip_from_inventory(world: &mut World, inv_slot: usize, equip_slot: Equipmen
 
     // Do the equip
     let mut query = world.query_filtered::<(&mut Inventory, &mut Equipment), With<Player>>();
-    
+
     if let Ok((mut inventory, mut equipment)) = query.get_single_mut(world) {
         // Remove from inventory
         let stack = inventory.remove_slot(inv_slot);
-        
+
         if let Some(stack) = stack {
             // If something already equipped, put it back in inventory
             if let Some(old_id) = equipment.unequip(equip_slot) {
                 inventory.add_single(old_id);
             }
-            
+
             // Equip new item
             equipment.equip(equip_slot, stack.id);
             info!("✅ Equipped {} to {:?}", stack.id, equip_slot);
@@ -285,7 +286,7 @@ fn equip_from_inventory(world: &mut World, inv_slot: usize, equip_slot: Equipmen
 
 fn unequip_to_slot(world: &mut World, equip_slot: EquipmentSlot, inv_slot: usize) {
     let mut query = world.query_filtered::<(&mut Inventory, &mut Equipment), With<Player>>();
-    
+
     if let Ok((mut inventory, mut equipment)) = query.get_single_mut(world) {
         // Check target slot is empty
         if inventory.get(inv_slot).is_some() {
@@ -305,7 +306,7 @@ fn unequip_to_slot(world: &mut World, equip_slot: EquipmentSlot, inv_slot: usize
 }
 
 fn apply_consumable_effect(world: &mut World, id: ItemId) {
-    use crate::items::{ItemCategory, ConsumableData};
+    use crate::items::{ConsumableData, ItemCategory};
     use crate::stats::health::component::Health;
     use crate::stats::mana::component::Mana;
     use crate::stats::stamina::component::Stamina;
@@ -313,7 +314,7 @@ fn apply_consumable_effect(world: &mut World, id: ItemId) {
     let effect = {
         let registry = world.resource::<ItemRegistry>();
         let def = registry.get(id);
-        
+
         match &def.category {
             ItemCategory::Consumable(data) => Some(data.effect.clone()),
             _ => None,
@@ -324,11 +325,12 @@ fn apply_consumable_effect(world: &mut World, id: ItemId) {
         return;
     };
 
-    let mut query = world.query_filtered::<(&mut Health, Option<&mut Mana>, Option<&mut Stamina>), With<Player>>();
-    
+    let mut query = world
+        .query_filtered::<(&mut Health, Option<&mut Mana>, Option<&mut Stamina>), With<Player>>();
+
     if let Ok((mut health, mana, stamina)) = query.get_single_mut(world) {
         use crate::items::definition::ConsumableEffect;
-        
+
         match effect {
             ConsumableEffect::Heal(amount) => {
                 health.current = (health.current + amount).min(health.max);

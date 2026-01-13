@@ -3,9 +3,9 @@
 use serde::{Deserialize, Serialize};
 
 /// Flags that define special item behaviors
-/// 
+///
 /// These are part of the item definition and cannot be changed at runtime.
-/// Morrowind-style: no random modifiers, each item is unique by definition.
+/// no random modifiers, each item is unique by definition.
 #[derive(Clone, Copy, Debug, Default, Serialize, Deserialize)]
 pub struct ItemFlags {
     /// Cannot be dropped or sold (quest items)

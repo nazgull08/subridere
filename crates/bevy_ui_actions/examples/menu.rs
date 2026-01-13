@@ -128,9 +128,24 @@ fn setup(mut commands: Commands) {
             });
 
             // Buttons with tooltips
-            spawn_menu_button(parent, StartGameAction, "Start Game", "Begin your adventure!");
-            spawn_menu_button(parent, OpenSettingsAction, "Settings", "Configure game options");
-            spawn_menu_button(parent, BackToMenuAction, "Back to Menu", "Return to main menu");
+            spawn_menu_button(
+                parent,
+                StartGameAction,
+                "Start Game",
+                "Begin your adventure!",
+            );
+            spawn_menu_button(
+                parent,
+                OpenSettingsAction,
+                "Settings",
+                "Configure game options",
+            );
+            spawn_menu_button(
+                parent,
+                BackToMenuAction,
+                "Back to Menu",
+                "Return to main menu",
+            );
             spawn_menu_button(parent, QuitAction, "Quit", "Exit the game");
         });
 }

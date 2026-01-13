@@ -1,7 +1,7 @@
 // ui/inventory/components.rs — UI marker components
 
-use bevy::prelude::*;
 use crate::items::EquipmentSlot;
+use bevy::prelude::*;
 
 /// Root container for entire inventory UI
 #[derive(Component)]

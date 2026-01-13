@@ -75,7 +75,7 @@ pub(crate) fn update_tooltip_hover(
     time: Res<Time>,
 ) {
     let mut found_hovered: Option<(Entity, &Tooltip)> = None;
-    
+
     for (entity, interaction, tooltip) in &query {
         if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
             found_hovered = Some((entity, tooltip));
@@ -166,7 +166,7 @@ pub(crate) fn hide_tooltip(
 ) {
     // Скрываем если: курсор ушёл ИЛИ идёт drag
     let should_hide = tooltip_state.hovered.is_none() || drag_state.is_dragging();
-    
+
     if tooltip_state.tooltip_entity.is_some() && should_hide {
         if let Some(entity) = tooltip_state.tooltip_entity.take() {
             commands.entity(entity).despawn();

@@ -71,7 +71,7 @@ impl Inventory {
     }
 
     /// Add item to inventory
-    /// 
+    ///
     /// Tries to stack with existing items first, then finds empty slot.
     /// Returns true if item was added, false if inventory full.
     pub fn add(&mut self, id: ItemId, quantity: u32, registry: &ItemRegistry) -> bool {
@@ -116,7 +116,7 @@ impl Inventory {
     }
 
     /// Add item without registry (assumes max_stack = 1)
-    /// 
+    ///
     /// Use this when you don't have registry access (e.g., in tests)
     pub fn add_single(&mut self, id: ItemId) -> bool {
         let empty_slot = self.slots.iter_mut().find(|s| s.is_none());
@@ -135,7 +135,7 @@ impl Inventory {
     }
 
     /// Remove specific quantity of item type
-    /// 
+    ///
     /// Returns true if removed successfully, false if not enough items.
     pub fn remove(&mut self, id: ItemId, quantity: u32) -> bool {
         if self.count(id) < quantity {
@@ -268,11 +268,11 @@ mod tests {
     use super::*;
 
     // Note: These tests use add_single since we don't have registry in tests
-    
+
     #[test]
     fn inventory_add_remove() {
         let mut inv = Inventory::new(5);
-        
+
         // Можем добавить предмет только если есть хотя бы один ItemId
         // В реальных тестах нужен ItemId enum - пока пропустим
     }
