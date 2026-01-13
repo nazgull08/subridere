@@ -261,7 +261,14 @@ pub(crate) fn drag_system(
                 // Отмена drag
                 if let Ok((_, _, _, Some(on_cancel), _, _)) = draggables.get(dragged_entity) {
                     let action = on_cancel.action.clone();
+                    let dragging = drag_state.dragging; // Сохраняем до clear
+
                     commands.queue(move |world: &mut World| {
+                        // Восстанавливаем dragging для action
+                        {
+                            let mut state = world.resource_mut::<DragState>();
+                            state.dragging = dragging;
+                        }
                         action.execute(world);
                     });
                 }

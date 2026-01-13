@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use bevy_ui_actions::prelude::*;
 
 use crate::items::EquipmentSlot;
+use crate::ui::inventory::actions::DropToWorldAction;
 
 use super::actions::{DropToEquipmentSlot, DropToInventorySlot};
 use super::components::*;
@@ -191,6 +192,7 @@ fn spawn_equipment_slot(
             Draggable,
             DropTarget,
             OnDrop::new(DropToEquipmentSlot { target_slot: slot }),
+            OnDragCancel::new(DropToWorldAction),
             Interaction::None,
             Name::new(format!("Equip: {:?}", slot)),
         ))
@@ -312,6 +314,7 @@ fn spawn_inventory_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, 
             OnDrop::new(DropToInventorySlot {
                 target_index: index,
             }),
+            OnDragCancel::new(DropToWorldAction),
             Interaction::None,
             Name::new(format!("Slot {}", index)),
         ))

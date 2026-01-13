@@ -6,7 +6,9 @@ use bevy_ui_actions::UiActionsPlugin;
 
 use super::spawn::{despawn_inventory_ui, spawn_inventory_ui};
 use super::state::{InventoryState, inventory_open};
-use super::sync::{sync_equipment_slots, sync_inventory_slots, sync_stats_display};
+use super::sync::{
+    sync_drag_visual, sync_equipment_slots, sync_inventory_slots, sync_stats_display,
+};
 
 pub struct UiInventoryPlugin;
 
@@ -31,8 +33,10 @@ impl Plugin for UiInventoryPlugin {
                 (
                     sync_inventory_slots,
                     sync_equipment_slots,
+                    sync_drag_visual,
                     sync_stats_display,
                 )
+                    .chain()
                     .run_if(inventory_open),
             );
 

@@ -180,6 +180,13 @@ impl Inventory {
             .sum()
     }
 
+    /// Set item directly in slot (for swap/unequip operations)
+    pub fn set_slot(&mut self, index: usize, stack: Option<ItemStack>) {
+        if index < self.slots.len() {
+            self.slots[index] = stack;
+        }
+    }
+
     /// Find first slot containing item type
     pub fn find(&self, id: ItemId) -> Option<usize> {
         self.slots

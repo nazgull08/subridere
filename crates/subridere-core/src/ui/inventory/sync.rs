@@ -1,6 +1,7 @@
 // ui/inventory/sync.rs — Sync game data to UI visuals
 
 use bevy::prelude::*;
+use bevy_ui_actions::{DragPhase, DragState};
 
 use crate::inventory::component::{Equipment, Inventory};
 use crate::items::ItemRegistry;
@@ -146,5 +147,37 @@ pub fn sync_stats_display(
 
     if let (Some(s), Ok(mut text)) = (stamina, sp_query.single_mut()) {
         **text = format!("{:.0} / {:.0}", s.current, s.max);
+    }
+}
+
+/// Dim source slot while dragging
+pub fn sync_drag_visual(
+    drag_state: Res<DragState>,
+    mut inv_slots: Query<(Entity, &mut BackgroundColor), With<InventorySlotUI>>,
+    mut equip_slots: Query<
+        (Entity, &mut BackgroundColor),
+        (With<EquipmentSlotUI>, Without<InventorySlotUI>),
+    >,
+) {
+    if drag_state.phase != DragPhase::Active {
+        return;
+    }
+
+    let Some(dragging_entity) = drag_state.dragging else {
+        return;
+    };
+
+    const DRAGGING_DIM: Color = Color::srgba(0.1, 0.1, 0.1, 0.7);
+
+    for (entity, mut bg) in &mut inv_slots {
+        if entity == dragging_entity {
+            *bg = BackgroundColor(DRAGGING_DIM);
+        }
+    }
+
+    for (entity, mut bg) in &mut equip_slots {
+        if entity == dragging_entity {
+            *bg = BackgroundColor(DRAGGING_DIM);
+        }
     }
 }

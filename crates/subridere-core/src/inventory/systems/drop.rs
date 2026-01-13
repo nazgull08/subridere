@@ -1,32 +1,95 @@
 // inventory/systems/drop.rs — Item drop system
 
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
-use crate::items::{ItemId, ItemRegistry};
+use crate::inventory::component::{Equipment, Inventory};
+use crate::items::{EquipmentSlot, ItemId, ItemRegistry};
+use crate::player::component::Player;
 
-use super::super::component::{Equipment, Inventory};
 use super::world_item::{Pickupable, WorldItem};
 
-/// Marker component: entity wants to drop an item
-#[derive(Component)]
-pub struct DropIntent {
+// ============================================================
+// Event
+// ============================================================
+
+/// Event: drop item from inventory/equipment to world
+#[derive(Event)]
+pub struct DropToWorldEvent {
     pub source: DropSource,
 }
 
 /// Where the dropped item comes from
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum DropSource {
-    /// From inventory slot
-    InventorySlot(usize),
-
-    /// From equipment slot  
-    EquipmentSlot(crate::items::EquipmentSlot),
+    Inventory(usize),
+    Equipment(EquipmentSlot),
 }
 
+// ============================================================
+// System: Handle drop event
+// ============================================================
+
+/// Process DropToWorldEvent — remove from inventory/equipment, spawn in world
+pub fn handle_drop_to_world(
+    mut commands: Commands,
+    mut events: EventReader<DropToWorldEvent>,
+    mut player_query: Query<(&Transform, &mut Inventory, &mut Equipment), With<Player>>,
+    registry: Res<ItemRegistry>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    for event in events.read() {
+        info!("🔍 handle_drop_to_world received event: {:?}", event.source);
+        let Ok((transform, mut inventory, mut equipment)) = player_query.get_single_mut() else {
+            continue;
+        };
+
+        // Calculate drop position (in front of player)
+        let drop_position = transform.translation + transform.forward() * 1.5 + Vec3::Y * 0.5;
+
+        // Small upward velocity for nice arc
+        let drop_velocity = Vec3::Y * 2.0 + transform.forward() * 1.0;
+
+        // Get item and remove from source
+        let (item_id, quantity) = match event.source {
+            DropSource::Inventory(slot) => {
+                let Some(stack) = inventory.remove_slot(slot) else {
+                    warn!("No item in inventory slot {} to drop", slot);
+                    continue;
+                };
+                (stack.id, stack.quantity)
+            }
+            DropSource::Equipment(slot) => {
+                let Some(id) = equipment.unequip(slot) else {
+                    warn!("No item in equipment slot {:?} to drop", slot);
+                    continue;
+                };
+                (id, 1)
+            }
+        };
+
+        // Spawn in world
+        spawn_world_item(
+            &mut commands,
+            &registry,
+            item_id,
+            quantity,
+            drop_position,
+            Some(drop_velocity),
+            &mut meshes,
+            &mut materials,
+        );
+
+        info!("📤 Dropped {} (x{}) to world", item_id, quantity);
+    }
+}
+
+// ============================================================
+// Spawn functions
+// ============================================================
+
 /// Spawn a world item at position
-///
-/// Creates entity with WorldItem, Pickupable, physics, and visual.
-/// Returns the spawned entity.
 pub fn spawn_world_item(
     commands: &mut Commands,
     registry: &ItemRegistry,
@@ -47,16 +110,16 @@ pub fn spawn_world_item(
         Visibility::Visible,
     ));
 
-    // Add physics
+    // Physics
     entity_commands.insert((
-        bevy_rapier3d::prelude::RigidBody::Dynamic,
-        bevy_rapier3d::prelude::Collider::cuboid(0.15, 0.15, 0.15),
-        bevy_rapier3d::prelude::Restitution::coefficient(0.3),
+        RigidBody::Dynamic,
+        Collider::cuboid(0.15, 0.15, 0.15),
+        Restitution::coefficient(0.3),
     ));
 
-    // Add initial velocity if specified
+    // Initial velocity
     if let Some(vel) = velocity {
-        entity_commands.insert(bevy_rapier3d::prelude::Velocity {
+        entity_commands.insert(Velocity {
             linvel: vel,
             ..default()
         });
@@ -64,7 +127,7 @@ pub fn spawn_world_item(
 
     let entity = entity_commands.id();
 
-    // Spawn visual as child
+    // Visual as child
     spawn_item_visual(commands, entity, def, meshes, materials);
 
     entity
@@ -81,7 +144,7 @@ fn spawn_item_visual(
     use crate::items::visual::{ItemVisual, VisualShape};
 
     let ItemVisual::Primitive { parts } = &def.visual else {
-        return; // No visual or Model (future)
+        return;
     };
 
     commands.entity(parent).with_children(|builder| {
@@ -105,69 +168,4 @@ fn spawn_item_visual(
             ));
         }
     });
-}
-
-/// Drop item from inventory into world
-pub fn drop_from_inventory(
-    commands: &mut Commands,
-    inventory: &mut Inventory,
-    slot_index: usize,
-    drop_position: Vec3,
-    drop_velocity: Vec3,
-    registry: &ItemRegistry,
-    meshes: &mut Assets<Mesh>,
-    materials: &mut Assets<StandardMaterial>,
-) -> bool {
-    let Some(stack) = inventory.remove_slot(slot_index) else {
-        warn!("No item in slot {} to drop", slot_index);
-        return false;
-    };
-
-    spawn_world_item(
-        commands,
-        registry,
-        stack.id,
-        stack.quantity,
-        drop_position,
-        Some(drop_velocity),
-        meshes,
-        materials,
-    );
-
-    info!(
-        "📤 Dropped {} (x{}) from inventory slot {}",
-        stack.id, stack.quantity, slot_index
-    );
-    true
-}
-
-/// Drop item from equipment into world
-pub fn drop_from_equipment(
-    commands: &mut Commands,
-    equipment: &mut Equipment,
-    slot: crate::items::EquipmentSlot,
-    drop_position: Vec3,
-    drop_velocity: Vec3,
-    registry: &ItemRegistry,
-    meshes: &mut Assets<Mesh>,
-    materials: &mut Assets<StandardMaterial>,
-) -> bool {
-    let Some(id) = equipment.unequip(slot) else {
-        warn!("No item in equipment slot {:?} to drop", slot);
-        return false;
-    };
-
-    spawn_world_item(
-        commands,
-        registry,
-        id,
-        1, // Equipment is always quantity 1
-        drop_position,
-        Some(drop_velocity),
-        meshes,
-        materials,
-    );
-
-    info!("📤 Dropped {} from equipment {:?}", id, slot);
-    true
 }

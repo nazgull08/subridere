@@ -2,6 +2,7 @@
 
 use bevy::prelude::*;
 
+use super::systems::drop::{DropToWorldEvent, handle_drop_to_world};
 use super::systems::pickup::{
     TargetedItem, detect_pickupable_items, handle_pickup_input, process_pickup_intent,
 };
@@ -12,6 +13,8 @@ pub struct InventoryPlugin;
 impl Plugin for InventoryPlugin {
     fn build(&self, app: &mut App) {
         app
+            // Events
+            .add_event::<DropToWorldEvent>()
             // Resources
             .init_resource::<TargetedItem>()
             // Systems - only run after items are loaded
@@ -21,6 +24,7 @@ impl Plugin for InventoryPlugin {
                     detect_pickupable_items,
                     handle_pickup_input,
                     process_pickup_intent,
+                    handle_drop_to_world,
                 )
                     .run_if(registry_loaded),
             );
