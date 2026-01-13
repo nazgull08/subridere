@@ -112,6 +112,14 @@ impl Default for DragGhostStyle {
     }
 }
 
+/// Источник визуала для ghost
+enum GhostVisual {
+    /// Используем изображение
+    Image(Handle<Image>),
+    /// Используем цвет фона
+    Color(Color),
+}
+
 // ============ State Machine System ============
 
 pub(crate) fn drag_system(
@@ -120,17 +128,22 @@ pub(crate) fn drag_system(
     mouse: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window>,
     draggables: Query<
-        (Entity, &Interaction, Option<&OnDragStart>, Option<&OnDragCancel>, Option<&BackgroundColor>),
+        (
+            Entity,
+            &Interaction,
+            Option<&OnDragStart>,
+            Option<&OnDragCancel>,
+            Option<&BackgroundColor>,
+            Option<&Children>,
+        ),
         (With<Draggable>, Without<Disabled>),
     >,
+    image_query: Query<&ImageNode>,
     drop_targets: Query<(Entity, &Interaction, Option<&OnDrop>), With<DropTarget>>,
     mut ghost_query: Query<&mut Node, With<DragGhost>>,
     mut commands: Commands,
 ) {
-    let cursor_pos = windows
-        .single()
-        .ok()
-        .and_then(|w| w.cursor_position());
+    let cursor_pos = windows.single().ok().and_then(|w| w.cursor_position());
 
     match drag_state.phase {
         // ========== IDLE ==========
@@ -141,7 +154,7 @@ pub(crate) fn drag_system(
 
             let Some(cursor) = cursor_pos else { return };
 
-            for (entity, interaction, _, _, _) in &draggables {
+            for (entity, interaction, _, _, _, _) in &draggables {
                 if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
                     drag_state.phase = DragPhase::Pending;
                     drag_state.dragging = Some(entity);
@@ -171,36 +184,16 @@ pub(crate) fn drag_system(
 
             drag_state.phase = DragPhase::Active;
 
-            let ghost_color = draggables
-                .get(dragged_entity)
-                .ok()
-                .and_then(|(_, _, _, _, bg)| bg)
-                .map(|bg| {
-                    let c = bg.0.to_srgba();
-                    Color::srgba(c.red, c.green, c.blue, ghost_style.opacity)
-                })
-                .unwrap_or(ghost_style.background);
+            // Определяем визуал для ghost
+            let ghost_visual =
+                find_ghost_visual(dragged_entity, &draggables, &image_query, &ghost_style);
 
-            let ghost = commands
-                .spawn((
-                    DragGhost,
-                    Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(cursor.x - ghost_style.size / 2.0),
-                        top: Val::Px(cursor.y - ghost_style.size / 2.0),
-                        width: Val::Px(ghost_style.size),
-                        height: Val::Px(ghost_style.size),
-                        ..default()
-                    },
-                    BackgroundColor(ghost_color),
-                    ZIndex(999),
-                    FocusPolicy::Pass,  // <-- Не блокирует hover!
-                ))
-                .id();
-
+            // Создаём ghost
+            let ghost = spawn_ghost(&mut commands, cursor, &ghost_style, ghost_visual);
             drag_state.ghost_entity = Some(ghost);
 
-            if let Ok((_, _, Some(on_start), _, _)) = draggables.get(dragged_entity) {
+            // Вызываем OnDragStart если есть
+            if let Ok((_, _, Some(on_start), _, _, _)) = draggables.get(dragged_entity) {
                 let action = on_start.action.clone();
                 commands.queue(move |world: &mut World| {
                     action.execute(world);
@@ -215,6 +208,7 @@ pub(crate) fn drag_system(
                 return;
             };
 
+            // Обновляем позицию ghost
             if let Some(cursor) = cursor_pos {
                 if let Some(ghost_entity) = drag_state.ghost_entity {
                     if let Ok(mut node) = ghost_query.get_mut(ghost_entity) {
@@ -228,10 +222,12 @@ pub(crate) fn drag_system(
                 return;
             }
 
+            // Удаляем ghost
             if let Some(ghost) = drag_state.ghost_entity.take() {
-                commands.entity(ghost).despawn();
+                commands.entity(ghost).despawn_recursive();
             }
 
+            // Ищем drop target
             let mut found_target: Option<(Entity, Option<Arc<dyn UiAction>>)> = None;
 
             for (target_entity, interaction, on_drop) in &drop_targets {
@@ -251,7 +247,7 @@ pub(crate) fn drag_system(
                 if let Some(action) = action {
                     let dragging = drag_state.dragging;
                     let drop_target = drag_state.drop_target;
-                    
+
                     commands.queue(move |world: &mut World| {
                         {
                             let mut state = world.resource_mut::<DragState>();
@@ -262,7 +258,8 @@ pub(crate) fn drag_system(
                     });
                 }
             } else {
-                if let Ok((_, _, _, Some(on_cancel), _)) = draggables.get(dragged_entity) {
+                // Отмена drag
+                if let Ok((_, _, _, Some(on_cancel), _, _)) = draggables.get(dragged_entity) {
                     let action = on_cancel.action.clone();
                     commands.queue(move |world: &mut World| {
                         action.execute(world);
@@ -271,6 +268,97 @@ pub(crate) fn drag_system(
             }
 
             drag_state.clear();
+        }
+    }
+}
+
+/// Найти визуал для ghost (изображение или цвет)
+fn find_ghost_visual(
+    entity: Entity,
+    draggables: &Query<
+        (
+            Entity,
+            &Interaction,
+            Option<&OnDragStart>,
+            Option<&OnDragCancel>,
+            Option<&BackgroundColor>,
+            Option<&Children>,
+        ),
+        (With<Draggable>, Without<Disabled>),
+    >,
+    image_query: &Query<&ImageNode>,
+    ghost_style: &DragGhostStyle,
+) -> GhostVisual {
+    let Ok((_, _, _, _, bg_color, children)) = draggables.get(entity) else {
+        return GhostVisual::Color(ghost_style.background);
+    };
+
+    // 1. Проверяем ImageNode на самом элементе
+    if let Ok(image_node) = image_query.get(entity) {
+        return GhostVisual::Image(image_node.image.clone());
+    }
+
+    // 2. Ищем ImageNode в children (для слотов с иконками)
+    if let Some(children) = children {
+        for child in children.iter() {
+            if let Ok(image_node) = image_query.get(child) {
+                // Пропускаем невидимые
+                return GhostVisual::Image(image_node.image.clone());
+            }
+        }
+    }
+
+    // 3. Используем BackgroundColor
+    if let Some(bg) = bg_color {
+        let c = bg.0.to_srgba();
+        return GhostVisual::Color(Color::srgba(c.red, c.green, c.blue, ghost_style.opacity));
+    }
+
+    // 4. Fallback
+    GhostVisual::Color(ghost_style.background)
+}
+
+/// Создать ghost entity
+fn spawn_ghost(
+    commands: &mut Commands,
+    cursor: Vec2,
+    style: &DragGhostStyle,
+    visual: GhostVisual,
+) -> Entity {
+    let base_node = Node {
+        position_type: PositionType::Absolute,
+        left: Val::Px(cursor.x - style.size / 2.0),
+        top: Val::Px(cursor.y - style.size / 2.0),
+        width: Val::Px(style.size),
+        height: Val::Px(style.size),
+        ..default()
+    };
+
+    match visual {
+        GhostVisual::Image(handle) => {
+            commands
+                .spawn((
+                    DragGhost,
+                    base_node,
+                    ImageNode {
+                        image: handle,
+                        ..default()
+                    },
+                    GlobalZIndex(999),
+                    FocusPolicy::Pass,
+                ))
+                .id()
+        }
+        GhostVisual::Color(color) => {
+            commands
+                .spawn((
+                    DragGhost,
+                    base_node,
+                    BackgroundColor(color),
+                    GlobalZIndex(999),
+                    FocusPolicy::Pass,
+                ))
+                .id()
         }
     }
 }

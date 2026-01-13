@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::input::resources::InputSettings;
 
 use super::systems::keyboard::{handle_keyboard_input, handle_shoot_input};
+use crate::ui::inventory::inventory_closed;
 use super::systems::weapon_switch::weapon_switch_system;
 
 pub struct InputPlugin;
@@ -12,10 +13,9 @@ impl Plugin for InputPlugin {
         app.init_resource::<InputSettings>().add_systems(
             Update,
             (
-                handle_keyboard_input,
-                handle_shoot_input,
-                weapon_switch_system,
-                // DISABLED: pickup input - rebuilding inventory
+                handle_keyboard_input.run_if(inventory_closed),
+                handle_shoot_input.run_if(inventory_closed),
+                weapon_switch_system.run_if(inventory_closed),
             ),
         );
     }

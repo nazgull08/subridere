@@ -16,6 +16,7 @@ use crate::inventory::InventoryPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::stats::plugin::StatsPlugin;
 use crate::ui::hud::plugin::HudUiPlugin;
+use crate::ui::inventory::UiInventoryPlugin;
 use crate::unit::plugin::UnitPlugin;
 use crate::world::plugin::WorldPlugin;
 
@@ -41,6 +42,7 @@ pub fn run() {
         .add_plugins(InputPlugin)
         .add_plugins(FpsStatsPlugin)
         .add_plugins(HudUiPlugin)
+        .add_plugins(UiInventoryPlugin)
         // ── Game logic ───────────────────────────
         .add_plugins(StatsPlugin)
         .add_plugins(UnitPlugin)
