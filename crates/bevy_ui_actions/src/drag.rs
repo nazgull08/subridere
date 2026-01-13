@@ -1,19 +1,23 @@
 use crate::action::UiAction;
+use crate::visual::Disabled;
 use bevy::prelude::*;
 use std::sync::Arc;
 
-/// Marker: этот элемент можно перетаскивать
+/// Порог в пикселях для начала drag
+pub const DRAG_THRESHOLD: f32 = 5.0;
+
+/// Marker: элемент можно перетаскивать
 #[derive(Component)]
 pub struct Draggable;
 
-/// Marker: на этот элемент можно бросить
+/// Marker: элемент принимает drop
 #[derive(Component)]
 pub struct DropTarget;
 
-/// Действие когда начали тащить этот элемент
+/// Action при начале перетаскивания
 #[derive(Component)]
 pub struct OnDragStart {
-    action: Arc<dyn UiAction>,
+    pub action: Arc<dyn UiAction>,
 }
 
 impl OnDragStart {
@@ -22,19 +26,12 @@ impl OnDragStart {
             action: Arc::new(action),
         }
     }
-
-    pub(crate) fn execute(&self, commands: &mut Commands) {
-        let action = self.action.clone();
-        commands.queue(move |world: &mut World| {
-            action.execute(world);
-        });
-    }
 }
 
-/// Действие когда что-то бросили НА этот элемент
+/// Action при успешном drop на target
 #[derive(Component)]
 pub struct OnDrop {
-    action: Arc<dyn UiAction>,
+    pub action: Arc<dyn UiAction>,
 }
 
 impl OnDrop {
@@ -43,19 +40,12 @@ impl OnDrop {
             action: Arc::new(action),
         }
     }
-
-    pub(crate) fn execute(&self, commands: &mut Commands) {
-        let action = self.action.clone();
-        commands.queue(move |world: &mut World| {
-            action.execute(world);
-        });
-    }
 }
 
-/// Действие когда drag отменён (бросили не на target)
+/// Action при отмене drag (отпустили не на target)
 #[derive(Component)]
 pub struct OnDragCancel {
-    action: Arc<dyn UiAction>,
+    pub action: Arc<dyn UiAction>,
 }
 
 impl OnDragCancel {
@@ -64,38 +54,48 @@ impl OnDragCancel {
             action: Arc::new(action),
         }
     }
-
-    pub(crate) fn execute(&self, commands: &mut Commands) {
-        let action = self.action.clone();
-        commands.queue(move |world: &mut World| {
-            action.execute(world);
-        });
-    }
 }
 
-/// Текущее состояние drag & drop
+/// Состояние drag & drop
 #[derive(Resource, Default)]
 pub struct DragState {
-    /// Entity которую тащим
+    /// Entity который тащим
     pub dragging: Option<Entity>,
-    /// Начальная позиция мыши
+    /// Начальная позиция курсора
     pub start_pos: Vec2,
-    /// Drag уже начался (мышь сдвинулась)
+    /// Drag уже начался (превысили threshold)
     pub drag_started: bool,
+    /// Entity ghost элемента
+    pub ghost_entity: Option<Entity>,
 }
 
 impl DragState {
-    /// Есть ли активный drag
-    pub fn is_dragging(&self) -> bool {
-        self.dragging.is_some() && self.drag_started
-    }
-
-    /// Очистить состояние
     pub fn clear(&mut self) {
         self.dragging = None;
+        self.start_pos = Vec2::ZERO;
         self.drag_started = false;
+        self.ghost_entity = None;
     }
 }
 
-/// Порог в пикселях для начала drag (чтобы случайно не начать при клике)
-pub const DRAG_THRESHOLD: f32 = 5.0;
+/// Marker для ghost UI
+#[derive(Component)]
+pub struct DragGhost;
+
+/// Стиль ghost
+#[derive(Resource)]
+pub struct DragGhostStyle {
+    pub background: Color,
+    pub size: f32,
+    pub opacity: f32,
+}
+
+impl Default for DragGhostStyle {
+    fn default() -> Self {
+        Self {
+            background: Color::srgba(0.5, 0.5, 0.8, 0.7),
+            size: 50.0,
+            opacity: 0.7,
+        }
+    }
+}

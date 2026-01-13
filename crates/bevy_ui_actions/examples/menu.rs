@@ -1,23 +1,23 @@
-//! Пример меню с hover эффектами.
+//! Пример меню с hover эффектами и tooltip.
 //!
 //! Демонстрирует:
 //! - State management через actions
-//! - Hover actions для UI feedback
-//! - Визуальное изменение при hover (автоматическое)
+//! - OnHover actions для UI feedback
+//! - Tooltip на кнопках
+//! - InteractiveVisual для автоматических эффектов
 //!
 //! Запуск: `cargo run --example menu -p bevy_ui_actions`
 
 use bevy::prelude::*;
-use bevy_ui_actions::{prelude::*, OnHover};
+use bevy_ui_actions::prelude::*;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(UiActionsPlugin)
         .init_state::<GameState>()
-        .init_resource::<HoverInfo>()
         .add_systems(Startup, setup)
-        .add_systems(Update, (update_status_text, update_hover_text))
+        .add_systems(Update, update_status_text)
         .run();
 }
 
@@ -28,9 +28,6 @@ enum GameState {
     Playing,
     Settings,
 }
-
-#[derive(Resource, Default)]
-struct HoverInfo(Option<String>);
 
 // ============ Click Actions ============
 
@@ -75,25 +72,10 @@ impl UiAction for QuitAction {
     }
 }
 
-// ============ Hover Actions ============
-
-struct ShowHintAction {
-    hint: &'static str,
-}
-
-impl UiAction for ShowHintAction {
-    fn execute(&self, world: &mut World) {
-        world.resource_mut::<HoverInfo>().0 = Some(self.hint.to_string());
-    }
-}
-
 // ============ UI Components ============
 
 #[derive(Component)]
 struct StatusText;
-
-#[derive(Component)]
-struct HoverText;
 
 fn setup(mut commands: Commands) {
     commands.spawn(Camera2d);
@@ -129,15 +111,14 @@ fn setup(mut commands: Commands) {
                 StatusText,
             ));
 
-            // Hover hint
+            // Hint
             parent.spawn((
-                Text::new("Hover over a button..."),
+                Text::new("Hover over buttons to see tooltips"),
                 TextFont {
-                    font_size: 18.0,
+                    font_size: 16.0,
                     ..default()
                 },
-                TextColor(Color::srgb(0.5, 0.8, 0.5)),
-                HoverText,
+                TextColor(Color::srgb(0.5, 0.5, 0.5)),
             ));
 
             // Spacer
@@ -146,25 +127,10 @@ fn setup(mut commands: Commands) {
                 ..default()
             });
 
-            // Buttons with hover hints
-            spawn_menu_button(
-                parent,
-                StartGameAction,
-                "Start Game",
-                "Begin your adventure!",
-            );
-            spawn_menu_button(
-                parent,
-                OpenSettingsAction,
-                "Settings",
-                "Configure game options",
-            );
-            spawn_menu_button(
-                parent,
-                BackToMenuAction,
-                "Back to Menu",
-                "Return to main menu",
-            );
+            // Buttons with tooltips
+            spawn_menu_button(parent, StartGameAction, "Start Game", "Begin your adventure!");
+            spawn_menu_button(parent, OpenSettingsAction, "Settings", "Configure game options");
+            spawn_menu_button(parent, BackToMenuAction, "Back to Menu", "Return to main menu");
             spawn_menu_button(parent, QuitAction, "Quit", "Exit the game");
         });
 }
@@ -173,7 +139,7 @@ fn spawn_menu_button(
     parent: &mut ChildSpawnerCommands,
     action: impl UiAction,
     label: &str,
-    hint: &'static str,
+    tooltip_text: &str,
 ) {
     parent
         .spawn((
@@ -186,8 +152,9 @@ fn spawn_menu_button(
                 ..default()
             },
             BackgroundColor(Color::srgb(0.2, 0.2, 0.2)),
-            ActionButton::new(action),
-            OnHover::new(ShowHintAction { hint }),
+            OnClick::new(action),
+            Tooltip::new(tooltip_text),
+            InteractiveVisual,
         ))
         .with_children(|btn| {
             btn.spawn((
@@ -204,17 +171,6 @@ fn update_status_text(state: Res<State<GameState>>, mut query: Query<&mut Text, 
     if state.is_changed() {
         for mut text in &mut query {
             **text = format!("State: {:?}", state.get());
-        }
-    }
-}
-
-fn update_hover_text(hover_info: Res<HoverInfo>, mut query: Query<&mut Text, With<HoverText>>) {
-    if hover_info.is_changed() {
-        for mut text in &mut query {
-            **text = hover_info
-                .0
-                .clone()
-                .unwrap_or_else(|| "Hover over a button...".to_string());
         }
     }
 }

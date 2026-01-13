@@ -1,10 +1,11 @@
 use crate::click::OnClick;
-use crate::drag::{Draggable, DropTarget, OnDragStart, OnDrop, OnDragCancel, DragState, DRAG_THRESHOLD};
+use crate::drag::{DRAG_THRESHOLD, DragGhost, DragGhostStyle, DragState, Draggable, DropTarget, OnDragCancel, OnDragStart, OnDrop};
 use crate::hover::{OnHover, OnHoverExit, OnPress};
 use crate::right_click::OnRightClick;
 use crate::visual::{Disabled, InteractiveVisual};
 use crate::style::ButtonStyle;
 use crate::tooltip::{Tooltip, TooltipState, TooltipStyle, TooltipUI};
+use bevy::ui::FocusPolicy;
 use bevy::window::Window;
 use bevy::prelude::*;
 
@@ -100,106 +101,208 @@ pub(crate) fn update_interactive_visuals(
     }
 }
 
-/// Начало потенциального drag (mouse down на Draggable)
 pub(crate) fn handle_drag_start(
     query: Query<(Entity, &Interaction), (With<Draggable>, Without<Disabled>)>,
     mouse: Res<ButtonInput<MouseButton>>,
-    mut drag_state: ResMut<DragState>,
     windows: Query<&Window>,
+    mut drag_state: ResMut<DragState>,
 ) {
-    // Начинаем только если ещё не тащим
-    if drag_state.dragging.is_some() {
+    // Только если ещё не тащим и нажали кнопку
+    if drag_state.dragging.is_some() || !mouse.just_pressed(MouseButton::Left) {
         return;
     }
 
-    if mouse.just_pressed(MouseButton::Left) {
-        // Ищем элемент под курсором
-        for (entity, interaction) in &query {
-            if *interaction == Interaction::Pressed {
-                // Запоминаем, но drag ещё не начался
-                drag_state.dragging = Some(entity);
-                drag_state.drag_started = false;
-                
-                // Запоминаем позицию мыши
-                if let Ok(window) = windows.single() {
-                    if let Some(pos) = window.cursor_position() {
-                        drag_state.start_pos = pos;
-                    }
-                }
-                break;
-            }
+    let Ok(window) = windows.get_single() else {
+        return;
+    };
+    let Some(cursor_pos) = window.cursor_position() else {
+        return;
+    };
+
+    for (entity, interaction) in &query {
+        if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
+            drag_state.dragging = Some(entity);
+            drag_state.start_pos = cursor_pos;
+            drag_state.drag_started = false;
+            break;
         }
     }
 }
 
-/// Отслеживание движения мыши во время drag
 pub(crate) fn handle_drag_move(
-    mut drag_state: ResMut<DragState>,
+    draggable_query: Query<(Option<&OnDragStart>, &BackgroundColor), With<Draggable>>,
     windows: Query<&Window>,
-    query: Query<&OnDragStart>,
+    mut drag_state: ResMut<DragState>,
+    ghost_style: Res<DragGhostStyle>,
     mut commands: Commands,
 ) {
-    // Если есть потенциальный drag, но он ещё не начался
-    if let Some(entity) = drag_state.dragging {
-        if drag_state.drag_started {
-            return; // Уже тащим
-        }
+    let Some(dragged_entity) = drag_state.dragging else {
+        return;
+    };
 
-        if let Ok(window) = windows.single() {
-            if let Some(current_pos) = window.cursor_position() {
-                let distance = current_pos.distance(drag_state.start_pos);
-                
-                // Превысили порог — drag начался
-                if distance > DRAG_THRESHOLD {
-                    drag_state.drag_started = true;
-                    
-                    // Вызываем OnDragStart если есть
-                    if let Ok(on_drag_start) = query.get(entity) {
-                        on_drag_start.execute(&mut commands);
-                    }
-                }
-            }
-        }
+    if drag_state.drag_started {
+        return;
+    }
+
+    let Ok(window) = windows.get_single() else {
+        return;
+    };
+    let Some(cursor_pos) = window.cursor_position() else {
+        return;
+    };
+
+    let distance = cursor_pos.distance(drag_state.start_pos);
+    if distance < DRAG_THRESHOLD {
+        return;
+    }
+
+    drag_state.drag_started = true;
+
+    let ghost_color = if let Ok((_, bg_color)) = draggable_query.get(dragged_entity) {
+        Color::srgba(
+            bg_color.0.to_srgba().red,
+            bg_color.0.to_srgba().green,
+            bg_color.0.to_srgba().blue,
+            ghost_style.opacity,
+        )
+    } else {
+        ghost_style.background
+    };
+
+    // Ghost СПРАВА-СНИЗУ от курсора (смещение 15px)
+    let offset = 15.0;
+    let ghost = commands
+        .spawn((
+            DragGhost,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(cursor_pos.x + offset),
+                top: Val::Px(cursor_pos.y + offset),
+                width: Val::Px(ghost_style.size),
+                height: Val::Px(ghost_style.size),
+                ..default()
+            },
+            BackgroundColor(ghost_color),
+            ZIndex(999),
+        ))
+        .id();
+
+    drag_state.ghost_entity = Some(ghost);
+
+    if let Ok((Some(on_drag_start), _)) = draggable_query.get(dragged_entity) {
+        let action = on_drag_start.action.clone();
+        commands.queue(move |world: &mut World| {
+            action.execute(world);
+        });
     }
 }
 
-/// Завершение drag (mouse up)
+/// Обновление позиции ghost
+pub(crate) fn update_ghost_position(
+    mut ghost_query: Query<&mut Node, With<DragGhost>>,
+    windows: Query<&Window>,
+    drag_state: Res<DragState>,
+) {
+    if !drag_state.drag_started {
+        return;
+    }
+
+    let Some(ghost_entity) = drag_state.ghost_entity else {
+        return;
+    };
+
+    let Ok(window) = windows.get_single() else {
+        return;
+    };
+    let Some(cursor_pos) = window.cursor_position() else {
+        return;
+    };
+
+    // То же смещение
+    let offset = 15.0;
+    if let Ok(mut node) = ghost_query.get_mut(ghost_entity) {
+        node.left = Val::Px(cursor_pos.x + offset);
+        node.top = Val::Px(cursor_pos.y + offset);
+    }
+}
+
+/// Обработка drop или cancel
 pub(crate) fn handle_drag_end(
-    mut drag_state: ResMut<DragState>,
+    drop_target_query: Query<(Entity, &Interaction, Option<&OnDrop>), With<DropTarget>>,
+    draggable_query: Query<(Option<&OnDragCancel>, &Interaction), With<Draggable>>,
     mouse: Res<ButtonInput<MouseButton>>,
-    drop_targets: Query<(Entity, &Interaction), With<DropTarget>>,
-    on_drop_query: Query<&OnDrop>,
-    on_cancel_query: Query<&OnDragCancel>,
+    mut drag_state: ResMut<DragState>,
     mut commands: Commands,
 ) {
-    if mouse.just_released(MouseButton::Left) {
-        if let Some(dragged_entity) = drag_state.dragging {
-            if drag_state.drag_started {
-                // Ищем DropTarget под курсором
-                let mut dropped_on_target = false;
-                
-                for (target_entity, interaction) in &drop_targets {
-                    if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
-                        // Нашли target — вызываем OnDrop
-                        if let Ok(on_drop) = on_drop_query.get(target_entity) {
-                            on_drop.execute(&mut commands);
-                            dropped_on_target = true;
-                        }
-                        break;
-                    }
-                }
-                
-                // Если не попали на target — вызываем OnDragCancel
-                if !dropped_on_target {
-                    if let Ok(on_cancel) = on_cancel_query.get(dragged_entity) {
-                        on_cancel.execute(&mut commands);
-                    }
-                }
-            }
-            
-            // Очищаем состояние
-            drag_state.clear();
+    if !drag_state.drag_started || !mouse.just_released(MouseButton::Left) {
+        return;
+    }
+
+    let dragged_entity = drag_state.dragging;
+
+    if let Some(ghost) = drag_state.ghost_entity {
+        commands.entity(ghost).despawn_recursive();
+    }
+
+    // DEBUG: смотрим состояние всех элементов
+    info!("=== DRAG END DEBUG ===");
+    
+    if let Some(entity) = dragged_entity {
+        if let Ok((_, interaction)) = draggable_query.get(entity) {
+            info!("Dragged element {:?} interaction: {:?}", entity, interaction);
         }
+    }
+    
+    for (target_entity, interaction, _) in &drop_target_query {
+        info!("DropTarget {:?} interaction: {:?}", target_entity, interaction);
+    }
+
+    // Ищем DropTarget который сейчас Hovered или Pressed
+    let mut dropped_on_target = false;
+
+    for (target_entity, interaction, on_drop) in &drop_target_query {
+        if Some(target_entity) == dragged_entity {
+            continue;
+        }
+
+        if *interaction == Interaction::Hovered || *interaction == Interaction::Pressed {
+            info!("HIT on {:?}", target_entity);
+            if let Some(on_drop) = on_drop {
+                let action = on_drop.action.clone();
+                commands.queue(move |world: &mut World| {
+                    action.execute(world);
+                });
+            }
+            dropped_on_target = true;
+            break;
+        }
+    }
+
+    if !dropped_on_target {
+        info!("No target hit");
+        if let Some(entity) = dragged_entity {
+            if let Ok((Some(on_cancel), _)) = draggable_query.get(entity) {
+                let action = on_cancel.action.clone();
+                commands.queue(move |world: &mut World| {
+                    action.execute(world);
+                });
+            }
+        }
+    }
+
+    drag_state.clear();
+}
+
+/// Отмена drag если мышь отпущена до threshold
+pub(crate) fn handle_drag_abort(
+    mouse: Res<ButtonInput<MouseButton>>,
+    mut drag_state: ResMut<DragState>,
+) {
+    if drag_state.dragging.is_some()
+        && !drag_state.drag_started
+        && mouse.just_released(MouseButton::Left)
+    {
+        drag_state.clear();
     }
 }
 

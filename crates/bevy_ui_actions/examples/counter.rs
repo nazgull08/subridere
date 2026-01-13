@@ -1,9 +1,9 @@
 //! Минимальный пример — счётчик с кнопками.
 //!
 //! Демонстрирует:
-//! - Базовые actions (click)
-//! - Hover/Press actions (логирование)
-//! - Автоматический визуальный feedback
+//! - OnClick actions
+//! - OnHover/OnPress actions (логирование)
+//! - InteractiveVisual для автоматического feedback
 //!
 //! Запуск: `cargo run --example counter -p bevy_ui_actions`
 
@@ -111,9 +111,10 @@ fn setup(mut commands: Commands) {
                             ..default()
                         },
                         BackgroundColor(Color::srgb(0.2, 0.2, 0.2)),
-                        ActionButton::new(DecrementAction),
+                        OnClick::new(DecrementAction),
                         OnHover::new(LogHoverAction { name: "Decrement" }),
                         OnPress::new(LogPressAction { name: "Decrement" }),
+                        InteractiveVisual,
                     ))
                     .with_children(|btn| {
                         btn.spawn((
@@ -125,8 +126,8 @@ fn setup(mut commands: Commands) {
                         ));
                     });
 
-                    // Increment button — simple spawn
-                    row.spawn_action_button(IncrementAction, "+");
+                    // Increment button — using helper
+                    row.spawn_button(IncrementAction, "+");
                 });
 
             // Hint
