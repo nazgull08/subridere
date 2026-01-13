@@ -1,28 +1,53 @@
-use crate::items::visual::definition::VisualDefinition;
-use crate::items::visual::loader::VisualDefinitionLoader;
+// items/plugin.rs — Items system plugin
+
 use bevy::prelude::*;
 
 use super::definition::ItemDefinition;
-use super::loader::ItemDefinitionLoader;
+use super::registry::{ItemRegistry, load_item_registry};
+
 /// Plugin that sets up the items system
-///
-/// Registers:
-/// - ItemDefinition asset type
-/// - ItemDefinitionLoader for .item.ron files
-/// - VisualDefinition asset type
-/// - VisualDefinitionLoader for .visual.ron files
 pub struct ItemsPlugin;
 
 impl Plugin for ItemsPlugin {
     fn build(&self, app: &mut App) {
-        // Register asset loaders
-        app.init_asset::<ItemDefinition>()
+        app
+            // Register asset type
+            .init_asset::<ItemDefinition>()
             .init_asset_loader::<ItemDefinitionLoader>()
-            .init_asset::<VisualDefinition>()
-            .init_asset_loader::<VisualDefinitionLoader>();
+            // Initialize registry
+            .init_resource::<ItemRegistry>()
+            // Load items
+            .add_systems(Update, load_item_registry);
 
         info!("✅ Items plugin initialized");
+    }
+}
 
-        // TODO: Add systems for item spawning, pickup, etc.
+/// Asset loader for ItemDefinition
+use bevy::asset::io::Reader;
+use bevy::asset::{AssetLoader, LoadContext};
+
+#[derive(Default)]
+pub struct ItemDefinitionLoader;
+
+impl AssetLoader for ItemDefinitionLoader {
+    type Asset = ItemDefinition;
+    type Settings = ();
+    type Error = ron::error::SpannedError;
+
+    async fn load(
+        &self,
+        reader: &mut dyn Reader,
+        _settings: &Self::Settings,
+        _load_context: &mut LoadContext<'_>,
+    ) -> Result<Self::Asset, Self::Error> {
+        let mut bytes = Vec::new();
+        reader.read_to_end(&mut bytes).await.unwrap();
+        let definition: ItemDefinition = ron::de::from_bytes(&bytes)?;
+        Ok(definition)
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["item.ron"]
     }
 }

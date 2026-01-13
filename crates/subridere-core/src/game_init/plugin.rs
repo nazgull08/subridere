@@ -1,12 +1,13 @@
 use bevy::prelude::*;
 
 use crate::game_init::{lighting::spawn_lighting, player::spawn_player};
+use crate::items::registry::registry_loaded;
 
 use super::{
     assets::{load_game_assets, wait_for_assets},
     enemies::spawn_test_enemies,
     lighting::setup_ambient_light,
-    loot::spawn_loot,
+    loot::spawn_loot,  // ← Вернули
     maze_rooms::{spawn_maze_rooms, spawn_room_lights},
     state::InitStage,
 };
@@ -26,6 +27,10 @@ impl Plugin for GameInitPlugin {
             .add_systems(OnEnter(InitStage::MazeReady), spawn_room_lights)
             .add_systems(OnEnter(InitStage::LightsReady), spawn_player)
             .add_systems(OnEnter(InitStage::EnemiesReady), spawn_test_enemies)
-            .add_systems(OnEnter(InitStage::ItemsReady), spawn_loot);
+            // Лут спавнится когда registry загружен
+            .add_systems(
+                OnEnter(InitStage::ItemsReady),
+                spawn_loot.run_if(registry_loaded),
+            );
     }
 }

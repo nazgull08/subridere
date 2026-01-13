@@ -1,0 +1,44 @@
+// Health Potion — restores health
+(
+    id: "health_potion",
+    name: "Health Potion",
+    description: "A red potion that restores health when consumed.",
+
+    category: Consumable((
+        effect: Heal(25.0),
+    )),
+
+    weight: 0.5,
+    value: 20,
+    max_stack: 10,
+
+    flags: (),
+
+    icon: "textures/items/health_potion_icon.png",
+
+    visual: Primitive(
+        parts: [
+            // Bottle body
+            (
+                shape: Cylinder,
+                size: (0.04, 0.1, 0.04),
+                offset: (0.0, 0.0, 0.0),
+                color: (0.9, 0.2, 0.2, 0.8),
+            ),
+            // Bottle neck
+            (
+                shape: Cylinder,
+                size: (0.02, 0.03, 0.02),
+                offset: (0.0, 0.06, 0.0),
+                color: (0.8, 0.8, 0.8, 1.0),
+            ),
+            // Cork
+            (
+                shape: Cylinder,
+                size: (0.025, 0.02, 0.025),
+                offset: (0.0, 0.08, 0.0),
+                color: (0.6, 0.4, 0.2, 1.0),
+            ),
+        ]
+    ),
+)

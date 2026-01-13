@@ -1,26 +1,22 @@
-//! Event-driven UI actions for Bevy.
+pub mod core;
+pub mod interactions;
+pub mod widgets;
 
-mod action;
-mod click;
-mod drag;
-mod helpers;
-mod hover;
 mod plugin;
-mod right_click;
-mod style;
-mod systems;
-mod tooltip; 
-mod visual;
-
 pub mod prelude;
 
-pub use action::UiAction;
-pub use click::OnClick;
-pub use drag::{Draggable, DropTarget, OnDragStart, OnDrop, OnDragCancel, DragState};
-pub use helpers::{ButtonConfig, SpawnActionButton, SpawnUiExt};
-pub use hover::{OnHover, OnHoverExit, OnPress};
+// Re-export plugin
 pub use plugin::UiActionsPlugin;
-pub use right_click::OnRightClick;
-pub use style::ButtonStyle;
-pub use tooltip::{Tooltip, TooltipState, TooltipStyle, TooltipUI};
-pub use visual::{InteractiveVisual, Disabled};
+
+// Re-export core
+pub use core::{ButtonConfig, ButtonStyle, SpawnActionButton, SpawnUiExt, UiAction};
+
+// Re-export interactions
+pub use interactions::{
+    DragGhost, DragGhostStyle, DragPhase, DragState, Draggable, DropTarget,
+    OnClick, OnDragCancel, OnDragStart, OnDrop, OnHover, OnHoverExit, OnPress,
+    OnRightClick, PreviousInteraction,
+};
+
+// Re-export widgets
+pub use widgets::{Disabled, InteractiveVisual, Tooltip, TooltipState, TooltipStyle, TooltipUI};

@@ -1,47 +1,63 @@
-use bevy::prelude::*;
-use serde::Deserialize;
+// items/visual/shape.rs — Primitive shapes for item visuals
 
-/// Describes a single visual part of an item
-///
-/// Each part is a primitive shape with position, size, and color.
-/// Position is relative to the parent entity.
-#[derive(Debug, Clone, Deserialize)]
+use serde::{Deserialize, Serialize};
+
+/// A single visual part of an item
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VisualPart {
-    /// Type of primitive shape
-    pub shape: PrimitiveShape,
+    /// Shape type
+    pub shape: VisualShape,
 
-    /// Size of the shape (interpretation depends on shape type)
-    /// - Cube: (width, height, depth)
-    /// - Cylinder: (radius, height, radius)
-    /// - Sphere: (radius, radius, radius)
-    pub size: Vec3,
+    /// Size (width, height, depth) or (radius, height, radius) depending on shape
+    pub size: (f32, f32, f32),
 
-    /// Position offset relative to parent entity
-    pub offset: Vec3,
+    /// Offset from item origin
+    #[serde(default)]
+    pub offset: (f32, f32, f32),
 
-    /// Color as RGBA (red, green, blue, alpha) - each 0.0 to 1.0
+    /// RGBA color
     pub color: (f32, f32, f32, f32),
 }
 
-/// Primitive shape types for item visuals
-#[derive(Clone, Debug, Deserialize)]
-pub enum PrimitiveShape {
-    /// Box/Cube shape
+/// Available primitive shapes
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum VisualShape {
     Cube,
-
-    /// Cylinder (useful for staffs, handles, etc)
-    Cylinder,
-
-    /// Smooth sphere
     Sphere,
-
-    /// Low-poly sphere (icosphere)
-    Icosphere,
+    Cylinder,
+    Capsule,
 }
 
 impl VisualPart {
-    /// Convert the color tuple to Bevy Color
-    pub fn bevy_color(&self) -> Color {
-        Color::srgba(self.color.0, self.color.1, self.color.2, self.color.3)
+    pub fn cube(size: (f32, f32, f32), color: (f32, f32, f32, f32)) -> Self {
+        Self {
+            shape: VisualShape::Cube,
+            size,
+            offset: (0.0, 0.0, 0.0),
+            color,
+        }
+    }
+
+    pub fn sphere(radius: f32, color: (f32, f32, f32, f32)) -> Self {
+        Self {
+            shape: VisualShape::Sphere,
+            size: (radius, radius, radius),
+            offset: (0.0, 0.0, 0.0),
+            color,
+        }
+    }
+
+    pub fn cylinder(radius: f32, height: f32, color: (f32, f32, f32, f32)) -> Self {
+        Self {
+            shape: VisualShape::Cylinder,
+            size: (radius, height, radius),
+            offset: (0.0, 0.0, 0.0),
+            color,
+        }
+    }
+
+    pub fn with_offset(mut self, offset: (f32, f32, f32)) -> Self {
+        self.offset = offset;
+        self
     }
 }

@@ -1,9 +1,6 @@
-use crate::action::UiAction;
-use crate::click::OnClick;
-use crate::drag::{Draggable, DropTarget, OnDrop};
-use crate::right_click::OnRightClick;
-use crate::tooltip::Tooltip;
-use crate::visual::InteractiveVisual;
+use crate::interactions::{OnClick, Draggable, DropTarget, OnDrop, OnRightClick};
+use crate::widgets::{InteractiveVisual, Tooltip};
+use crate::core::action::UiAction;
 use bevy::prelude::*;
 
 /// Конфигурация кнопки
@@ -22,42 +19,6 @@ impl Default for ButtonConfig {
             height: Val::Px(50.0),
             background_color: Color::srgb(0.2, 0.2, 0.2),
             font_size: 20.0,
-        }
-    }
-}
-
-/// Конфигурация слота (для инвентаря, equipment и т.д.)
-#[derive(Clone)]
-pub struct SlotConfig<C, R, D>
-where
-    C: UiAction,
-    R: UiAction,
-    D: UiAction,
-{
-    pub size: f32,
-    pub background_color: Color,
-    pub on_click: Option<C>,
-    pub on_right_click: Option<R>,
-    pub on_drop: Option<D>,
-    pub tooltip: Option<String>,
-    pub draggable: bool,
-}
-
-impl<C, R, D> Default for SlotConfig<C, R, D>
-where
-    C: UiAction,
-    R: UiAction,
-    D: UiAction,
-{
-    fn default() -> Self {
-        Self {
-            size: 50.0,
-            background_color: Color::srgb(0.15, 0.15, 0.15),
-            on_click: None,
-            on_right_click: None,
-            on_drop: None,
-            tooltip: None,
-            draggable: true,
         }
     }
 }
@@ -113,28 +74,13 @@ impl SpawnUiExt for ChildSpawnerCommands<'_> {
     }
 }
 
-// Сохраняем старый trait для обратной совместимости
+// Алиас для обратной совместимости
 pub trait SpawnActionButton {
     fn spawn_action_button(&mut self, action: impl UiAction, label: impl Into<String>) -> Entity;
-    fn spawn_action_button_with(
-        &mut self,
-        action: impl UiAction,
-        label: impl Into<String>,
-        config: ButtonConfig,
-    ) -> Entity;
 }
 
 impl SpawnActionButton for ChildSpawnerCommands<'_> {
     fn spawn_action_button(&mut self, action: impl UiAction, label: impl Into<String>) -> Entity {
         self.spawn_button(action, label)
-    }
-
-    fn spawn_action_button_with(
-        &mut self,
-        action: impl UiAction,
-        label: impl Into<String>,
-        config: ButtonConfig,
-    ) -> Entity {
-        self.spawn_button_with(action, label, config)
     }
 }

@@ -1,0 +1,47 @@
+// Wooden Staff — basic magic weapon
+(
+    id: "wooden_staff",
+    name: "Wooden Staff",
+    description: "A simple wooden staff, favored by apprentice mages.",
+
+    category: Weapon((
+        damage: 8.0,
+        speed: 1.2,
+        slot: MainHand,
+        mana_cost: 5.0,
+    )),
+
+    weight: 3.0,
+    value: 50,
+    max_stack: 1,
+
+    flags: (),
+
+    icon: "textures/items/wooden_staff_icon.png",
+
+    visual: Primitive(
+        parts: [
+            // Main shaft
+            (
+                shape: Cylinder,
+                size: (0.03, 1.4, 0.03),
+                offset: (0.0, 0.0, 0.0),
+                color: (0.45, 0.35, 0.2, 1.0),
+            ),
+            // Crystal orb at top
+            (
+                shape: Sphere,
+                size: (0.08, 0.08, 0.08),
+                offset: (0.0, 0.75, 0.0),
+                color: (0.3, 0.6, 0.9, 1.0),
+            ),
+            // Bottom cap
+            (
+                shape: Sphere,
+                size: (0.04, 0.04, 0.04),
+                offset: (0.0, -0.7, 0.0),
+                color: (0.3, 0.25, 0.15, 1.0),
+            ),
+        ]
+    ),
+)

@@ -1,80 +1,179 @@
+// items/definition.rs — Item definition (loaded from RON)
+
 use bevy::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Asset, TypePath, Deserialize, Clone, Debug)]
+use super::flags::ItemFlags;
+use super::slots::{AccessorySlot, ArmorSlot, WeaponSlot};
+use super::visual::ItemVisual;
+
+/// Complete item definition — loaded from a single RON file
+/// 
+/// One file = complete truth about an item.
+/// No data fragmentation, no hardcoded mappings.
+#[derive(Asset, TypePath, Debug, Clone, Deserialize)]
 pub struct ItemDefinition {
+    /// Unique identifier (must match enum variant)
     pub id: String,
+
+    /// Display name
     pub name: String,
-    pub visual_ref: String,
-    pub icon: String,
-    pub properties: ItemProperties,
-}
 
-#[derive(Deserialize, Clone, Debug)]
-pub enum ItemProperties {
-    Weapon(WeaponProperties),
-    Armor(ArmorProperties),
-    Consumable(ConsumableProperties),
-}
+    /// Description shown in UI
+    #[serde(default)]
+    pub description: String,
 
-#[derive(Deserialize, Clone, Debug)]
-pub struct WeaponProperties {
-    pub damage: f32,
-    pub attack_speed: f32,
-    pub mana_cost: f32,
-}
+    /// Item category with type-specific data
+    pub category: ItemCategory,
 
-/// Properties for armor items
-#[derive(Deserialize, Clone, Debug)]
-pub struct ArmorProperties {
-    /// Which slot this armor goes in
-    pub slot: ArmorSlot,
-
-    /// Defense rating
-    pub defense: f32,
-
-    /// Weight (optional, for later)
+    /// Weight in units
+    #[serde(default = "default_weight")]
     pub weight: f32,
+
+    /// Base value in gold
+    #[serde(default)]
+    pub value: u32,
+
+    /// Maximum stack size (1 = not stackable)
+    #[serde(default = "default_stack")]
+    pub max_stack: u32,
+
+    /// Special flags
+    #[serde(default)]
+    pub flags: ItemFlags,
+
+    /// Path to icon texture
+    #[serde(default)]
+    pub icon: String,
+
+    /// Visual representation in world
+    #[serde(default)]
+    pub visual: ItemVisual,
 }
 
-/// Equipment slots for armor
-#[derive(Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-pub enum ArmorSlot {
-    Helmet,
-    LeftPauldron,
-    RightPauldron,
-    Chest,
-    LeftGlove,
-    RightGlove,
-    Greaves,
-    LeftBoot,
-    RightBoot,
+fn default_weight() -> f32 {
+    1.0
 }
 
-impl ArmorSlot {
-    /// Check if this armor slot matches an equipment slot type
-    pub fn matches_equipment_slot(
-        &self,
-        equipment_slot: &crate::ui::inventory::systems::EquipmentSlotType,
-    ) -> bool {
-        use crate::ui::inventory::systems::EquipmentSlotType;
+fn default_stack() -> u32 {
+    1
+}
 
+impl ItemDefinition {
+    /// Can this item be stacked?
+    pub fn is_stackable(&self) -> bool {
+        self.max_stack > 1
+    }
+
+    /// Can this item be equipped?
+    pub fn is_equippable(&self) -> bool {
         matches!(
-            (self, equipment_slot),
-            (ArmorSlot::Helmet, EquipmentSlotType::Helmet)
-                | (ArmorSlot::LeftPauldron, EquipmentSlotType::LeftPauldron)
-                | (ArmorSlot::RightPauldron, EquipmentSlotType::RightPauldron)
-                | (ArmorSlot::Chest, EquipmentSlotType::Chest)
-                | (ArmorSlot::LeftGlove, EquipmentSlotType::LeftGlove)
-                | (ArmorSlot::RightGlove, EquipmentSlotType::RightGlove)
-                | (ArmorSlot::Greaves, EquipmentSlotType::Greaves)
-                | (ArmorSlot::LeftBoot, EquipmentSlotType::LeftBoot)
-                | (ArmorSlot::RightBoot, EquipmentSlotType::RightBoot)
+            self.category,
+            ItemCategory::Weapon(_) | ItemCategory::Armor(_) | ItemCategory::Accessory(_)
         )
+    }
+
+    /// Get equipment slot if equippable
+    pub fn equipment_slot(&self) -> Option<super::slots::EquipmentSlot> {
+        match &self.category {
+            ItemCategory::Weapon(w) => Some(w.slot.into()),
+            ItemCategory::Armor(a) => Some(a.slot.into()),
+            ItemCategory::Accessory(a) => Some(a.slot.into()),
+            _ => None,
+        }
+    }
+
+    /// Get damage if weapon
+    pub fn damage(&self) -> Option<f32> {
+        match &self.category {
+            ItemCategory::Weapon(w) => Some(w.damage),
+            _ => None,
+        }
+    }
+
+    /// Get defense if armor
+    pub fn defense(&self) -> Option<f32> {
+        match &self.category {
+            ItemCategory::Armor(a) => Some(a.defense),
+            _ => None,
+        }
     }
 }
 
-#[derive(Deserialize, Clone, Debug)]
-pub struct ConsumableProperties {
-    pub max_stack: u32,
+/// Item category — determines behavior and required slot
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ItemCategory {
+    Weapon(WeaponData),
+    Armor(ArmorData),
+    Accessory(AccessoryData),
+    Consumable(ConsumableData),
+    Misc,
+}
+
+/// Weapon-specific properties
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WeaponData {
+    /// Base damage
+    pub damage: f32,
+
+    /// Attack speed multiplier (1.0 = normal)
+    #[serde(default = "default_speed")]
+    pub speed: f32,
+
+    /// Equipment slot
+    pub slot: WeaponSlot,
+
+    /// Mana cost per attack (for magic weapons)
+    #[serde(default)]
+    pub mana_cost: f32,
+}
+
+fn default_speed() -> f32 {
+    1.0
+}
+
+/// Armor-specific properties
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ArmorData {
+    /// Defense value
+    pub defense: f32,
+
+    /// Equipment slot
+    pub slot: ArmorSlot,
+
+    /// Magic resistance bonus
+    #[serde(default)]
+    pub magic_resist: f32,
+}
+
+/// Accessory-specific properties
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AccessoryData {
+    /// Equipment slot
+    pub slot: AccessorySlot,
+
+    // Future: effects, bonuses, etc.
+}
+
+/// Consumable-specific properties
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ConsumableData {
+    /// Effect when used
+    pub effect: ConsumableEffect,
+}
+
+/// Effects for consumable items
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ConsumableEffect {
+    /// Restore health
+    Heal(f32),
+
+    /// Restore mana
+    RestoreMana(f32),
+
+    /// Restore stamina
+    RestoreStamina(f32),
+
+    // Buff (future)
+    // Buff { stat: String, amount: f32, duration: f32 },
 }

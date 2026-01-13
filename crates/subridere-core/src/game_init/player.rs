@@ -2,16 +2,10 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use crate::{
-    camera::flycam::FlyCamera,
-    fighting::{projectile::weapons::CurrentWeapon, weapon_display::spawn::create_weapon_display},
-    input::component::PlayerControlled,
-    inventory::{Equipment, Inventory},
-    player::{
-        component::{PLAYER_START_POS, Player, PlayerVisual},
+    camera::flycam::FlyCamera, fighting::{projectile::weapons::CurrentWeapon, weapon_display::spawn::create_weapon_display}, input::component::PlayerControlled, inventory::{Equipment, Inventory}, player::{
+        component::{Player, PlayerVisual, PLAYER_START_POS},
         visual::create_player_body_bundle,
-    },
-    stats::{health::component::Health, mana::component::Mana, stamina::component::Stamina},
-    unit::component::{Grounded, Unit, Velocity},
+    }, stats::{health::component::Health, mana::component::Mana, stamina::component::Stamina}, unit::component::{Grounded, Unit, Velocity}
 };
 
 use super::state::InitStage;
