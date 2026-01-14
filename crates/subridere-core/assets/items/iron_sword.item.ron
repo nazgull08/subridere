@@ -1,0 +1,54 @@
+// Iron Sword — basic melee weapon
+(
+    id: "iron_sword",
+    name: "Iron Sword",
+    description: "A reliable iron sword. Standard issue for soldiers.",
+
+    category: Weapon((
+        damage: 12.0,
+        speed: 1.0,
+        slot: MainHand,
+        mana_cost: 0.0,
+    )),
+
+    weight: 3.5,
+    value: 80,
+    max_stack: 1,
+
+    flags: (),
+
+    icon: "textures/items/iron_sword_icon.png",
+
+    visual: Primitive(
+        parts: [
+            // Клинок
+            (
+                shape: Cube,
+                size: (0.08, 1.2, 0.03),
+                offset: (0.0, 0.6, 0.0),
+                color: (0.75, 0.75, 0.8, 1.0),
+            ),
+            // Гарда
+            (
+                shape: Cube,
+                size: (0.35, 0.05, 0.06),
+                offset: (0.0, 0.0, 0.0),
+                color: (0.5, 0.45, 0.3, 1.0),
+            ),
+            // Рукоять
+            (
+                shape: Cylinder,
+                size: (0.05, 0.28, 0.05),
+                offset: (0.0, -0.16, 0.0),
+                color: (0.4, 0.25, 0.15, 1.0),
+            ),
+            // Навершие
+            (
+                shape: Sphere,
+                size: (0.07, 0.07, 0.07),
+                offset: (0.0, -0.32, 0.0),
+                color: (0.5, 0.45, 0.3, 1.0),
+            ),
+        ]
+    ),
+)

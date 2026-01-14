@@ -1,20 +1,20 @@
-// Health Potion — restores health
+// Mana Potion — restores mana
 (
-    id: "health_potion",
-    name: "Health Potion",
-    description: "A red potion that restores health when consumed.",
+    id: "mana_potion",
+    name: "Mana Potion",
+    description: "A blue potion that restores magical energy.",
 
     category: Consumable((
-        effect: Heal(25.0),
+        effect: RestoreMana(30.0),
     )),
 
     weight: 0.5,
-    value: 20,
+    value: 25,
     max_stack: 10,
 
     flags: (),
 
-    icon: "textures/items/health_potion_icon.png",
+    icon: "textures/items/mana_potion_icon.png",
 
     visual: Primitive(
         parts: [
@@ -23,7 +23,7 @@
                 shape: Cylinder,
                 size: (0.12, 0.3, 0.12),
                 offset: (0.0, 0.0, 0.0),
-                color: (0.9, 0.2, 0.2, 0.8),
+                color: (0.2, 0.3, 0.9, 0.8),
             ),
             // Bottle neck
             (

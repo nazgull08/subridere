@@ -1,0 +1,35 @@
+// Torch — light source
+(
+    id: "torch",
+    name: "Torch",
+    description: "A wooden torch wrapped in oil-soaked cloth. Provides light in dark places.",
+
+    category: Misc,
+
+    weight: 0.5,
+    value: 5,
+    max_stack: 5,
+
+    flags: (),
+
+    icon: "textures/items/torch_icon.png",
+
+    visual: Primitive(
+        parts: [
+            // Палка
+            (
+                shape: Cylinder,
+                size: (0.04, 0.6, 0.04),
+                offset: (0.0, 0.0, 0.0),
+                color: (0.4, 0.28, 0.15, 1.0),
+            ),
+            // Огонёк
+            (
+                shape: Sphere,
+                size: (0.12, 0.12, 0.12),
+                offset: (0.0, 0.38, 0.0),
+                color: (1.0, 0.6, 0.1, 1.0),
+            ),
+        ]
+    ),
+)

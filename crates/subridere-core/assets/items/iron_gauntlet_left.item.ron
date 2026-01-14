@@ -1,0 +1,46 @@
+// Iron Gauntlet (Left) — basic hand armor
+(
+    id: "iron_gauntlet_left",
+    name: "Iron Gauntlet (Left)",
+    description: "A heavy iron gauntlet for the left hand. Knuckles reinforced for punching.",
+
+    category: Armor((
+        defense: 3.0,
+        slot: LeftGauntlet,
+        magic_resist: 0.0,
+    )),
+
+    weight: 1.5,
+    value: 35,
+    max_stack: 1,
+
+    flags: (),
+
+    icon: "textures/items/iron_gauntlet_left_icon.png",
+
+    visual: Primitive(
+        parts: [
+            // Тыльная часть ладони
+            (
+                shape: Cube,
+                size: (0.14, 0.05, 0.12),
+                offset: (0.0, 0.1, 0.04),
+                color: (0.6, 0.6, 0.65, 1.0),
+            ),
+            // Пальцы (один блок — стиль рукавицы)
+            (
+                shape: Cube,
+                size: (0.12, 0.04, 0.1),
+                offset: (0.0, 0.12, 0.12),
+                color: (0.5, 0.5, 0.55, 1.0),
+            ),
+            // Большой палец (сбоку)
+            (
+                shape: Cube,
+                size: (0.04, 0.04, 0.08),
+                offset: (0.08, 0.08, 0.06),  // для RIGHT: (-0.08, 0.08, 0.06)
+                color: (0.5, 0.5, 0.55, 1.0),
+            ),
+        ]
+    ),
+)

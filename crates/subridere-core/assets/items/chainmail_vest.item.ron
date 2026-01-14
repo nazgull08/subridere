@@ -1,0 +1,53 @@
+// Chainmail Vest — body armor
+(
+    id: "chainmail_vest",
+    name: "Chainmail Vest",
+    description: "A vest of interlocking iron rings. Good protection without restricting movement.",
+
+    category: Armor((
+        defense: 8.0,
+        slot: Cuirass,
+        magic_resist: 0.0,
+    )),
+
+    weight: 8.0,
+    value: 150,
+    max_stack: 1,
+
+    flags: (),
+
+    icon: "textures/items/chainmail_vest_icon.png",
+
+    visual: Primitive(
+        parts: [
+            // Main torso
+            (
+                shape: Cube,
+                size: (0.4, 0.5, 0.2),
+                offset: (0.0, 0.0, 0.0),
+                color: (0.5, 0.5, 0.55, 1.0),
+            ),
+            // Left shoulder
+            (
+                shape: Cube,
+                size: (0.12, 0.08, 0.15),
+                offset: (-0.22, 0.22, 0.0),
+                color: (0.55, 0.55, 0.6, 1.0),
+            ),
+            // Right shoulder
+            (
+                shape: Cube,
+                size: (0.12, 0.08, 0.15),
+                offset: (0.22, 0.22, 0.0),
+                color: (0.55, 0.55, 0.6, 1.0),
+            ),
+            // Collar
+            (
+                shape: Cylinder,
+                size: (0.12, 0.06, 0.12),
+                offset: (0.0, 0.28, 0.0),
+                color: (0.5, 0.5, 0.55, 1.0),
+            ),
+        ]
+    ),
+)

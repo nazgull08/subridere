@@ -33,69 +33,236 @@ pub fn spawn_loot(
         return;
     }
 
-    info!("🪄 Spawning loot across {} rooms", room_positions.len());
+    info!("🎲 Spawning loot across {} rooms", room_positions.len());
+
+    // === WEAPONS ===
 
     // Spawn 2 wooden staffs
-    for i in 0..2 {
-        let room_idx = rng.gen_range(0..room_positions.len());
-        let room_pos = room_positions[room_idx];
-        let pos = calculate_spawn_position(&room_pos, &room_size, spawn_height, &mut rng);
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::WoodenStaff,
+        2,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "🪄 Staff",
+    );
 
-        spawn_world_item(
-            &mut commands,
-            &registry,
-            ItemId::WoodenStaff, // ← Типобезопасно!
-            1,
-            pos,
-            None,
-            &mut meshes,
-            &mut materials,
-        );
+    // Spawn 2 iron swords
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::IronSword,
+        2,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "⚔️ Sword",
+    );
 
-        info!("  🪄 Staff {} at room {:?}", i + 1, room_pos);
-    }
+    // Spawn 1 wooden shield
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::WoodenShield,
+        1,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "🛡️ Shield",
+    );
+
+    // === ARMOR ===
 
     // Spawn 2 iron helmets
-    for i in 0..2 {
-        let room_idx = rng.gen_range(0..room_positions.len());
-        let room_pos = room_positions[room_idx];
-        let pos = calculate_spawn_position(&room_pos, &room_size, spawn_height, &mut rng);
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::IronHelmet,
+        2,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "🪖 Helmet",
+    );
 
-        spawn_world_item(
-            &mut commands,
-            &registry,
-            ItemId::IronHelmet, // ← Типобезопасно!
-            1,
-            pos,
-            None,
-            &mut meshes,
-            &mut materials,
-        );
+    // Spawn 1 chainmail vest
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::ChainmailVest,
+        1,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "🦺 Chainmail",
+    );
 
-        info!("  🛡️ Helmet {} at room {:?}", i + 1, room_pos);
-    }
+    // Spawn boots (left and right separately!)
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::LeatherBootLeft,
+        2,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "👢 Boot L",
+    );
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::LeatherBootRight,
+        2,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "👢 Boot R",
+    );
 
-    // Spawn 3 health potions
-    for i in 0..3 {
-        let room_idx = rng.gen_range(0..room_positions.len());
-        let room_pos = room_positions[room_idx];
-        let pos = calculate_spawn_position(&room_pos, &room_size, spawn_height, &mut rng);
+    // Spawn gauntlets (left and right separately!)
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::IronGauntletLeft,
+        2,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "🧤 Gauntlet L",
+    );
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::IronGauntletRight,
+        2,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "🧤 Gauntlet R",
+    );
 
-        spawn_world_item(
-            &mut commands,
-            &registry,
-            ItemId::HealthPotion, // ← Типобезопасно!
-            1,
-            pos,
-            None,
-            &mut meshes,
-            &mut materials,
-        );
+    // === ACCESSORIES ===
 
-        info!("  🧪 Potion {} at room {:?}", i + 1, room_pos);
-    }
+    // Spawn 3 gold rings
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::GoldRing,
+        3,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "💍 Ring",
+    );
 
+    // === CONSUMABLES ===
+
+    // Spawn 4 health potions
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::HealthPotion,
+        4,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "❤️ Health Pot",
+    );
+
+    // Spawn 3 mana potions
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::ManaPotion,
+        3,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "💙 Mana Pot",
+    );
+
+    // === MISC ===
+
+    // Spawn 5 torches
+    spawn_items(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::Torch,
+        5,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "🔥 Torch",
+    );
+
+    info!("✅ Loot spawning complete!");
     next_state.set(InitStage::Done);
+}
+
+/// Helper function to spawn multiple items of the same type
+fn spawn_items(
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+    registry: &Res<ItemRegistry>,
+    item_id: ItemId,
+    count: usize,
+    room_positions: &[IVec3],
+    room_size: Vec3,
+    spawn_height: f32,
+    rng: &mut impl Rng,
+    label: &str,
+) {
+    for i in 0..count {
+        let room_idx = rng.gen_range(0..room_positions.len());
+        let room_pos = room_positions[room_idx];
+        let pos = calculate_spawn_position(&room_pos, &room_size, spawn_height, rng);
+
+        spawn_world_item(commands, registry, item_id, 1, pos, None, meshes, materials);
+
+        info!("  {} {} at room {:?}", label, i + 1, room_pos);
+    }
 }
 
 /// Calculate random spawn position within a room

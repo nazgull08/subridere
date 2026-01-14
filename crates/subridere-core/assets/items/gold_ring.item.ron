@@ -1,0 +1,37 @@
+// Gold Ring — basic accessory
+(
+    id: "gold_ring",
+    name: "Gold Ring",
+    description: "A simple gold ring. Purely decorative, but quite valuable.",
+
+    category: Accessory((
+        slot: LeftRing,
+    )),
+
+    weight: 0.1,
+    value: 100,
+    max_stack: 1,
+
+    flags: (),
+
+    icon: "textures/items/gold_ring_icon.png",
+
+    visual: Primitive(
+        parts: [
+            // Ring band (short fat cylinder to represent a ring)
+            (
+                shape: Cylinder,
+                size: (0.08, 0.03, 0.08),
+                offset: (0.0, 0.0, 0.0),
+                color: (0.9, 0.75, 0.3, 1.0),
+            ),
+            // Inner highlight (smaller darker cylinder for depth illusion)
+            (
+                shape: Cylinder,
+                size: (0.05, 0.035, 0.05),
+                offset: (0.0, 0.0, 0.0),
+                color: (0.7, 0.55, 0.2, 1.0),
+            ),
+        ]
+    ),
+)

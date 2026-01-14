@@ -1,0 +1,46 @@
+// Leather Boot (Right) — basic foot armor
+(
+    id: "leather_boot_right",
+    name: "Leather Boot (Right)",
+    description: "A sturdy leather boot for the right foot. Comfortable for long journeys.",
+
+    category: Armor((
+        defense: 2.0,
+        slot: RightBoot,
+        magic_resist: 0.0,
+    )),
+
+    weight: 1.0,
+    value: 20,
+    max_stack: 1,
+
+    flags: (),
+
+    icon: "textures/items/leather_boot_right_icon.png",
+
+    visual: Primitive(
+        parts: [
+            // Foot part
+            (
+                shape: Cube,
+                size: (0.12, 0.1, 0.3),
+                offset: (0.0, 0.0, 0.05),
+                color: (0.45, 0.3, 0.2, 1.0),
+            ),
+            // Ankle/shaft
+            (
+                shape: Cylinder,
+                size: (0.08, 0.2, 0.08),
+                offset: (0.0, 0.15, -0.05),
+                color: (0.5, 0.35, 0.22, 1.0),
+            ),
+            // Sole
+            (
+                shape: Cube,
+                size: (0.13, 0.03, 0.32),
+                offset: (0.0, -0.05, 0.05),
+                color: (0.25, 0.18, 0.12, 1.0),
+            ),
+        ]
+    ),
+)

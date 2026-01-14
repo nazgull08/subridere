@@ -1,0 +1,47 @@
+// Wooden Shield — basic defensive item
+(
+    id: "wooden_shield",
+    name: "Wooden Shield",
+    description: "A round wooden shield with iron boss. Good for blocking.",
+
+    category: Weapon((
+        damage: 3.0,
+        speed: 0.8,
+        slot: OffHand,
+        mana_cost: 0.0,
+    )),
+
+    weight: 4.0,
+    value: 45,
+    max_stack: 1,
+
+    flags: (),
+
+    icon: "textures/items/wooden_shield_icon.png",
+
+    visual: Primitive(
+        parts: [
+            // Основа щита (дерево)
+            (
+                shape: Cylinder,
+                size: (0.4, 0.05, 0.4),
+                offset: (0.0, 0.0, 0.0),
+                color: (0.55, 0.4, 0.25, 1.0),
+            ),
+            // Умбон (железная выпуклость в центре)
+            (
+                shape: Sphere,
+                size: (0.12, 0.1, 0.12),
+                offset: (0.0, 0.05, 0.0),
+                color: (0.6, 0.6, 0.65, 1.0),
+            ),
+            // Деревянный обод
+            (
+                shape: Cylinder,
+                size: (0.42, 0.06, 0.42),
+                offset: (0.0, 0.0, 0.0),
+                color: (0.45, 0.32, 0.18, 1.0),
+            ),
+        ]
+    ),
+)
