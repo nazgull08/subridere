@@ -7,6 +7,10 @@ pub enum GameMenuState {
     Open,
 }
 
+/// Сохраняет последний активный таб между открытиями меню
+#[derive(Resource, Default)]
+pub struct GameMenuActiveTab(pub usize);
+
 pub fn game_menu_closed(state: Res<State<GameMenuState>>) -> bool {
     *state.get() == GameMenuState::Closed
 }

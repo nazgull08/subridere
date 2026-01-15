@@ -1,6 +1,5 @@
 pub mod game_menu;
 pub mod hud;
-pub mod inventory;
 pub mod menu;
 pub mod system_menu;
 

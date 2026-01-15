@@ -3,10 +3,18 @@ use bevy_ui_actions::prelude::*;
 
 use super::components::GameMenuRoot;
 use super::layout::*;
-use super::tabs::{spawn_character_tab, spawn_inventory_content, spawn_journal_tab, spawn_map_tab};
+use super::state::GameMenuActiveTab;
+use super::tabs::{
+    spawn_character_content, spawn_inventory_content, spawn_journal_tab, spawn_map_tab,
+};
 
-pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn spawn_game_menu(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    active_tab: Res<GameMenuActiveTab>,
+) {
     let font = asset_server.load("fonts/dogica.ttf");
+    let active = active_tab.0;
 
     commands
         .spawn((
@@ -34,7 +42,7 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                 },
                 BackgroundColor(PANEL_BG),
                 BorderColor(PANEL_BORDER),
-                TabGroup::new(0),
+                TabGroup::new(active),
                 Name::new("Game Menu Panel"),
             ))
             .with_children(|panel| {
@@ -49,10 +57,10 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                         Name::new("Tab Buttons"),
                     ))
                     .with_children(|row| {
-                        spawn_tab_button(row, &font, 0, "Inventory", true);
-                        spawn_tab_button(row, &font, 1, "Character", false);
-                        spawn_tab_button(row, &font, 2, "Journal", false);
-                        spawn_tab_button(row, &font, 3, "Map", false);
+                        spawn_tab_button(row, &font, 0, "Inventory", active == 0);
+                        spawn_tab_button(row, &font, 1, "Character", active == 1);
+                        spawn_tab_button(row, &font, 2, "Journal", active == 2);
+                        spawn_tab_button(row, &font, 3, "Map", active == 3);
                     });
 
                 // Tab content area
@@ -66,11 +74,15 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                         Name::new("Tab Content Area"),
                     ))
                     .with_children(|content_area| {
-                        // Tab 0: Inventory (реальный контент)
+                        // Tab 0: Inventory
                         content_area
                             .spawn((
                                 Node {
-                                    display: Display::Flex,
+                                    display: if active == 0 {
+                                        Display::Flex
+                                    } else {
+                                        Display::None
+                                    },
                                     width: Val::Percent(100.0),
                                     height: Val::Percent(100.0),
                                     ..default()
@@ -82,11 +94,15 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 spawn_inventory_content(tab, &font);
                             });
 
-                        // Tab 1: Character (заглушка)
+                        // Tab 1: Character
                         content_area
                             .spawn((
                                 Node {
-                                    display: Display::None,
+                                    display: if active == 1 {
+                                        Display::Flex
+                                    } else {
+                                        Display::None
+                                    },
                                     width: Val::Percent(100.0),
                                     height: Val::Percent(100.0),
                                     ..default()
@@ -95,14 +111,18 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 Name::new("Tab Content: Character"),
                             ))
                             .with_children(|tab| {
-                                spawn_character_tab(tab, &font);
+                                spawn_character_content(tab, &font);
                             });
 
-                        // Tab 2: Journal (заглушка)
+                        // Tab 2: Journal
                         content_area
                             .spawn((
                                 Node {
-                                    display: Display::None,
+                                    display: if active == 2 {
+                                        Display::Flex
+                                    } else {
+                                        Display::None
+                                    },
                                     width: Val::Percent(100.0),
                                     height: Val::Percent(100.0),
                                     ..default()
@@ -114,11 +134,15 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 spawn_journal_tab(tab, &font);
                             });
 
-                        // Tab 3: Map (заглушка)
+                        // Tab 3: Map
                         content_area
                             .spawn((
                                 Node {
-                                    display: Display::None,
+                                    display: if active == 3 {
+                                        Display::Flex
+                                    } else {
+                                        Display::None
+                                    },
                                     width: Val::Percent(100.0),
                                     height: Val::Percent(100.0),
                                     ..default()
@@ -133,7 +157,14 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             });
         });
 
-    info!("🎮 Game Menu spawned");
+    info!("🎮 Game Menu spawned (tab: {})", active);
+}
+
+/// Сохранить активный таб перед закрытием
+pub fn save_active_tab(mut active_tab: ResMut<GameMenuActiveTab>, query: Query<&TabGroup>) {
+    for tab_group in &query {
+        active_tab.0 = tab_group.active;
+    }
 }
 
 pub fn despawn_game_menu(mut commands: Commands, query: Query<Entity, With<GameMenuRoot>>) {

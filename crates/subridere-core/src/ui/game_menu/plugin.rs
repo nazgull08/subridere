@@ -2,8 +2,11 @@ use bevy::prelude::*;
 use bevy::window::CursorGrabMode;
 use bevy_ui_actions::UiActionsPlugin;
 
-use super::spawn::{despawn_game_menu, spawn_game_menu};
-use super::state::{GameMenuState, game_menu_open};
+use super::spawn::{despawn_game_menu, save_active_tab, spawn_game_menu};
+use super::state::{GameMenuActiveTab, GameMenuState, game_menu_open};
+use super::tabs::character::sync::{
+    sync_attributes_display, sync_level_display, sync_stats_display,
+};
 use super::tabs::inventory::sync::{sync_drag_visual, sync_equipment_slots, sync_inventory_slots};
 
 pub struct GameMenuPlugin;
@@ -12,17 +15,25 @@ impl Plugin for GameMenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(UiActionsPlugin)
             .init_state::<GameMenuState>()
+            .init_resource::<GameMenuActiveTab>() // NEW
             .add_systems(Update, toggle_game_menu_input)
             .add_systems(OnEnter(GameMenuState::Open), (spawn_game_menu, show_cursor))
             .add_systems(
                 OnExit(GameMenuState::Open),
-                (despawn_game_menu, hide_cursor),
+                (save_active_tab, despawn_game_menu, hide_cursor).chain(), // save_active_tab first
             )
-            // Sync systems — only when menu is open
             .add_systems(
                 Update,
-                (sync_inventory_slots, sync_equipment_slots, sync_drag_visual)
-                    .chain()
+                (
+                    // Inventory sync
+                    sync_inventory_slots,
+                    sync_equipment_slots,
+                    sync_drag_visual,
+                    // Character sync
+                    sync_level_display,
+                    sync_attributes_display,
+                    sync_stats_display,
+                )
                     .run_if(game_menu_open),
             );
 
