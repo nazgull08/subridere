@@ -1,6 +1,7 @@
 use super::component::Stamina;
 use bevy::prelude::*;
 
+/// Регенерация стамины
 pub fn regenerate_stamina(mut query: Query<&mut Stamina>, time: Res<Time>) {
     for mut stamina in &mut query {
         if stamina.regen > 0.0 && stamina.current < stamina.max {

@@ -10,7 +10,10 @@ use crate::{
         component::{PLAYER_START_POS, Player, PlayerVisual},
         visual::create_player_body_bundle,
     },
-    stats::{health::component::Health, mana::component::Mana, stamina::component::Stamina},
+    stats::{
+        health::component::Health, mana::component::Mana, plugin::StatsBundle,
+        stamina::component::Stamina,
+    },
     unit::component::{Grounded, Unit, Velocity},
 };
 
@@ -44,9 +47,7 @@ pub fn spawn_player(
         .insert(Transform::from_translation(PLAYER_START_POS))
         .insert(Visibility::Visible)
         .insert(Name::new("Player"))
-        .insert(Health::default())
-        .insert(Mana::default())
-        .insert(Stamina::default())
+        .insert(StatsBundle::default())
         .insert(CurrentWeapon::default())
         .insert(Inventory::default())
         .insert(Equipment::default())
