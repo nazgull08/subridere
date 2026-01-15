@@ -3,7 +3,7 @@
 //! Демонстрирует:
 //! - TabGroup, Tab, TabContent
 //! - Автоматическое переключение видимости контента
-//! - ActiveTab маркер для стилизации
+//! - Active маркер для стилизации
 //! - VisualStyle для кастомных цветов
 //!
 //! Запуск: `cargo run --example tabs -p bevy_ui_actions`
@@ -16,7 +16,6 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(UiActionsPlugin)
         .add_systems(Startup, setup)
-        .add_systems(Update, update_tab_styles)
         .run();
 }
 
@@ -63,10 +62,10 @@ fn setup(mut commands: Commands) {
                             ..default()
                         })
                         .with_children(|row| {
-                            spawn_tab_button(row, 0, "Inventory");
-                            spawn_tab_button(row, 1, "Stats");
-                            spawn_tab_button(row, 2, "Skills");
-                            spawn_tab_button(row, 3, "Map");
+                            spawn_tab_button(row, 0, "Inventory", true);
+                            spawn_tab_button(row, 1, "Stats", false);
+                            spawn_tab_button(row, 2, "Skills", false);
+                            spawn_tab_button(row, 3, "Map", false);
                         });
 
                     // Tab content panels
@@ -115,39 +114,48 @@ fn setup(mut commands: Commands) {
         });
 }
 
-fn spawn_tab_button(parent: &mut ChildSpawnerCommands, index: usize, label: &str) {
-    parent
-        .spawn((
-            Button,
-            Node {
-                padding: UiRect::axes(Val::Px(20.0), Val::Px(10.0)),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                border: UiRect {
-                    left: Val::Px(1.0),
-                    right: Val::Px(1.0),
-                    top: Val::Px(1.0),
-                    bottom: Val::Px(0.0),
-                },
+fn spawn_tab_button(parent: &mut ChildSpawnerCommands, index: usize, label: &str, is_active: bool) {
+    let mut entity = parent.spawn((
+        Button,
+        Node {
+            padding: UiRect::axes(Val::Px(20.0), Val::Px(10.0)),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            border: UiRect {
+                left: Val::Px(1.0),
+                right: Val::Px(1.0),
+                top: Val::Px(1.0),
+                bottom: Val::Px(0.0),
+            },
+            ..default()
+        },
+        BackgroundColor(if is_active {
+            Color::srgb(0.28, 0.28, 0.32)
+        } else {
+            Color::srgb(0.15, 0.15, 0.18)
+        }),
+        BorderColor(Color::srgb(0.3, 0.3, 0.35)),
+        Tab::new(index),
+        VisualStyle::tab(),
+        InteractiveVisual,
+        Interaction::None,
+    ));
+
+    // Первый таб изначально активен
+    if is_active {
+        entity.insert(Active);
+    }
+
+    entity.with_children(|btn| {
+        btn.spawn((
+            Text::new(label),
+            TextFont {
+                font_size: 16.0,
                 ..default()
             },
-            BackgroundColor(Color::srgb(0.15, 0.15, 0.18)),
-            BorderColor(Color::srgb(0.3, 0.3, 0.35)),
-            Tab::new(index),
-            VisualStyle::tab(),
-            InteractiveVisual,
-            Interaction::None,
-        ))
-        .with_children(|btn| {
-            btn.spawn((
-                Text::new(label),
-                TextFont {
-                    font_size: 16.0,
-                    ..default()
-                },
-                TextColor(Color::srgb(0.7, 0.7, 0.7)),
-            ));
-        });
+            TextColor(Color::srgb(0.7, 0.7, 0.7)),
+        ));
+    });
 }
 
 fn spawn_tab_content(
@@ -157,15 +165,16 @@ fn spawn_tab_content(
     content: &str,
     bg_color: Color,
 ) {
-    let visibility = if index == 0 {
-        Visibility::Inherited
+    let display = if index == 0 {
+        Display::Flex
     } else {
-        Visibility::Hidden
+        Display::None
     };
 
     parent
         .spawn((
             Node {
+                display,
                 width: Val::Percent(100.0),
                 min_height: Val::Px(200.0),
                 padding: UiRect::all(Val::Px(15.0)),
@@ -177,7 +186,6 @@ fn spawn_tab_content(
             BackgroundColor(bg_color),
             BorderColor(Color::srgb(0.3, 0.3, 0.35)),
             TabContent::new(index),
-            visibility,
         ))
         .with_children(|panel| {
             // Title
@@ -200,20 +208,4 @@ fn spawn_tab_content(
                 TextColor(Color::srgb(0.7, 0.7, 0.7)),
             ));
         });
-}
-
-// ============ Style active tab ============
-
-fn update_tab_styles(
-    mut tab_query: Query<(&mut BackgroundColor, &mut VisualStyle, Has<ActiveTab>), With<Tab>>,
-) {
-    for (mut bg, mut style, is_active) in &mut tab_query {
-        if is_active {
-            *style = VisualStyle::tab_active();
-            *bg = BackgroundColor(style.normal);
-        } else {
-            *style = VisualStyle::tab();
-            *bg = BackgroundColor(style.normal);
-        }
-    }
 }

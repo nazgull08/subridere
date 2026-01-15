@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use super::Active;
+
 /// Группа вкладок — хранит индекс активной
 #[derive(Component)]
 pub struct TabGroup {
@@ -42,58 +44,86 @@ impl TabContent {
     }
 }
 
-/// Маркер для активной вкладки (добавляется/убирается автоматически)
-#[derive(Component)]
-pub struct ActiveTab;
-
 /// Система: клик по Tab меняет TabGroup.active
+/// Ищет TabGroup вверх по иерархии
 pub(crate) fn handle_tab_clicks(
-    tab_query: Query<(&Interaction, &Tab, &ChildOf), Changed<Interaction>>,
+    tab_query: Query<(Entity, &Interaction, &Tab, &ChildOf), Changed<Interaction>>,
+    parent_query: Query<&ChildOf>,
     mut group_query: Query<&mut TabGroup>,
 ) {
-    for (interaction, tab, parent) in &tab_query {
-        if *interaction == Interaction::Pressed {
-            if let Ok(mut group) = group_query.get_mut(parent.get()) {
+    for (entity, interaction, tab, parent) in &tab_query {
+        if *interaction != Interaction::Pressed {
+            continue;
+        }
+
+        // Ищем TabGroup вверх по иерархии
+        let mut current = parent.get();
+
+        for _ in 0..10 {
+            if let Ok(mut group) = group_query.get_mut(current) {
                 if group.active != tab.index {
                     group.active = tab.index;
                 }
+                break;
+            }
+
+            if let Ok(next_parent) = parent_query.get(current) {
+                current = next_parent.get();
+            } else {
+                break;
             }
         }
     }
 }
 
 /// Система: обновление видимости TabContent
+/// Использует Display::None чтобы скрытый контент не занимал место
 pub(crate) fn sync_tab_content_visibility(
-    group_query: Query<(&TabGroup, &Children), Changed<TabGroup>>,
-    mut content_query: Query<(&TabContent, &mut Visibility)>,
+    group_query: Query<(Entity, &TabGroup), Changed<TabGroup>>,
+    children_query: Query<&Children>,
+    mut content_query: Query<(&TabContent, &mut Node)>,
 ) {
-    for (group, children) in &group_query {
-        for child in children.iter() {
-            if let Ok((content, mut visibility)) = content_query.get_mut(child) {
-                *visibility = if content.index == group.active {
-                    Visibility::Inherited
+    for (group_entity, group) in &group_query {
+        let mut to_visit = vec![group_entity];
+
+        while let Some(entity) = to_visit.pop() {
+            if let Ok((content, mut node)) = content_query.get_mut(entity) {
+                node.display = if content.index == group.active {
+                    Display::Flex
                 } else {
-                    Visibility::Hidden
+                    Display::None
                 };
+            }
+
+            if let Ok(children) = children_query.get(entity) {
+                to_visit.extend(children.iter());
             }
         }
     }
 }
 
-/// Система: маркер ActiveTab на активной вкладке
+/// Система: маркер Active на активной вкладке
+/// Ищет Tab рекурсивно вниз
 pub(crate) fn sync_active_tab_marker(
-    group_query: Query<(&TabGroup, &Children), Changed<TabGroup>>,
+    group_query: Query<(Entity, &TabGroup), Changed<TabGroup>>,
+    children_query: Query<&Children>,
     tab_query: Query<&Tab>,
     mut commands: Commands,
 ) {
-    for (group, children) in &group_query {
-        for child in children.iter() {
-            if let Ok(tab) = tab_query.get(child) {
+    for (group_entity, group) in &group_query {
+        let mut to_visit = vec![group_entity];
+
+        while let Some(entity) = to_visit.pop() {
+            if let Ok(tab) = tab_query.get(entity) {
                 if tab.index == group.active {
-                    commands.entity(child).insert(ActiveTab);
+                    commands.entity(entity).insert(Active);
                 } else {
-                    commands.entity(child).remove::<ActiveTab>();
+                    commands.entity(entity).remove::<Active>();
                 }
+            }
+
+            if let Ok(children) = children_query.get(entity) {
+                to_visit.extend(children.iter());
             }
         }
     }

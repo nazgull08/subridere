@@ -18,4 +18,8 @@ pub use interactions::{
 };
 
 // Re-export widgets
-pub use widgets::{Disabled, InteractiveVisual, Tooltip, TooltipState, TooltipStyle, TooltipUI};
+pub use widgets::{
+    Active, Disabled, InteractiveVisual, ProgressBar, ProgressBarConfig, ProgressBarFill,
+    SpawnProgressBarExt, Tab, TabContent, TabGroup, Tooltip, TooltipState, TooltipStyle, TooltipUI,
+    VisualStyle,
+};

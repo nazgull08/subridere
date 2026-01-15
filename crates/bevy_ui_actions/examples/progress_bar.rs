@@ -108,13 +108,7 @@ fn setup(mut commands: Commands) {
                     );
 
                     // MP bar
-                    spawn_labeled_bar(
-                        panel,
-                        "Mana",
-                        ProgressBarConfig::mana(),
-                        0.5,
-                        ManaBar,
-                    );
+                    spawn_labeled_bar(panel, "Mana", ProgressBarConfig::mana(), 0.5, ManaBar);
 
                     // SP bar
                     spawn_labeled_bar(
@@ -236,10 +230,42 @@ fn handle_input(keys: Res<ButtonInput<KeyCode>>, mut stats: ResMut<PlayerStats>)
 
 fn sync_bars(
     stats: Res<PlayerStats>,
-    mut hp_query: Query<&mut ProgressBar, (With<HealthBar>, Without<ManaBar>, Without<StaminaBar>, Without<StrengthBar>)>,
-    mut mp_query: Query<&mut ProgressBar, (With<ManaBar>, Without<HealthBar>, Without<StaminaBar>, Without<StrengthBar>)>,
-    mut sp_query: Query<&mut ProgressBar, (With<StaminaBar>, Without<HealthBar>, Without<ManaBar>, Without<StrengthBar>)>,
-    mut str_query: Query<&mut ProgressBar, (With<StrengthBar>, Without<HealthBar>, Without<ManaBar>, Without<StaminaBar>)>,
+    mut hp_query: Query<
+        &mut ProgressBar,
+        (
+            With<HealthBar>,
+            Without<ManaBar>,
+            Without<StaminaBar>,
+            Without<StrengthBar>,
+        ),
+    >,
+    mut mp_query: Query<
+        &mut ProgressBar,
+        (
+            With<ManaBar>,
+            Without<HealthBar>,
+            Without<StaminaBar>,
+            Without<StrengthBar>,
+        ),
+    >,
+    mut sp_query: Query<
+        &mut ProgressBar,
+        (
+            With<StaminaBar>,
+            Without<HealthBar>,
+            Without<ManaBar>,
+            Without<StrengthBar>,
+        ),
+    >,
+    mut str_query: Query<
+        &mut ProgressBar,
+        (
+            With<StrengthBar>,
+            Without<HealthBar>,
+            Without<ManaBar>,
+            Without<StaminaBar>,
+        ),
+    >,
     mut text_query: Query<&mut Text, With<StatsText>>,
 ) {
     if !stats.is_changed() {
@@ -265,9 +291,12 @@ fn sync_bars(
     if let Ok(mut text) = text_query.get_single_mut() {
         **text = format!(
             "HP: {:.0}/{:.0}  MP: {:.0}/{:.0}  SP: {:.0}/{:.0}  STR: {}/30",
-            stats.health, stats.health_max,
-            stats.mana, stats.mana_max,
-            stats.stamina, stats.stamina_max,
+            stats.health,
+            stats.health_max,
+            stats.mana,
+            stats.mana_max,
+            stats.stamina,
+            stats.stamina_max,
             stats.strength
         );
     }

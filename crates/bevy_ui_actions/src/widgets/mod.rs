@@ -4,9 +4,9 @@ mod tooltip;
 mod visual;
 
 pub use progress_bar::{ProgressBar, ProgressBarConfig, ProgressBarFill, SpawnProgressBarExt};
-pub use tabs::{ActiveTab, Tab, TabContent, TabGroup};
+pub use tabs::{Tab, TabContent, TabGroup};
 pub use tooltip::{Tooltip, TooltipState, TooltipStyle, TooltipUI};
-pub use visual::{Disabled, InteractiveVisual, VisualStyle};
+pub use visual::{Active, Disabled, InteractiveVisual, VisualStyle};
 
 // Re-export systems for plugin
 pub(crate) use progress_bar::update_progress_bars;

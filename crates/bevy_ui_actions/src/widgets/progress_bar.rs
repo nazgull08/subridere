@@ -9,7 +9,9 @@ pub struct ProgressBar {
 
 impl ProgressBar {
     pub fn new(value: f32) -> Self {
-        Self { value: value.clamp(0.0, 1.0) }
+        Self {
+            value: value.clamp(0.0, 1.0),
+        }
     }
 
     pub fn empty() -> Self {

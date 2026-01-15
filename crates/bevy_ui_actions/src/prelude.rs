@@ -5,6 +5,10 @@ pub use crate::interactions::{
     OnDragStart, OnDrop, OnHover, OnHoverExit, OnPress, OnRightClick,
 };
 
-pub use crate::widgets::{Disabled, InteractiveVisual, Tooltip, TooltipState, TooltipStyle, TabGroup, Tab, TabContent, ActiveTab, VisualStyle, ProgressBar, ProgressBarFill, ProgressBarConfig, SpawnProgressBarExt};
+pub use crate::widgets::{
+    Active, Disabled, InteractiveVisual, ProgressBar, ProgressBarConfig, ProgressBarFill,
+    SpawnProgressBarExt, Tab, TabContent, TabGroup, Tooltip, TooltipState, TooltipStyle,
+    VisualStyle,
+};
 
 pub use crate::UiActionsPlugin;
