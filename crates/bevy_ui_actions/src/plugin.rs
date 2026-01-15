@@ -5,7 +5,7 @@ use crate::interactions::{
 };
 use crate::widgets::{
     hide_tooltip, show_tooltip, update_interactive_visuals, update_tooltip_hover, TooltipState,
-    TooltipStyle,
+    TooltipStyle,update_progress_bars, handle_tab_clicks, sync_active_tab_marker, sync_tab_content_visibility
 };
 use bevy::prelude::*;
 
@@ -36,6 +36,12 @@ impl Plugin for UiActionsPlugin {
                     hide_tooltip,
                     // Visual feedback
                     update_interactive_visuals,
+                            // Progress bars
+                    update_progress_bars,
+                    // Tabs
+                    handle_tab_clicks,
+                    sync_tab_content_visibility,
+                    sync_active_tab_marker,
                 ),
             );
     }
