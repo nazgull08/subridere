@@ -6,6 +6,7 @@ pub mod health;
 pub mod mana;
 pub mod modifiers;
 pub mod plugin;
+pub mod level;
 pub mod recalculate;
 pub mod stamina;
 
@@ -17,3 +18,4 @@ pub use health::Health;
 pub use mana::Mana;
 pub use modifiers::{ModifierOp, ModifierSource, ModifierTarget, StatModifiers};
 pub use stamina::Stamina;
+pub use level::{Experience, ExperienceReward, Level};
