@@ -73,7 +73,7 @@ fn toggle_inventory_input(
 
 /// Show cursor when inventory opens
 fn show_cursor(mut windows: Query<&mut Window>) {
-    if let Ok(mut window) = windows.get_single_mut() {
+    if let Ok(mut window) = windows.single_mut() {
         window.cursor_options.grab_mode = CursorGrabMode::None;
         window.cursor_options.visible = true;
     }
@@ -81,7 +81,7 @@ fn show_cursor(mut windows: Query<&mut Window>) {
 
 /// Hide cursor when inventory closes
 fn hide_cursor(mut windows: Query<&mut Window>) {
-    if let Ok(mut window) = windows.get_single_mut() {
+    if let Ok(mut window) = windows.single_mut() {
         window.cursor_options.grab_mode = CursorGrabMode::Confined;
         window.cursor_options.visible = false;
     }

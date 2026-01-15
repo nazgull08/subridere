@@ -224,7 +224,7 @@ pub(crate) fn drag_system(
 
             // Удаляем ghost
             if let Some(ghost) = drag_state.ghost_entity.take() {
-                commands.entity(ghost).despawn_recursive();
+                commands.entity(ghost).despawn();
             }
 
             // Ищем drop target

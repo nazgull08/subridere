@@ -89,14 +89,14 @@ impl UiAction for DropToWorldAction {
             DropSource::Inventory(slot) => {
                 let mut query = world.query_filtered::<&Inventory, With<Player>>();
                 query
-                    .get_single(world)
+                    .single(world)
                     .map(|inv| inv.get(slot).is_some())
                     .unwrap_or(false)
             }
             DropSource::Equipment(slot) => {
                 let mut query = world.query_filtered::<&Equipment, With<Player>>();
                 query
-                    .get_single(world)
+                    .single(world)
                     .map(|eq| eq.get(slot).is_some())
                     .unwrap_or(false)
             }
@@ -125,7 +125,7 @@ impl UiAction for QuickEquipAction {
     fn execute(&self, world: &mut World) {
         let item_id = {
             let mut query = world.query_filtered::<&Inventory, With<Player>>();
-            let Ok(inventory) = query.get_single(world) else {
+            let Ok(inventory) = query.single(world) else {
                 return;
             };
             inventory.get(self.slot_index).map(|stack| stack.id)
@@ -158,7 +158,7 @@ impl UiAction for QuickUnequipAction {
     fn execute(&self, world: &mut World) {
         let empty_slot = {
             let mut query = world.query_filtered::<&Inventory, With<Player>>();
-            let Ok(inventory) = query.get_single(world) else {
+            let Ok(inventory) = query.single(world) else {
                 return;
             };
             inventory
@@ -185,7 +185,7 @@ impl UiAction for UseItemAction {
     fn execute(&self, world: &mut World) {
         let item_id = {
             let mut query = world.query_filtered::<&Inventory, With<Player>>();
-            let Ok(inventory) = query.get_single(world) else {
+            let Ok(inventory) = query.single(world) else {
                 return;
             };
             inventory.get(self.slot_index).map(|stack| stack.id)
@@ -211,7 +211,7 @@ impl UiAction for UseItemAction {
         apply_consumable_effect(world, id);
 
         let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
-        if let Ok(mut inventory) = query.get_single_mut(world) {
+        if let Ok(mut inventory) = query.single_mut(world) {
             inventory.remove(id, 1);
             info!("✅ Used {}", id);
         }
@@ -239,7 +239,7 @@ fn get_drag_source(world: &mut World) -> Option<DropSource> {
 
 fn swap_inventory_slots(world: &mut World, a: usize, b: usize) {
     let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
-    if let Ok(mut inventory) = query.get_single_mut(world) {
+    if let Ok(mut inventory) = query.single_mut(world) {
         inventory.swap(a, b);
         info!("🔄 Swapped inventory slots {} ↔ {}", a, b);
     }
@@ -248,7 +248,7 @@ fn swap_inventory_slots(world: &mut World, a: usize, b: usize) {
 fn equip_from_inventory(world: &mut World, inv_slot: usize, equip_slot: EquipmentSlot) {
     let item_id = {
         let mut query = world.query_filtered::<&Inventory, With<Player>>();
-        let Ok(inventory) = query.get_single(world) else {
+        let Ok(inventory) = query.single(world) else {
             return;
         };
         inventory.get(inv_slot).map(|stack| stack.id)
@@ -269,7 +269,7 @@ fn equip_from_inventory(world: &mut World, inv_slot: usize, equip_slot: Equipmen
     }
 
     let mut query = world.query_filtered::<(&mut Inventory, &mut Equipment), With<Player>>();
-    if let Ok((mut inventory, mut equipment)) = query.get_single_mut(world) {
+    if let Ok((mut inventory, mut equipment)) = query.single_mut(world) {
         if let Some(stack) = inventory.remove_slot(inv_slot) {
             if let Some(old_id) = equipment.unequip(equip_slot) {
                 inventory.add_single(old_id);
@@ -282,7 +282,7 @@ fn equip_from_inventory(world: &mut World, inv_slot: usize, equip_slot: Equipmen
 
 fn unequip_to_slot(world: &mut World, equip_slot: EquipmentSlot, inv_slot: usize) {
     let mut query = world.query_filtered::<(&mut Inventory, &mut Equipment), With<Player>>();
-    if let Ok((mut inventory, mut equipment)) = query.get_single_mut(world) {
+    if let Ok((mut inventory, mut equipment)) = query.single_mut(world) {
         // Check target slot is empty
         if inventory.get(inv_slot).is_some() {
             info!("❌ Inventory slot {} not empty", inv_slot);
@@ -322,7 +322,7 @@ fn apply_consumable_effect(world: &mut World, id: ItemId) {
     let mut query = world
         .query_filtered::<(&mut Health, Option<&mut Mana>, Option<&mut Stamina>), With<Player>>();
 
-    if let Ok((mut health, mana, stamina)) = query.get_single_mut(world) {
+    if let Ok((mut health, mana, stamina)) = query.single_mut(world) {
         match effect {
             ConsumableEffect::Heal(amount) => {
                 health.current = (health.current + amount).min(health.max);

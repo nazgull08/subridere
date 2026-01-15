@@ -3,14 +3,13 @@ use bevy_ui_actions::prelude::*;
 
 use super::components::GameMenuRoot;
 use super::layout::*;
-use super::tabs::{spawn_character_tab, spawn_inventory_tab, spawn_journal_tab, spawn_map_tab};
+use super::tabs::{spawn_character_tab, spawn_inventory_content, spawn_journal_tab, spawn_map_tab};
 
 pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/dogica.ttf");
 
     commands
         .spawn((
-            // Fullscreen overlay
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
@@ -25,7 +24,6 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             Name::new("Game Menu Root"),
         ))
         .with_children(|root| {
-            // Main panel
             root.spawn((
                 Node {
                     width: Val::Px(MENU_WIDTH),
@@ -40,7 +38,7 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                 Name::new("Game Menu Panel"),
             ))
             .with_children(|panel| {
-                // Tab buttons row
+                // Tab buttons
                 panel
                     .spawn((
                         Node {
@@ -62,13 +60,13 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                     .spawn((
                         Node {
                             width: Val::Percent(100.0),
-                            height: Val::Percent(100.0),
+                            flex_grow: 1.0,
                             ..default()
                         },
                         Name::new("Tab Content Area"),
                     ))
                     .with_children(|content_area| {
-                        // Tab 0: Inventory
+                        // Tab 0: Inventory (реальный контент)
                         content_area
                             .spawn((
                                 Node {
@@ -81,10 +79,10 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 Name::new("Tab Content: Inventory"),
                             ))
                             .with_children(|tab| {
-                                spawn_inventory_tab(tab, &font);
+                                spawn_inventory_content(tab, &font);
                             });
 
-                        // Tab 1: Character
+                        // Tab 1: Character (заглушка)
                         content_area
                             .spawn((
                                 Node {
@@ -100,7 +98,7 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 spawn_character_tab(tab, &font);
                             });
 
-                        // Tab 2: Journal
+                        // Tab 2: Journal (заглушка)
                         content_area
                             .spawn((
                                 Node {
@@ -116,7 +114,7 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 spawn_journal_tab(tab, &font);
                             });
 
-                        // Tab 3: Map
+                        // Tab 3: Map (заглушка)
                         content_area
                             .spawn((
                                 Node {
@@ -140,7 +138,7 @@ pub fn spawn_game_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 pub fn despawn_game_menu(mut commands: Commands, query: Query<Entity, With<GameMenuRoot>>) {
     for entity in &query {
-        commands.entity(entity).despawn_recursive();
+        commands.entity(entity).despawn();
     }
     info!("🎮 Game Menu despawned");
 }
@@ -176,7 +174,7 @@ fn spawn_tab_button(
         VisualStyle::tab(),
         InteractiveVisual,
         Interaction::None,
-        Name::new(format!("Tab Button: {}", label)),
+        Name::new(format!("Tab: {}", label)),
     ));
 
     if is_active {

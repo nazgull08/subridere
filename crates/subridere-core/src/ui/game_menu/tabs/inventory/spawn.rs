@@ -1,74 +1,38 @@
-// ui/inventory/spawn.rs — Spawn inventory UI
-
 use bevy::prelude::*;
 use bevy_ui_actions::prelude::*;
 
 use crate::items::EquipmentSlot;
-use crate::ui::inventory::actions::DropToWorldAction;
 
-use super::actions::{DropToEquipmentSlot, DropToInventorySlot};
+use super::actions::{DropToEquipmentSlot, DropToInventorySlot, DropToWorldAction};
 use super::components::*;
 use super::layout::*;
 
-/// Spawn the complete inventory UI
-pub fn spawn_inventory_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load("fonts/dogica.ttf");
-
-    commands
+/// Spawn inventory tab content (Equipment + Grid)
+pub fn spawn_inventory_content(parent: &mut ChildSpawnerCommands, font: &Handle<Font>) {
+    parent
         .spawn((
-            // Root container — fullscreen overlay
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
-                position_type: PositionType::Absolute,
+                flex_direction: FlexDirection::Row,
+                padding: UiRect::all(Val::Px(15.0)),
+                column_gap: Val::Px(20.0),
                 justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
                 ..default()
             },
-            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.5)),
-            GlobalZIndex(100),
-            InventoryRoot,
-            Name::new("Inventory Root"),
+            Name::new("Inventory Content"),
         ))
-        .with_children(|root| {
-            // Main panel container
-            root.spawn((
-                Node {
-                    flex_direction: FlexDirection::Row,
-                    padding: UiRect::all(Val::Px(20.0)),
-                    column_gap: Val::Px(20.0),
-                    border: UiRect::all(Val::Px(2.0)),
-                    ..default()
-                },
-                BackgroundColor(PANEL_BG),
-                BorderColor(PANEL_BORDER),
-                Name::new("Inventory Panel"),
-            ))
-            .with_children(|panel| {
-                // Left: Equipment panel
-                spawn_equipment_panel(panel, &font);
+        .with_children(|content| {
+            // Left: Equipment
+            spawn_equipment_panel(content, font);
 
-                // Center: Inventory grid
-                spawn_inventory_grid(panel, &font);
-
-                // Right: Stats panel
-                spawn_stats_panel(panel, &font);
-            });
+            // Right: Inventory Grid
+            spawn_inventory_grid(content, font);
         });
-
-    info!("📦 Inventory UI spawned");
-}
-
-/// Despawn inventory UI
-pub fn despawn_inventory_ui(mut commands: Commands, query: Query<Entity, With<InventoryRoot>>) {
-    for entity in &query {
-        commands.entity(entity).despawn();
-    }
-    info!("📦 Inventory UI despawned");
 }
 
 // ============================================================
-// Equipment Panel (Left)
+// Equipment Panel
 // ============================================================
 
 fn spawn_equipment_panel(parent: &mut ChildSpawnerCommands, font: &Handle<Font>) {
@@ -84,7 +48,6 @@ fn spawn_equipment_panel(parent: &mut ChildSpawnerCommands, font: &Handle<Font>)
             Name::new("Equipment Panel"),
         ))
         .with_children(|col| {
-            // Title
             col.spawn((
                 Text::new("Equipment"),
                 TextFont {
@@ -95,11 +58,10 @@ fn spawn_equipment_panel(parent: &mut ChildSpawnerCommands, font: &Handle<Font>)
                 TextColor(TEXT_COLOR),
             ));
 
-            // Equipment layout
-            // Row 1: Helmet
+            // Helmet
             spawn_equip_row(col, font, &[EquipmentSlot::Helmet]);
 
-            // Row 2: L.Pauldron, Cuirass, R.Pauldron
+            // Shoulders + Chest
             spawn_equip_row(
                 col,
                 font,
@@ -110,17 +72,17 @@ fn spawn_equipment_panel(parent: &mut ChildSpawnerCommands, font: &Handle<Font>)
                 ],
             );
 
-            // Row 3: L.Gauntlet, R.Gauntlet
+            // Gauntlets
             spawn_equip_row(
                 col,
                 font,
                 &[EquipmentSlot::LeftGauntlet, EquipmentSlot::RightGauntlet],
             );
 
-            // Row 4: Greaves
+            // Greaves
             spawn_equip_row(col, font, &[EquipmentSlot::Greaves]);
 
-            // Row 5: L.Boot, R.Boot
+            // Boots
             spawn_equip_row(
                 col,
                 font,
@@ -133,14 +95,14 @@ fn spawn_equipment_panel(parent: &mut ChildSpawnerCommands, font: &Handle<Font>)
                 ..default()
             });
 
-            // Weapons row
+            // Weapons
             spawn_equip_row(
                 col,
                 font,
                 &[EquipmentSlot::MainHand, EquipmentSlot::OffHand],
             );
 
-            // Accessories row
+            // Accessories
             spawn_equip_row(
                 col,
                 font,
@@ -197,14 +159,13 @@ fn spawn_equipment_slot(
             Name::new(format!("Equip: {:?}", slot)),
         ))
         .with_children(|slot_node| {
-            // Icon — absolute positioned, centered
+            // Icon
             slot_node.spawn((
                 ImageNode::default(),
                 Node {
                     width: Val::Px(EQUIP_SLOT_SIZE - 8.0),
                     height: Val::Px(EQUIP_SLOT_SIZE - 8.0),
                     position_type: PositionType::Absolute,
-                    // Center the absolute element
                     left: Val::Px(4.0),
                     top: Val::Px(4.0),
                     ..default()
@@ -213,7 +174,7 @@ fn spawn_equipment_slot(
                 SlotIcon,
             ));
 
-            // Label — stays in flex flow, centered by parent
+            // Label
             slot_node.spawn((
                 Text::new(slot_short_name(slot)),
                 TextFont {
@@ -248,7 +209,7 @@ fn slot_short_name(slot: EquipmentSlot) -> &'static str {
 }
 
 // ============================================================
-// Inventory Grid (Center)
+// Inventory Grid
 // ============================================================
 
 fn spawn_inventory_grid(parent: &mut ChildSpawnerCommands, font: &Handle<Font>) {
@@ -263,7 +224,6 @@ fn spawn_inventory_grid(parent: &mut ChildSpawnerCommands, font: &Handle<Font>) 
             Name::new("Inventory Grid"),
         ))
         .with_children(|col| {
-            // Title
             col.spawn((
                 Text::new("Inventory"),
                 TextFont {
@@ -274,7 +234,7 @@ fn spawn_inventory_grid(parent: &mut ChildSpawnerCommands, font: &Handle<Font>) 
                 TextColor(TEXT_COLOR),
             ));
 
-            // Grid container
+            // Grid
             col.spawn((
                 Node {
                     display: Display::Grid,
@@ -308,7 +268,6 @@ fn spawn_inventory_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, 
             BackgroundColor(SLOT_EMPTY),
             BorderColor(SLOT_BORDER),
             InventorySlotUI { index },
-            // bevy_ui_actions components
             Draggable,
             DropTarget,
             OnDrop::new(DropToInventorySlot {
@@ -319,103 +278,37 @@ fn spawn_inventory_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, 
             Name::new(format!("Slot {}", index)),
         ))
         .with_children(|slot| {
-            // Icon (hidden by default)
+            // Icon
             slot.spawn((
                 ImageNode::default(),
                 Node {
-                    width: Val::Px(SLOT_SIZE - 12.0),
-                    height: Val::Px(SLOT_SIZE - 12.0),
+                    width: Val::Px(SLOT_SIZE - 8.0),
+                    height: Val::Px(SLOT_SIZE - 8.0),
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(4.0),
+                    top: Val::Px(4.0),
                     ..default()
                 },
                 Visibility::Hidden,
                 SlotIcon,
             ));
 
-            // Quantity text (bottom-right)
+            // Quantity
             slot.spawn((
                 Text::new(""),
                 TextFont {
                     font: font.clone(),
-                    font_size: 12.0,
+                    font_size: 10.0,
                     ..default()
                 },
-                TextColor(TEXT_COLOR),
+                TextColor(Color::WHITE),
                 Node {
                     position_type: PositionType::Absolute,
                     right: Val::Px(2.0),
-                    bottom: Val::Px(0.0),
+                    bottom: Val::Px(2.0),
                     ..default()
                 },
                 SlotQuantity,
             ));
         });
-}
-
-// ============================================================
-// Stats Panel (Right)
-// ============================================================
-
-fn spawn_stats_panel(parent: &mut ChildSpawnerCommands, font: &Handle<Font>) {
-    parent
-        .spawn((
-            Node {
-                flex_direction: FlexDirection::Column,
-                row_gap: Val::Px(8.0),
-                padding: UiRect::all(Val::Px(10.0)),
-                min_width: Val::Px(120.0),
-                ..default()
-            },
-            StatsPanel,
-            Name::new("Stats Panel"),
-        ))
-        .with_children(|col| {
-            // Title
-            col.spawn((
-                Text::new("Stats"),
-                TextFont {
-                    font: font.clone(),
-                    font_size: 14.0,
-                    ..default()
-                },
-                TextColor(TEXT_COLOR),
-            ));
-
-            // HP
-            spawn_stat_row(col, font, "HP:", Color::srgb(0.9, 0.3, 0.3), StatsHpText);
-
-            // MP
-            spawn_stat_row(col, font, "MP:", Color::srgb(0.3, 0.3, 0.9), StatsMpText);
-
-            // SP
-            spawn_stat_row(col, font, "SP:", Color::srgb(0.3, 0.9, 0.3), StatsSpText);
-        });
-}
-
-fn spawn_stat_row<M: Component>(
-    parent: &mut ChildSpawnerCommands,
-    font: &Handle<Font>,
-    label: &str,
-    color: Color,
-    marker: M,
-) {
-    parent
-        .spawn((
-            Text::new(label),
-            TextFont {
-                font: font.clone(),
-                font_size: 12.0,
-                ..default()
-            },
-            TextColor(TEXT_DIM),
-        ))
-        .with_child((
-            TextSpan::new("0 / 0"),
-            TextFont {
-                font: font.clone(),
-                font_size: 12.0,
-                ..default()
-            },
-            TextColor(color),
-            marker,
-        ));
 }

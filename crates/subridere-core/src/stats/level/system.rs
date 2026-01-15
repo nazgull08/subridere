@@ -35,7 +35,7 @@ pub fn process_experience_gain(
                 level.current, ATTRIBUTE_POINTS_PER_LEVEL, attributes.unspent_points
             );
 
-            level_up_events.send(LevelUpEvent {
+            level_up_events.write(LevelUpEvent {
                 entity: event.entity,
                 new_level: level.current,
             });

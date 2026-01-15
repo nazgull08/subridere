@@ -149,7 +149,7 @@ pub fn process_pickup_intent(
         // Try to add item to inventory
         if inventory.add(id, quantity, &registry) {
             // Success! Remove item from world
-            commands.entity(target_entity).despawn_recursive();
+            commands.entity(target_entity).despawn();
             info!("✅ Picked up: {} (x{})", id, quantity);
         } else {
             // Inventory full
@@ -177,7 +177,7 @@ pub fn handle_pickup_input(
         return;
     }
 
-    let Ok(player_entity) = player_query.get_single() else {
+    let Ok(player_entity) = player_query.single() else {
         return;
     };
 

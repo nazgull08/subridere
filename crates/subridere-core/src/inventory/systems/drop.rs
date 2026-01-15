@@ -41,7 +41,7 @@ pub fn handle_drop_to_world(
 ) {
     for event in events.read() {
         info!("🔍 handle_drop_to_world received event: {:?}", event.source);
-        let Ok((transform, mut inventory, mut equipment)) = player_query.get_single_mut() else {
+        let Ok((transform, mut inventory, mut equipment)) = player_query.single_mut() else {
             continue;
         };
 

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::camera::flycam::fly_camera_input;
 use crate::ui::game_menu::game_menu_closed;
-use crate::ui::inventory::inventory_closed;
+use crate::ui::system_menu::system_menu_closed;
 
 use super::controller::grab_mouse;
 
@@ -13,8 +13,8 @@ impl Plugin for CameraPlugin {
         app.add_systems(
             Update,
             (grab_mouse, fly_camera_input)
-                .run_if(inventory_closed)
-                .run_if(game_menu_closed),
+                .run_if(game_menu_closed)
+                .run_if(system_menu_closed),
         );
     }
 }

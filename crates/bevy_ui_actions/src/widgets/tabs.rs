@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use super::Active;
 
 /// Группа вкладок — хранит индекс активной
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct TabGroup {
     pub active: usize,
 }
@@ -11,12 +11,6 @@ pub struct TabGroup {
 impl TabGroup {
     pub fn new(active: usize) -> Self {
         Self { active }
-    }
-}
-
-impl Default for TabGroup {
-    fn default() -> Self {
-        Self { active: 0 }
     }
 }
 
@@ -51,13 +45,13 @@ pub(crate) fn handle_tab_clicks(
     parent_query: Query<&ChildOf>,
     mut group_query: Query<&mut TabGroup>,
 ) {
-    for (entity, interaction, tab, parent) in &tab_query {
+    for (_, interaction, tab, parent) in &tab_query {
         if *interaction != Interaction::Pressed {
             continue;
         }
 
         // Ищем TabGroup вверх по иерархии
-        let mut current = parent.get();
+        let mut current = parent.parent();
 
         for _ in 0..10 {
             if let Ok(mut group) = group_query.get_mut(current) {
@@ -68,7 +62,7 @@ pub(crate) fn handle_tab_clicks(
             }
 
             if let Ok(next_parent) = parent_query.get(current) {
-                current = next_parent.get();
+                current = next_parent.parent();
             } else {
                 break;
             }

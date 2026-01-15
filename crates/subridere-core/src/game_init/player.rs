@@ -10,10 +10,7 @@ use crate::{
         component::{PLAYER_START_POS, Player, PlayerVisual},
         visual::create_player_body_bundle,
     },
-    stats::{
-        health::component::Health, mana::component::Mana, plugin::StatsBundle,
-        stamina::component::Stamina,
-    },
+    stats::plugin::StatsBundle,
     unit::component::{Grounded, Unit, Velocity},
 };
 
