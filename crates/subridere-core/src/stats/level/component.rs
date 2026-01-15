@@ -3,24 +3,17 @@ use bevy::prelude::*;
 #[derive(Component, Debug, Clone)]
 pub struct Level {
     pub current: u32,
-    pub attribute_points: u32,
 }
 
 impl Default for Level {
     fn default() -> Self {
-        Self {
-            current: 1,
-            attribute_points: 0,
-        }
+        Self { current: 1 }
     }
 }
 
 impl Level {
     pub fn new(level: u32) -> Self {
-        Self {
-            current: level,
-            attribute_points: 0,
-        }
+        Self { current: level }
     }
 }
 

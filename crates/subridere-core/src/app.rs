@@ -15,6 +15,7 @@ use crate::inventory::InventoryPlugin;
 use crate::items::ItemsPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::stats::plugin::StatsPlugin;
+use crate::ui::GameMenuPlugin;
 use crate::ui::hud::plugin::HudUiPlugin;
 use crate::ui::inventory::UiInventoryPlugin;
 use crate::unit::plugin::UnitPlugin;
@@ -52,5 +53,6 @@ pub fn run() {
         .add_plugins(EnemiesPlugin)
         .add_plugins(ItemsPlugin)
         .add_plugins(InventoryPlugin)
+        .add_plugins(GameMenuPlugin)
         .run();
 }
