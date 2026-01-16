@@ -1,3 +1,6 @@
+pub mod state;
+pub use state::AppState;
+
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy_kira_audio::AudioPlugin;
@@ -16,7 +19,7 @@ use crate::items::ItemsPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::stats::plugin::StatsPlugin;
 use crate::ui::hud::plugin::HudUiPlugin;
-use crate::ui::{GameMenuPlugin, SystemMenuPlugin};
+use crate::ui::{GameMenuPlugin, MainMenuPlugin, SystemMenuPlugin};
 use crate::unit::plugin::UnitPlugin;
 use crate::world::plugin::WorldPlugin;
 
@@ -31,6 +34,7 @@ pub fn run() {
             }),
             ..default()
         }))
+        .init_state::<AppState>()
         .add_plugins(GameInitPlugin)
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default().with_default_system_setup(true))
@@ -54,5 +58,6 @@ pub fn run() {
         .add_plugins(InventoryPlugin)
         .add_plugins(GameMenuPlugin)
         .add_plugins(SystemMenuPlugin)
+        .add_plugins(MainMenuPlugin)
         .run();
 }

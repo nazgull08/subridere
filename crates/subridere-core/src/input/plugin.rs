@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::app::AppState; // ← ADD
 use crate::input::resources::InputSettings;
 use crate::ui::game_menu::game_menu_closed;
 use crate::ui::system_menu::system_menu_closed;
@@ -18,6 +19,7 @@ impl Plugin for InputPlugin {
                 handle_shoot_input,
                 weapon_switch_system,
             )
+                .run_if(in_state(AppState::InGame)) // ← ADD THIS
                 .run_if(game_menu_closed)
                 .run_if(system_menu_closed),
         );

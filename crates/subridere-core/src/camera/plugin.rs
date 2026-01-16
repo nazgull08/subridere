@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::app::AppState; // ← ADD
 use crate::camera::flycam::fly_camera_input;
 use crate::ui::game_menu::game_menu_closed;
 use crate::ui::system_menu::system_menu_closed;
@@ -13,6 +14,7 @@ impl Plugin for CameraPlugin {
         app.add_systems(
             Update,
             (grab_mouse, fly_camera_input)
+                .run_if(in_state(AppState::InGame)) // ← ADD THIS
                 .run_if(game_menu_closed)
                 .run_if(system_menu_closed),
         );
