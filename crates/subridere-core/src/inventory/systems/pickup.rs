@@ -7,7 +7,7 @@ use crate::items::{ItemId, ItemRegistry};
 use crate::player::component::Player;
 
 use super::super::component::Inventory;
-use super::world_item::{Pickupable, WorldItem};
+use crate::items::{Pickupable, WorldItem};
 
 /// Resource: currently targeted item (raycast result)
 #[derive(Resource, Default)]

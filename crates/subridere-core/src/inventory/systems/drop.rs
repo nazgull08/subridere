@@ -1,13 +1,10 @@
 // inventory/systems/drop.rs — Item drop system
 
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::*;
 
 use crate::inventory::component::{Equipment, Inventory};
-use crate::items::{EquipmentSlot, ItemId, ItemRegistry};
+use crate::items::{EquipmentSlot, ItemRegistry, spawn_world_item};
 use crate::player::component::Player;
-
-use super::world_item::{Pickupable, WorldItem};
 
 // ============================================================
 // Event
@@ -45,13 +42,9 @@ pub fn handle_drop_to_world(
             continue;
         };
 
-        // Calculate drop position (in front of player)
         let drop_position = transform.translation + transform.forward() * 1.5 + Vec3::Y * 0.5;
-
-        // Small upward velocity for nice arc
         let drop_velocity = Vec3::Y * 2.0 + transform.forward() * 1.0;
 
-        // Get item and remove from source
         let (item_id, quantity) = match event.source {
             DropSource::Inventory(slot) => {
                 let Some(stack) = inventory.remove_slot(slot) else {
@@ -69,7 +62,6 @@ pub fn handle_drop_to_world(
             }
         };
 
-        // Spawn in world
         spawn_world_item(
             &mut commands,
             &registry,
@@ -83,89 +75,4 @@ pub fn handle_drop_to_world(
 
         info!("📤 Dropped {} (x{}) to world", item_id, quantity);
     }
-}
-
-// ============================================================
-// Spawn functions
-// ============================================================
-
-/// Spawn a world item at position
-pub fn spawn_world_item(
-    commands: &mut Commands,
-    registry: &ItemRegistry,
-    id: ItemId,
-    quantity: u32,
-    position: Vec3,
-    velocity: Option<Vec3>,
-    meshes: &mut Assets<Mesh>,
-    materials: &mut Assets<StandardMaterial>,
-) -> Entity {
-    let def = registry.get(id);
-
-    let mut entity_commands = commands.spawn((
-        Name::new(def.name.clone()),
-        WorldItem::with_quantity(id, quantity),
-        Pickupable,
-        Transform::from_translation(position),
-        Visibility::Visible,
-    ));
-
-    // Physics
-    entity_commands.insert((
-        RigidBody::Dynamic,
-        Collider::cuboid(0.15, 0.15, 0.15),
-        Restitution::coefficient(0.3),
-    ));
-
-    // Initial velocity
-    if let Some(vel) = velocity {
-        entity_commands.insert(Velocity {
-            linvel: vel,
-            ..default()
-        });
-    }
-
-    let entity = entity_commands.id();
-
-    // Visual as child
-    spawn_item_visual(commands, entity, def, meshes, materials);
-
-    entity
-}
-
-/// Spawn visual meshes for item
-fn spawn_item_visual(
-    commands: &mut Commands,
-    parent: Entity,
-    def: &crate::items::ItemDefinition,
-    meshes: &mut Assets<Mesh>,
-    materials: &mut Assets<StandardMaterial>,
-) {
-    use crate::items::visual::{ItemVisual, VisualShape};
-
-    let ItemVisual::Primitive { parts } = &def.visual else {
-        return;
-    };
-
-    commands.entity(parent).with_children(|builder| {
-        for part in parts {
-            let mesh = match part.shape {
-                VisualShape::Cube => Mesh::from(Cuboid::new(part.size.0, part.size.1, part.size.2)),
-                VisualShape::Sphere => Mesh::from(Sphere::new(part.size.0)),
-                VisualShape::Cylinder => Mesh::from(Cylinder::new(part.size.0, part.size.1)),
-                VisualShape::Capsule => Mesh::from(Capsule3d::new(part.size.0, part.size.1)),
-            };
-
-            let material = StandardMaterial {
-                base_color: Color::srgba(part.color.0, part.color.1, part.color.2, part.color.3),
-                ..default()
-            };
-
-            builder.spawn((
-                Mesh3d(meshes.add(mesh)),
-                MeshMaterial3d(materials.add(material)),
-                Transform::from_translation(Vec3::new(part.offset.0, part.offset.1, part.offset.2)),
-            ));
-        }
-    });
 }

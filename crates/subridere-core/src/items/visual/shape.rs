@@ -1,5 +1,5 @@
 // items/visual/shape.rs — Primitive shapes for item visuals
-
+use bevy::prelude::{Color, Vec3};
 use serde::{Deserialize, Serialize};
 
 /// A single visual part of an item
@@ -59,5 +59,20 @@ impl VisualPart {
     pub fn with_offset(mut self, offset: (f32, f32, f32)) -> Self {
         self.offset = offset;
         self
+    }
+
+    /// Convert offset tuple to Vec3
+    pub fn offset_vec3(&self) -> Vec3 {
+        Vec3::new(self.offset.0, self.offset.1, self.offset.2)
+    }
+
+    /// Convert size tuple to Vec3
+    pub fn size_vec3(&self) -> Vec3 {
+        Vec3::new(self.size.0, self.size.1, self.size.2)
+    }
+
+    /// Convert color to Bevy Color
+    pub fn bevy_color(&self) -> Color {
+        Color::srgba(self.color.0, self.color.1, self.color.2, self.color.3)
     }
 }

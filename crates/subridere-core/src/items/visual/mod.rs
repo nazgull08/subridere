@@ -1,8 +1,10 @@
 // items/visual/mod.rs — Item visual representation
 
 mod shape;
+mod spawn;
 
 pub use shape::{VisualPart, VisualShape};
+pub use spawn::{spawn_item_visual, spawn_item_visual_with_colliders};
 
 use serde::{Deserialize, Serialize};
 

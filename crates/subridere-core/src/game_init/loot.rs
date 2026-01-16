@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::inventory::systems::drop::spawn_world_item;
-use crate::items::{ItemId, ItemRegistry};
+use crate::items::{ItemId, ItemRegistry, spawn_world_item};
 use crate::world::room::types::RoomMap;
 
 use super::state::InitStage;

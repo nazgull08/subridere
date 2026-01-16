@@ -48,7 +48,6 @@ pub fn run() {
         .add_plugins(InputPlugin)
         .add_plugins(FpsStatsPlugin)
         .add_plugins(HudUiPlugin)
-        //.add_plugins(UiInventoryPlugin)
         // ── Game logic ───────────────────────────
         .add_plugins(StatsPlugin)
         .add_plugins(UnitPlugin)

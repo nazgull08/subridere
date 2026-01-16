@@ -7,6 +7,7 @@ pub mod registry;
 pub mod slots;
 pub mod stack;
 pub mod visual;
+pub mod world;
 
 mod generated {
     include!(concat!(env!("OUT_DIR"), "/item_ids.rs"));
@@ -21,3 +22,4 @@ pub use registry::{ItemRegistry, registry_loaded};
 pub use slots::EquipmentSlot;
 pub use stack::ItemStack;
 pub use visual::{ItemVisual, VisualPart, VisualShape};
+pub use world::{Pickupable, Targeted, WorldItem, spawn_world_item};
