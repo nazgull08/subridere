@@ -5,7 +5,6 @@ use crate::items::{ItemId, ItemRegistry, spawn_world_item};
 use crate::world::room::types::RoomMap;
 
 use super::state::InitStage;
-use crate::core::components::GameEntity;
 
 /// Spawns random loot items across maze rooms
 pub fn spawn_loot(
@@ -152,6 +151,20 @@ pub fn spawn_loot(
         "🧤 Gauntlet R",
     );
 
+    spawn_items_with_marker(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &registry,
+        ItemId::VitalityHelm,
+        2,
+        &room_positions,
+        room_size,
+        spawn_height,
+        &mut rng,
+        "💚 Vitality Helmet",
+    );
+
     // === ACCESSORIES ===
     spawn_items_with_marker(
         &mut commands,
@@ -233,11 +246,8 @@ fn spawn_items_with_marker(
         let room_pos = room_positions[room_idx];
         let pos = calculate_spawn_position(&room_pos, &room_size, spawn_height, rng);
 
-        let entity = spawn_world_item(commands, registry, item_id, 1, pos, None, meshes, materials);
-
-        // ← ДОБАВИТЬ: пометить item как GameEntity
-        commands.entity(entity).insert(GameEntity);
-
+        let _entity =
+            spawn_world_item(commands, registry, item_id, 1, pos, None, meshes, materials);
         info!("  {} {} at room {:?}", label, i + 1, room_pos);
     }
 }

@@ -3,6 +3,8 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use crate::stats::{ModifierOp, ModifierTarget};
+
 use super::flags::ItemFlags;
 use super::slots::{AccessorySlot, ArmorSlot, WeaponSlot};
 use super::visual::ItemVisual;
@@ -135,23 +137,20 @@ fn default_speed() -> f32 {
 /// Armor-specific properties
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ArmorData {
-    /// Defense value
     pub defense: f32,
-
-    /// Equipment slot
     pub slot: ArmorSlot,
-
-    /// Magic resistance bonus
     #[serde(default)]
     pub magic_resist: f32,
+    #[serde(default)]
+    pub modifiers: Vec<(ModifierTarget, ModifierOp)>,
 }
 
 /// Accessory-specific properties
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccessoryData {
-    /// Equipment slot
     pub slot: AccessorySlot,
-    // Future: effects, bonuses, etc.
+    #[serde(default)]
+    pub modifiers: Vec<(ModifierTarget, ModifierOp)>,
 }
 
 /// Consumable-specific properties

@@ -2,12 +2,15 @@
 (
     id: "chainmail_vest",
     name: "Chainmail Vest",
-    description: "A vest of interlocking iron rings. Good protection without restricting movement.",
+    description: "A vest of interlocking iron rings. Enchanted to aid magical recovery.",
 
     category: Armor((
         defense: 8.0,
         slot: Cuirass,
         magic_resist: 0.0,
+        modifiers: [
+            (ManaRegen, Flat(2)),
+        ],
     )),
 
     weight: 8.0,

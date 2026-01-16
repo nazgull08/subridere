@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::items::ItemId;
 
@@ -28,7 +29,7 @@ pub enum ModifierSource {
 }
 
 /// Что модифицируем
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ModifierTarget {
     // Первичные
     Might,
@@ -63,7 +64,7 @@ pub enum ModifierTarget {
 }
 
 /// Тип операции
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum ModifierOp {
     /// Плоское добавление: +10
     Flat(f32),
@@ -108,6 +109,14 @@ impl StatModifiers {
     /// Удалить все от источника (например, при снятии предмета)
     pub fn remove_by_source(&mut self, source: &ModifierSource) {
         self.modifiers.retain(|m| &m.source != source);
+    }
+
+    /// Удалить модификаторы, не прошедшие фильтр
+    pub fn retain<F>(&mut self, mut f: F)
+    where
+        F: FnMut(&StatModifier) -> bool,
+    {
+        self.modifiers.retain(|m| f(m));
     }
 
     /// Есть ли модификаторы от источника?

@@ -1,0 +1,49 @@
+// Vitality Helm — helmet that boosts fortitude
+(
+    id: "vitality_helm",
+    name: "Vitality Helm",
+    description: "An enchanted helmet that strengthens the wearer's constitution.",
+
+    category: Armor((
+        defense: 3.0,
+        slot: Helmet,
+        magic_resist: 0.0,
+        modifiers: [
+            (Fortitude, Flat(2.0)),
+        ],
+    )),
+
+    weight: 3.5,
+    value: 120,
+    max_stack: 1,
+
+    flags: (),
+
+    icon: "textures/items/vitality_helm_icon.png",
+
+    visual: Primitive(
+        parts: [
+            // Купол шлема (зеленоватый — символ жизненной силы)
+            (
+                shape: Sphere,
+                size: (0.44, 0.36, 0.44),
+                offset: (0.0, 0.0, 0.0),
+                color: (0.3, 0.5, 0.35, 1.0),
+            ),
+            // Ободок
+            (
+                shape: Cylinder,
+                size: (0.48, 0.06, 0.48),
+                offset: (0.0, -0.24, 0.0),
+                color: (0.4, 0.6, 0.4, 1.0),
+            ),
+            // Руна на лбу (маленький куб)
+            (
+                shape: Cube,
+                size: (0.08, 0.08, 0.04),
+                offset: (0.0, 0.1, 0.4),
+                color: (0.2, 0.8, 0.3, 1.0),
+            ),
+        ]
+    ),
+)

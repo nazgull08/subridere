@@ -47,28 +47,37 @@ pub fn sync_level_display(
 
 /// Sync attribute values
 pub fn sync_attributes_display(
-    player_query: Query<&Attributes, With<Player>>,
+    player_query: Query<(&Attributes, &ComputedStats), With<Player>>, // ← Добавить ComputedStats
     mut value_texts: Query<(&AttributeValueText, &mut Text)>,
     mut bars: Query<(&AttributeBar, &mut Node)>,
-    mut buttons: Query<(&IncreaseAttributeButton, &mut Visibility)>, // Changed
+    mut buttons: Query<(&IncreaseAttributeButton, &mut Visibility)>,
 ) {
-    let Ok(attrs) = player_query.single() else {
+    let Ok((attrs, stats)) = player_query.single() else {
+        // ← Деструктурировать оба
         return;
     };
 
-    // Values
+    // Values — показываем базовое + бонус
     for (attr_text, mut text) in &mut value_texts {
-        text.0 = format!("{}", attrs.get(attr_text.0));
+        let base = attrs.get(attr_text.0);
+        let total = stats.get_attribute(attr_text.0) as u8;
+        if total > base {
+            text.0 = format!("{} (+{})", base, total - base);
+        } else if total < base {
+            text.0 = format!("{} ({})", base, total as i8 - base as i8); // дебафф
+        } else {
+            text.0 = format!("{}", base);
+        }
     }
 
-    // Bars (percentage of max 30)
+    // Bars — показываем итоговое значение
     for (attr_bar, mut node) in &mut bars {
-        let value = attrs.get(attr_bar.0) as f32;
+        let value = stats.get_attribute(attr_bar.0);
         let percent = (value / Attributes::MAX_VALUE as f32) * 100.0;
         node.width = Val::Percent(percent);
     }
 
-    // Hide buttons if no points available
+    // Buttons — проверяем базовое (можно ли тратить очки)
     let can_spend = attrs.unspent_points > 0;
     for (btn, mut vis) in &mut buttons {
         let can_increase = can_spend && attrs.get(btn.0) < Attributes::MAX_VALUE;

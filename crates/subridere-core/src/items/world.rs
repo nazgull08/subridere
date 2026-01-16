@@ -3,6 +3,8 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+use crate::core::components::GameEntity;
+
 use super::visual::{ItemVisual, spawn_item_visual_with_colliders};
 use super::{ItemId, ItemRegistry};
 
@@ -56,6 +58,7 @@ pub fn spawn_world_item(
             linear_damping: 2.0,
             angular_damping: 1.5,
         },
+        GameEntity,
     ));
 
     if let Some(vel) = velocity {
