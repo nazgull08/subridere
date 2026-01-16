@@ -3,8 +3,9 @@ use bevy_ui_actions::prelude::*;
 
 use crate::inventory::component::{Equipment, Inventory};
 use crate::inventory::systems::{DropSource, DropToWorldEvent};
-use crate::items::{EquipmentSlot, ItemRegistry, ItemStack};
+use crate::items::{ConsumableEffect, EquipmentSlot, ItemCategory, ItemRegistry, ItemStack};
 use crate::player::component::Player;
+use crate::stats::{Health, Mana, Stamina};
 
 use super::components::{EquipmentSlotUI, InventorySlotUI};
 
@@ -99,6 +100,87 @@ impl UiAction for DropToWorldAction {
 
         world.send_event(DropToWorldEvent { source });
         info!("📤 Queued drop to world: {:?}", source);
+    }
+}
+
+// ============================================================
+// Use Consumable (Right Click)
+// ============================================================
+
+pub struct UseConsumableAction {
+    pub slot_index: usize,
+}
+
+impl UiAction for UseConsumableAction {
+    fn execute(&self, world: &mut World) {
+        use_consumable(world, self.slot_index);
+    }
+}
+
+fn use_consumable(world: &mut World, slot_index: usize) {
+    // 1. Получить item_id из слота
+    let item_id = {
+        let mut query = world.query_filtered::<&Inventory, With<Player>>();
+        let Ok(inventory) = query.single(world) else {
+            return;
+        };
+        inventory.get(slot_index).map(|stack| stack.id)
+    };
+
+    let Some(id) = item_id else {
+        return;
+    };
+
+    // 2. Проверить, что это consumable, и получить эффект
+    let effect = {
+        let registry = world.resource::<ItemRegistry>();
+        let def = registry.get(id);
+        match &def.category {
+            ItemCategory::Consumable(data) => Some(data.effect.clone()),
+            _ => None,
+        }
+    };
+
+    let Some(effect) = effect else {
+        return; // Не consumable — молча игнорируем
+    };
+
+    // 3. Применить эффект
+    {
+        let mut query =
+            world.query_filtered::<(&mut Health, &mut Mana, &mut Stamina), With<Player>>();
+        if let Ok((mut health, mut mana, mut stamina)) = query.single_mut(world) {
+            match effect {
+                ConsumableEffect::Heal(amount) => {
+                    health.heal(amount);
+                    info!("❤️ Healed for {:.0}", amount);
+                }
+                ConsumableEffect::RestoreMana(amount) => {
+                    mana.restore(amount);
+                    info!("💙 Restored {:.0} mana", amount);
+                }
+                ConsumableEffect::RestoreStamina(amount) => {
+                    stamina.restore(amount);
+                    info!("💚 Restored {:.0} stamina", amount);
+                }
+            }
+        }
+    }
+
+    // 4. Уменьшить stack или удалить предмет
+    {
+        let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
+        if let Ok(mut inventory) = query.single_mut(world) {
+            if let Some(stack) = inventory.get_mut(slot_index) {
+                if stack.quantity > 1 {
+                    stack.quantity -= 1;
+                    info!("📦 {} remaining", stack.quantity);
+                } else {
+                    inventory.remove_slot(slot_index);
+                    info!("📦 Item consumed");
+                }
+            }
+        }
     }
 }
 

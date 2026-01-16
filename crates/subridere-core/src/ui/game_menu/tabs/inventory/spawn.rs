@@ -3,7 +3,9 @@ use bevy_ui_actions::prelude::*;
 
 use crate::items::EquipmentSlot;
 
-use super::actions::{DropToEquipmentSlot, DropToInventorySlot, DropToWorldAction};
+use super::actions::{
+    DropToEquipmentSlot, DropToInventorySlot, DropToWorldAction, UseConsumableAction,
+};
 use super::components::*;
 use super::layout::*;
 
@@ -274,6 +276,7 @@ fn spawn_inventory_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, 
                 target_index: index,
             }),
             OnDragCancel::new(DropToWorldAction),
+            OnRightClick::new(UseConsumableAction { slot_index: index }),
             Interaction::None,
             Name::new(format!("Slot {}", index)),
         ))
