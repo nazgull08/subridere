@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use rand::Rng;
 
 use super::state::InitStage;
+use crate::core::components::GameEntity;
 
 /// Spawns worms randomly across maze rooms
 pub fn spawn_test_enemies(
@@ -15,20 +16,17 @@ pub fn spawn_test_enemies(
 ) {
     let mut rng = rand::thread_rng();
 
-    // Room configuration
     let room_size = Vec3::new(12.0, 6.0, 12.0);
-    let spawn_height = 2.0; // Spawn worms 2m above floor
+    let spawn_height = 2.0;
 
-    // Collect all room positions
     let room_positions: Vec<IVec3> = room_map.rooms.keys().copied().collect();
 
     if room_positions.is_empty() {
         warn!("No rooms found in RoomMap!");
-        next_state.set(InitStage::Done);
+        next_state.set(InitStage::ItemsReady);
         return;
     }
 
-    // Spawn 3-5 worms randomly
     let worm_count = rng.gen_range(3..=5);
 
     info!(
@@ -38,27 +36,23 @@ pub fn spawn_test_enemies(
     );
 
     for i in 0..worm_count {
-        // Pick random room
         let room_idx = rng.gen_range(0..room_positions.len());
         let room_pos = room_positions[room_idx];
 
-        // Calculate world position (center of room)
         let world_pos = Vec3::new(
             room_pos.x as f32 * room_size.x,
             spawn_height,
             room_pos.z as f32 * room_size.z,
         );
 
-        // Random offset within room (don't spawn exactly in center)
-        let offset = Vec3::new(
-            rng.gen_range(-3.0..3.0), // ±3m in X
-            0.0,
-            rng.gen_range(-3.0..3.0), // ±3m in Z
-        );
+        let offset = Vec3::new(rng.gen_range(-3.0..3.0), 0.0, rng.gen_range(-3.0..3.0));
 
         let final_pos = world_pos + offset;
 
-        spawn_worm(&mut commands, &mut meshes, &mut materials, final_pos);
+        let worm_entity = spawn_worm(&mut commands, &mut meshes, &mut materials, final_pos);
+
+        // ← ДОБАВИТЬ: пометить worm как GameEntity
+        commands.entity(worm_entity).insert(GameEntity);
 
         info!(
             "  🐛 Worm {} spawned at room {:?} (world: {:?})",

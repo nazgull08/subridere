@@ -1,5 +1,3 @@
-// src/game_init/maze_rooms.rs
-
 use crate::world::builders::room::spawn_simple_room;
 use crate::world::generators::maze::generate_maze;
 use crate::world::room::types::{DoorFlags, RoomMap, RoomMetadata, WallFlags};
@@ -7,6 +5,7 @@ use bevy::prelude::*;
 use rand::{Rng, thread_rng};
 
 use super::state::InitStage;
+use crate::core::components::GameEntity;
 
 /// Спавним лабиринт из комнат в сетке width×height
 pub fn spawn_maze_rooms(
@@ -29,7 +28,6 @@ pub fn spawn_maze_rooms(
     for x in 0..width {
         for z in 0..height {
             let pos = IVec3::new(x, 0, z);
-            // по умолчанию все стены закрыты
             let has_light = rng.gen_bool(0.3);
             let meta = RoomMetadata {
                 wall_flags: WallFlags::default(),
@@ -48,10 +46,8 @@ pub fn spawn_maze_rooms(
             let pos3 = IVec3::new(x, 0, z);
             let meta = room_map.rooms.get_mut(&pos3).unwrap();
 
-            // соединения из графа
             let neighbors = graph.get(&cell).cloned().unwrap_or_default();
 
-            // для каждого направления выставляем wall/door
             // back (z-1)
             if neighbors.contains(&(cell + IVec2::new(0, -1))) {
                 meta.door_flags.back = true;
@@ -100,9 +96,14 @@ pub fn spawn_maze_rooms(
             meta.wall_flags.clone(),
             meta.door_flags.clone(),
         );
+
+        // ← ДОБАВИТЬ: пометить комнату как GameEntity
+        commands.entity(ent).insert(GameEntity);
+
         meta.entity = Some(ent);
     }
 
+    info!("✅ Maze spawned: {}x{} rooms", width, height);
     next_state.set(InitStage::MazeReady);
 }
 
@@ -117,12 +118,12 @@ pub fn spawn_room_lights(
         }
 
         let room_entity = room.entity.unwrap();
-        let light_pos = Vec3::new(0.0, 5.0, 0.0); // чуть выше пола, по центру
+        let light_pos = Vec3::new(0.0, 5.0, 0.0);
 
         commands.entity(room_entity).with_children(|child| {
             child.spawn((
                 PointLight {
-                    color: Color::srgb(0.0, 0.7, 0.0), // тёплый свет
+                    color: Color::srgb(0.0, 0.7, 0.0),
                     intensity: 1_000_000.0,
                     range: 200.0,
                     shadows_enabled: true,
@@ -130,8 +131,11 @@ pub fn spawn_room_lights(
                 },
                 Transform::from_translation(light_pos),
                 Name::new("RoomLight"),
+                // Не нужен GameEntity - удалится вместе с родителем
             ));
         });
-        next_state.set(InitStage::LightsReady);
     }
+
+    info!("✅ Room lights spawned");
+    next_state.set(InitStage::LightsReady);
 }

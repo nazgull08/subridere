@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 
+use crate::app::AppState;
+
 use super::damage::apply_damage;
-use super::health::regenerate_health;
+use super::health::{check_player_death, regenerate_health}; // ← ИЗМЕНИТЬ
 use super::level::plugin::LevelPlugin;
 use super::mana::regenerate_mana;
 use super::recalculate::recalculate_stats;
@@ -11,18 +13,19 @@ pub struct StatsPlugin;
 
 impl Plugin for StatsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(LevelPlugin) // <-- NEW
-            .add_systems(
-                Update,
-                (
-                    recalculate_stats,
-                    regenerate_health,
-                    regenerate_mana,
-                    regenerate_stamina,
-                    apply_damage,
-                )
-                    .chain(),
-            );
+        app.add_plugins(LevelPlugin).add_systems(
+            Update,
+            (
+                recalculate_stats,
+                regenerate_health,
+                regenerate_mana,
+                regenerate_stamina,
+                apply_damage,
+                check_player_death, // ← ДОБАВИТЬ
+            )
+                .chain()
+                .run_if(in_state(AppState::InGame)), // ← ДОБАВИТЬ
+        );
 
         info!("✅ Stats plugin initialized");
     }
@@ -31,8 +34,8 @@ impl Plugin for StatsPlugin {
 /// Bundle для сущности с полной системой статов
 #[derive(Bundle, Default)]
 pub struct StatsBundle {
-    pub level: super::Level,           // <-- NEW
-    pub experience: super::Experience, // <-- NEW
+    pub level: super::Level,
+    pub experience: super::Experience,
     pub attributes: super::Attributes,
     pub computed: super::ComputedStats,
     pub modifiers: super::StatModifiers,
@@ -63,7 +66,7 @@ impl StatsBundle {
 pub struct SimpleStatsBundle {
     pub health: super::Health,
     pub computed: super::ComputedStats,
-    pub experience_reward: super::ExperienceReward, // <-- NEW
+    pub experience_reward: super::ExperienceReward,
 }
 
 impl SimpleStatsBundle {

@@ -3,6 +3,7 @@ use bevy_rapier3d::prelude::*;
 
 use crate::{
     camera::flycam::FlyCamera,
+    core::components::GameEntity,
     fighting::{projectile::weapons::CurrentWeapon, weapon_display::spawn::create_weapon_display},
     input::component::PlayerControlled,
     inventory::{Equipment, Inventory},
@@ -48,6 +49,7 @@ pub fn spawn_player(
         .insert(CurrentWeapon::default())
         .insert(Inventory::default())
         .insert(Equipment::default())
+        .insert(GameEntity)
         .id();
 
     commands.entity(player_id).with_children(|parent| {

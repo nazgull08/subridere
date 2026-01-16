@@ -19,7 +19,9 @@ use crate::items::ItemsPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::stats::plugin::StatsPlugin;
 use crate::ui::hud::plugin::HudUiPlugin;
-use crate::ui::{GameMenuPlugin, MainMenuPlugin, SystemMenuPlugin};
+use crate::ui::{
+    DeathScreenPlugin, GameMenuPlugin, MainMenuPlugin, SystemMenuPlugin, VictoryScreenPlugin,
+};
 use crate::unit::plugin::UnitPlugin;
 use crate::world::plugin::WorldPlugin;
 
@@ -59,5 +61,7 @@ pub fn run() {
         .add_plugins(GameMenuPlugin)
         .add_plugins(SystemMenuPlugin)
         .add_plugins(MainMenuPlugin)
+        .add_plugins(DeathScreenPlugin)
+        .add_plugins(VictoryScreenPlugin)
         .run();
 }

@@ -1,5 +1,3 @@
-// game_init/loot.rs — Spawn loot items across maze rooms
-
 use bevy::prelude::*;
 use rand::Rng;
 
@@ -8,6 +6,7 @@ use crate::items::{ItemId, ItemRegistry};
 use crate::world::room::types::RoomMap;
 
 use super::state::InitStage;
+use crate::core::components::GameEntity;
 
 /// Spawns random loot items across maze rooms
 pub fn spawn_loot(
@@ -20,11 +19,9 @@ pub fn spawn_loot(
 ) {
     let mut rng = rand::thread_rng();
 
-    // Room configuration
     let room_size = Vec3::new(12.0, 6.0, 12.0);
     let spawn_height = 1.0;
 
-    // Collect all room positions
     let room_positions: Vec<IVec3> = room_map.rooms.keys().copied().collect();
 
     if room_positions.is_empty() {
@@ -36,9 +33,7 @@ pub fn spawn_loot(
     info!("🎲 Spawning loot across {} rooms", room_positions.len());
 
     // === WEAPONS ===
-
-    // Spawn 2 wooden staffs
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -51,9 +46,7 @@ pub fn spawn_loot(
         &mut rng,
         "🪄 Staff",
     );
-
-    // Spawn 2 iron swords
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -66,9 +59,7 @@ pub fn spawn_loot(
         &mut rng,
         "⚔️ Sword",
     );
-
-    // Spawn 1 wooden shield
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -83,9 +74,7 @@ pub fn spawn_loot(
     );
 
     // === ARMOR ===
-
-    // Spawn 2 iron helmets
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -98,9 +87,7 @@ pub fn spawn_loot(
         &mut rng,
         "🪖 Helmet",
     );
-
-    // Spawn 1 chainmail vest
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -113,9 +100,7 @@ pub fn spawn_loot(
         &mut rng,
         "🦺 Chainmail",
     );
-
-    // Spawn boots (left and right separately!)
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -128,7 +113,7 @@ pub fn spawn_loot(
         &mut rng,
         "👢 Boot L",
     );
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -141,9 +126,7 @@ pub fn spawn_loot(
         &mut rng,
         "👢 Boot R",
     );
-
-    // Spawn gauntlets (left and right separately!)
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -156,7 +139,7 @@ pub fn spawn_loot(
         &mut rng,
         "🧤 Gauntlet L",
     );
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -171,9 +154,7 @@ pub fn spawn_loot(
     );
 
     // === ACCESSORIES ===
-
-    // Spawn 3 gold rings
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -188,9 +169,7 @@ pub fn spawn_loot(
     );
 
     // === CONSUMABLES ===
-
-    // Spawn 4 health potions
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -203,9 +182,7 @@ pub fn spawn_loot(
         &mut rng,
         "❤️ Health Pot",
     );
-
-    // Spawn 3 mana potions
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -220,9 +197,7 @@ pub fn spawn_loot(
     );
 
     // === MISC ===
-
-    // Spawn 5 torches
-    spawn_items(
+    spawn_items_with_marker(
         &mut commands,
         &mut meshes,
         &mut materials,
@@ -240,8 +215,8 @@ pub fn spawn_loot(
     next_state.set(InitStage::Done);
 }
 
-/// Helper function to spawn multiple items of the same type
-fn spawn_items(
+/// Helper function to spawn multiple items and mark them as GameEntity
+fn spawn_items_with_marker(
     commands: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
@@ -259,7 +234,10 @@ fn spawn_items(
         let room_pos = room_positions[room_idx];
         let pos = calculate_spawn_position(&room_pos, &room_size, spawn_height, rng);
 
-        spawn_world_item(commands, registry, item_id, 1, pos, None, meshes, materials);
+        let entity = spawn_world_item(commands, registry, item_id, 1, pos, None, meshes, materials);
+
+        // ← ДОБАВИТЬ: пометить item как GameEntity
+        commands.entity(entity).insert(GameEntity);
 
         info!("  {} {} at room {:?}", label, i + 1, room_pos);
     }

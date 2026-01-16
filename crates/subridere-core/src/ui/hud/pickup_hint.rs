@@ -1,16 +1,16 @@
-use crate::inventory::systems::TargetedItem;
 use bevy::prelude::*;
+
+use crate::inventory::systems::TargetedItem;
 
 /// Marker component for pickup hint text
 #[derive(Component)]
 pub struct PickupHintText;
 
-/// Spawn pickup hint UI element (called once at startup)
 pub fn spawn_pickup_hint(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/dogica.ttf");
 
     commands.spawn((
-        Text::new(""), // Start empty
+        Text::new(""),
         TextFont {
             font,
             font_size: 20.0,
@@ -31,7 +31,13 @@ pub fn spawn_pickup_hint(mut commands: Commands, asset_server: Res<AssetServer>)
     info!("✅ Pickup hint UI spawned");
 }
 
-/// Update hint text based on what player is looking at
+pub fn despawn_pickup_hint(mut commands: Commands, query: Query<Entity, With<PickupHintText>>) {
+    for entity in &query {
+        commands.entity(entity).despawn();
+    }
+    info!("🧹 Pickup hint despawned");
+}
+
 pub fn update_pickup_hint(
     targeted: Res<TargetedItem>,
     mut hint_query: Query<&mut Text, With<PickupHintText>>,
@@ -40,11 +46,9 @@ pub fn update_pickup_hint(
         return;
     };
 
-    // If looking at an item, show hint
     if let Some(item_name) = &targeted.name {
         text.0 = format!("Press [E] to pick up {}", item_name);
     } else {
-        // Not looking at anything, clear text
         text.0.clear();
     }
 }

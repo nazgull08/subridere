@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::app::AppState;
+
 #[derive(Component)]
 pub struct Crosshair;
 
@@ -7,12 +9,12 @@ pub struct CrosshairPlugin;
 
 impl Plugin for CrosshairPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_crosshair);
+        app.add_systems(OnEnter(AppState::InGame), spawn_crosshair)
+            .add_systems(OnExit(AppState::InGame), despawn_crosshair);
     }
 }
 
 fn spawn_crosshair(mut commands: Commands) {
-    // Центральная точка
     commands.spawn((
         Node {
             position_type: PositionType::Absolute,
@@ -21,8 +23,8 @@ fn spawn_crosshair(mut commands: Commands) {
             width: Val::Px(4.0),
             height: Val::Px(4.0),
             margin: UiRect {
-                left: Val::Px(-2.0), // Смещение на половину ширины
-                top: Val::Px(-2.0),  // Смещение на половину высоты
+                left: Val::Px(-2.0),
+                top: Val::Px(-2.0),
                 ..default()
             },
             ..default()
@@ -31,4 +33,12 @@ fn spawn_crosshair(mut commands: Commands) {
         Crosshair,
         Name::new("Crosshair"),
     ));
+    info!("✅ Crosshair spawned");
+}
+
+fn despawn_crosshair(mut commands: Commands, query: Query<Entity, With<Crosshair>>) {
+    for entity in &query {
+        commands.entity(entity).despawn();
+    }
+    info!("🧹 Crosshair despawned");
 }

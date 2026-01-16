@@ -6,6 +6,7 @@ use bevy::prelude::*;
 #[states(scoped_entities)]
 pub enum InitStage {
     #[default]
+    Idle,
     Setup,
     AssetsLoading,
     MazeReady,
@@ -23,6 +24,7 @@ pub trait Next {
 impl Next for InitStage {
     fn next(&self) -> Self {
         match self {
+            InitStage::Idle => InitStage::Setup,
             InitStage::Setup => InitStage::AssetsLoading,
             InitStage::AssetsLoading => InitStage::MazeReady,
             InitStage::MazeReady => InitStage::LightsReady,

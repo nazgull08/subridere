@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_ui_actions::prelude::*;
 
 use super::components::SystemMenuRoot;
+use crate::app::AppState;
 
 pub fn spawn_system_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/dogica.ttf");
@@ -17,7 +18,7 @@ pub fn spawn_system_menu(mut commands: Commands, asset_server: Res<AssetServer>)
                 ..default()
             },
             BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.7)),
-            GlobalZIndex(200), // Выше game_menu
+            GlobalZIndex(200),
             SystemMenuRoot,
             Name::new("System Menu Root"),
         ))
@@ -59,6 +60,9 @@ pub fn spawn_system_menu(mut commands: Commands, asset_server: Res<AssetServer>)
 
                 // Settings button (заглушка)
                 spawn_menu_button(panel, &font, "Settings", SettingsAction);
+
+                // Main Menu button ← НОВОЕ
+                spawn_menu_button(panel, &font, "Main Menu", MainMenuAction);
 
                 // Quit button
                 spawn_menu_button(panel, &font, "Quit Game", QuitGameAction);
@@ -128,10 +132,30 @@ impl UiAction for SettingsAction {
     }
 }
 
+// ← НОВЫЙ ACTION
+struct MainMenuAction;
+
+impl UiAction for MainMenuAction {
+    fn execute(&self, world: &mut World) {
+        info!("🏠 Returning to Main Menu...");
+
+        // Закрыть System Menu
+        world
+            .resource_mut::<NextState<super::state::SystemMenuState>>()
+            .set(super::state::SystemMenuState::Closed);
+
+        // Перейти в MainMenu (это триггернёт cleanup_game)
+        world
+            .resource_mut::<NextState<AppState>>()
+            .set(AppState::MainMenu);
+    }
+}
+
 struct QuitGameAction;
 
 impl UiAction for QuitGameAction {
     fn execute(&self, world: &mut World) {
+        info!("👋 Quitting game");
         world.send_event(AppExit::Success);
     }
 }

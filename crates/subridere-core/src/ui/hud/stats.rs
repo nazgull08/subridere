@@ -1,6 +1,8 @@
+use bevy::prelude::*;
+
+use crate::app::AppState;
 use crate::player::component::Player;
 use crate::stats::{health::component::Health, mana::component::Mana, stamina::component::Stamina};
-use bevy::prelude::*;
 
 #[derive(Component)]
 struct HpText;
@@ -9,12 +11,17 @@ struct MpText;
 #[derive(Component)]
 struct SpText;
 
+/// Marker for the stats UI root (for cleanup)
+#[derive(Component)]
+struct StatsUiRoot;
+
 pub struct UiStatsPlugin;
 
 impl Plugin for UiStatsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_stats_ui)
-            .add_systems(Update, update_stats_ui);
+        app.add_systems(OnEnter(AppState::InGame), spawn_stats_ui)
+            .add_systems(OnExit(AppState::InGame), despawn_stats_ui)
+            .add_systems(Update, update_stats_ui.run_if(in_state(AppState::InGame)));
     }
 }
 
@@ -30,6 +37,7 @@ fn spawn_stats_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 flex_direction: FlexDirection::Column,
                 ..default()
             },
+            StatsUiRoot,
             Name::new("Stats UI Root"),
         ))
         .with_children(|parent| {
@@ -90,25 +98,34 @@ fn spawn_stats_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                     SpText,
                 ));
         });
+
+    info!("✅ Stats UI spawned");
+}
+
+fn despawn_stats_ui(mut commands: Commands, query: Query<Entity, With<StatsUiRoot>>) {
+    for entity in &query {
+        commands.entity(entity).despawn();
+    }
+    info!("🧹 Stats UI despawned");
 }
 
 fn update_stats_ui(
-    player: Query<(&Health, Option<&Mana>, Option<&Stamina>), With<Player>>,
-    mut span_sets: ParamSet<(
-        Query<&mut TextSpan, With<HpText>>,
-        Query<&mut TextSpan, With<MpText>>,
-        Query<&mut TextSpan, With<SpText>>,
-    )>,
+    player_query: Query<(&Health, &Mana, &Stamina), With<Player>>,
+    mut hp_query: Query<&mut TextSpan, (With<HpText>, Without<MpText>, Without<SpText>)>,
+    mut mp_query: Query<&mut TextSpan, (With<MpText>, Without<HpText>, Without<SpText>)>,
+    mut sp_query: Query<&mut TextSpan, (With<SpText>, Without<HpText>, Without<MpText>)>,
 ) {
-    if let Ok((health, mana, stamina)) = player.single() {
-        if let Ok(mut span) = span_sets.p0().single_mut() {
-            **span = format!("{:.0}", health.current);
-        }
-        if let (Some(m), Ok(mut span)) = (mana, span_sets.p1().single_mut()) {
-            **span = format!("{:.0}", m.current);
-        }
-        if let (Some(s), Ok(mut span)) = (stamina, span_sets.p2().single_mut()) {
-            **span = format!("{:.0}", s.current);
-        }
+    let Ok((health, mana, stamina)) = player_query.single() else {
+        return;
+    };
+
+    if let Ok(mut hp) = hp_query.single_mut() {
+        **hp = format!("{:.0}/{:.0}", health.current, health.max);
+    }
+    if let Ok(mut mp) = mp_query.single_mut() {
+        **mp = format!("{:.0}/{:.0}", mana.current, mana.max);
+    }
+    if let Ok(mut sp) = sp_query.single_mut() {
+        **sp = format!("{:.0}/{:.0}", stamina.current, stamina.max);
     }
 }

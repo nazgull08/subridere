@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use bevy::window::CursorGrabMode;
 
+use crate::app::AppState;
 use crate::ui::game_menu::GameMenuState;
 
 use super::spawn::{despawn_system_menu, spawn_system_menu};
@@ -11,15 +11,12 @@ pub struct SystemMenuPlugin;
 impl Plugin for SystemMenuPlugin {
     fn build(&self, app: &mut App) {
         app.init_state::<SystemMenuState>()
-            .add_systems(Update, handle_escape_input)
             .add_systems(
-                OnEnter(SystemMenuState::Open),
-                (spawn_system_menu, show_cursor),
+                Update,
+                handle_escape_input.run_if(in_state(AppState::InGame)),
             )
-            .add_systems(
-                OnExit(SystemMenuState::Open),
-                (despawn_system_menu, hide_cursor),
-            );
+            .add_systems(OnEnter(SystemMenuState::Open), spawn_system_menu)
+            .add_systems(OnExit(SystemMenuState::Open), despawn_system_menu);
 
         info!("✅ System Menu plugin initialized");
     }
@@ -35,12 +32,11 @@ fn handle_escape_input(
         return;
     }
 
-    // Если game_menu открыт — не открываем system_menu (game_menu сам закроется)
+    // Если game_menu открыт — не открываем system_menu
     if *game_menu_state.get() == GameMenuState::Open {
         return;
     }
 
-    // Toggle system menu
     match system_menu_state.get() {
         SystemMenuState::Closed => {
             info!("⚙️ Opening system menu");
@@ -50,24 +46,5 @@ fn handle_escape_input(
             info!("⚙️ Closing system menu");
             next_system_menu.set(SystemMenuState::Closed);
         }
-    }
-}
-
-fn show_cursor(mut windows: Query<&mut Window>) {
-    if let Ok(mut window) = windows.single_mut() {
-        window.cursor_options.grab_mode = CursorGrabMode::None;
-        window.cursor_options.visible = true;
-    }
-}
-
-fn hide_cursor(mut windows: Query<&mut Window>, game_menu_state: Res<State<GameMenuState>>) {
-    // Не скрываем курсор если game_menu ещё открыт
-    if *game_menu_state.get() == GameMenuState::Open {
-        return;
-    }
-
-    if let Ok(mut window) = windows.single_mut() {
-        window.cursor_options.grab_mode = CursorGrabMode::Confined;
-        window.cursor_options.visible = false;
     }
 }

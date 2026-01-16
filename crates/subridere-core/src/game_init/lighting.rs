@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::core::components::GameEntity;
+
 pub fn setup_ambient_light(mut _commands: Commands) {
     /*
     commands.insert_resource(AmbientLight {
@@ -23,5 +25,6 @@ pub fn spawn_lighting(mut commands: Commands) {
         },
         Transform::from_xyz(10.0, 20.0, 10.0),
         Name::new("MainLight"),
+        GameEntity,
     ));
 }

@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use block_bodies_core::serialization::BlockBodyFile;
 
+use crate::core::components::GameEntity; // ← ДОБАВИТЬ
 use crate::{
     enemies::{
         components::Enemy,
@@ -13,7 +14,7 @@ use crate::{
 /// Physics - HEAD (active, controlled)
 const HEAD_MASS: f32 = 4.0;
 const HEAD_LINEAR_DAMPING: f32 = 4.0;
-const HEAD_ANGULAR_DAMPING: f32 = 1.5; // ✅ СНИЖЕН (было 3.0) - легче повернуть
+const HEAD_ANGULAR_DAMPING: f32 = 1.5;
 
 /// Physics - BODY (passive, follows)
 const BODY_MASS: f32 = 0.5;
@@ -56,6 +57,7 @@ pub fn spawn_worm(
             GlobalTransform::default(),
             Visibility::Visible,
             Name::new("WormRoot"),
+            GameEntity, // ← ДОБАВИТЬ
         ))
         .id();
 
@@ -90,10 +92,7 @@ pub fn spawn_worm(
             (BODY_MASS, BODY_LINEAR_DAMPING, BODY_ANGULAR_DAMPING)
         };
 
-        // ✅ CRITICAL: Rotate cuboid so that +X is "forward" direction
-        // By default Bevy cuboid's longest axis might not align with movement
-        // We spawn along +X axis, so we want +X to be forward
-        let rotation = Quat::from_rotation_y(0.0); // Identity - +X is already forward
+        let rotation = Quat::from_rotation_y(0.0);
 
         let mut segment_cmd = commands.spawn((
             Mesh3d(mesh),
@@ -111,6 +110,7 @@ pub fn spawn_worm(
             Velocity::default(),
             Ccd::enabled(),
             Name::new(format!("Worm_{}", part.name)),
+            GameEntity, // ← ДОБАВИТЬ
         ));
 
         if is_head {
@@ -151,7 +151,7 @@ pub fn spawn_worm(
             .local_anchor1(anchor_on_parent)
             .local_anchor2(anchor_on_child)
             .limits(JointAxis::AngX, [-1.0, 1.0])
-            .limits(JointAxis::AngY, [-1.2, 1.2]) // Wide for side-to-side flex
+            .limits(JointAxis::AngY, [-1.2, 1.2])
             .limits(JointAxis::AngZ, [-1.0, 1.0])
             .build();
 
