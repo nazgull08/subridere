@@ -4,7 +4,6 @@ use bevy_rapier3d::prelude::*;
 use crate::{
     camera::flycam::FlyCamera,
     core::components::GameEntity,
-    fighting::{projectile::weapons::CurrentWeapon, weapon_display::spawn::create_weapon_display},
     input::component::PlayerControlled,
     inventory::{Equipment, Inventory},
     player::{
@@ -46,7 +45,6 @@ pub fn spawn_player(
         .insert(Visibility::Visible)
         .insert(Name::new("Player"))
         .insert(StatsBundle::default())
-        .insert(CurrentWeapon::default())
         .insert(Inventory::default())
         .insert(Equipment::default())
         .insert(GameEntity)
@@ -58,15 +56,7 @@ pub fn spawn_player(
                 Camera3d::default(),
                 FlyCamera::default(),
                 Name::new("PlayerCamera"),
-            ))
-            .with_children(|camera_parent| {
-                create_weapon_display(
-                    camera_parent,
-                    CurrentWeapon::default().weapon_type,
-                    meshes.as_mut(),
-                    materials.as_mut(),
-                );
-            });
+            ));
     });
 
     next_state.set(InitStage::EnemiesReady);

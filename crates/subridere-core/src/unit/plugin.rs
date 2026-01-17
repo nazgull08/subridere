@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use super::systems::intent::{
     apply_dash_intents, apply_jump_intents, apply_move_intents, apply_turn_intents, apply_velocity,
-    handle_shoot_intents, update_grounded_system,
+    update_grounded_system,
 };
 
 pub struct UnitPlugin;
@@ -18,7 +18,6 @@ impl Plugin for UnitPlugin {
                 apply_dash_intents,
                 apply_turn_intents,
                 apply_velocity,
-                handle_shoot_intents,
             ),
         );
     }

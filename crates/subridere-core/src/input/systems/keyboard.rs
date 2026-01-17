@@ -51,20 +51,3 @@ pub fn handle_keyboard_input(
         }
     }
 }
-
-pub fn handle_shoot_input(
-    buttons: Res<ButtonInput<MouseButton>>,
-    mut commands: Commands,
-    camera_query: Query<&GlobalTransform, With<Camera>>,
-    player_query: Query<Entity, With<PlayerControlled>>,
-) {
-    if buttons.just_pressed(MouseButton::Right) {
-        if let (Ok(camera), Ok(player_entity)) = (camera_query.single(), player_query.single()) {
-            let direction = camera.forward();
-            commands
-                .entity(player_entity)
-                .insert(ShootIntent(*direction));
-            println!("🔫 ShootIntent created");
-        }
-    }
-}

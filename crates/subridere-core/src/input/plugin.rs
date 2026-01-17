@@ -6,8 +6,7 @@ use crate::ui::game_menu::game_menu_closed;
 use crate::ui::system_menu::system_menu_closed;
 
 use super::cursor::update_cursor_state;
-use super::systems::keyboard::{handle_keyboard_input, handle_shoot_input};
-use super::systems::weapon_switch::weapon_switch_system;
+use super::systems::keyboard::{handle_keyboard_input};
 
 pub struct InputPlugin;
 
@@ -21,8 +20,6 @@ impl Plugin for InputPlugin {
                 Update,
                 (
                     handle_keyboard_input,
-                    handle_shoot_input,
-                    weapon_switch_system,
                 )
                     .run_if(in_state(AppState::InGame))
                     .run_if(game_menu_closed)
