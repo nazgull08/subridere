@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::fighting::melee::MeleeAttackIntent;
 use crate::input::component::PlayerControlled;
 use crate::input::resources::InputSettings;
 use crate::unit::component::{DashIntent, JumpIntent, MoveIntent, ShootIntent};
@@ -48,6 +49,19 @@ pub fn handle_keyboard_input(
                 Vec3::NEG_Z
             };
             commands.entity(entity).insert(DashIntent(dash_dir));
+        }
+    }
+}
+
+pub fn handle_melee_input(
+    buttons: Res<ButtonInput<MouseButton>>,
+    mut commands: Commands,
+    player_query: Query<Entity, With<PlayerControlled>>,
+) {
+    if buttons.just_pressed(MouseButton::Left) {
+        if let Ok(player_entity) = player_query.single() {
+            commands.entity(player_entity).insert(MeleeAttackIntent);
+            info!("⚔️ MeleeAttackIntent created");
         }
     }
 }

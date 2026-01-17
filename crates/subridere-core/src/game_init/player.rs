@@ -4,6 +4,7 @@ use bevy_rapier3d::prelude::*;
 use crate::{
     camera::flycam::FlyCamera,
     core::components::GameEntity,
+    fighting::PlayerCombatState,
     input::component::PlayerControlled,
     inventory::{Equipment, Inventory},
     player::{
@@ -60,6 +61,7 @@ pub fn spawn_player(
         .insert(StatsBundle::default())
         .insert(Inventory::default())
         .insert(Equipment::default())
+        .insert(PlayerCombatState::default())
         .insert(GameEntity)
         .id();
 

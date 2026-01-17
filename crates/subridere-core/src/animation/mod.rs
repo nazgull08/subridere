@@ -1,3 +1,4 @@
+pub mod arms;
 pub mod events;
 pub mod plugin;
 

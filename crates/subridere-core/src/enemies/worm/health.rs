@@ -1,8 +1,5 @@
 use super::components::{Worm, WormHead, WormSegment};
-use crate::{
-    enemies::worm::death::spawn_corpse_on_death,
-    stats::health::component::Health,
-};
+use crate::{enemies::worm::death::spawn_corpse_on_death, stats::health::component::Health};
 use bevy::prelude::*;
 
 /// Despawns dead worms and spawns corpse

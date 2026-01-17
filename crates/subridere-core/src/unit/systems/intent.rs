@@ -108,4 +108,3 @@ pub fn apply_velocity(
         controller.translation = Some(velocity.0 * dt);
     }
 }
-
