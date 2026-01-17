@@ -1,8 +1,10 @@
+pub mod animation;
 pub mod app;
 pub mod audio;
 pub mod camera;
 pub mod core;
 pub mod enemies;
+pub mod fighting;
 pub mod game_init;
 pub mod input;
 pub mod inventory;
@@ -11,5 +13,5 @@ pub mod player;
 pub mod stats;
 pub mod ui;
 pub mod unit;
-pub mod utils;
+//pub mod utils;
 pub mod world;

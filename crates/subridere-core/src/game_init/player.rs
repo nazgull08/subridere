@@ -7,8 +7,8 @@ use crate::{
     input::component::PlayerControlled,
     inventory::{Equipment, Inventory},
     player::{
+        body::spawn_first_person_arms,
         component::{PLAYER_START_POS, Player, PlayerVisual},
-        visual::create_player_body_bundle,
     },
     stats::plugin::StatsBundle,
     unit::component::{Grounded, Unit, Velocity},
@@ -16,14 +16,25 @@ use crate::{
 
 use super::state::InitStage;
 
+/// Высота игрока
+const PLAYER_HEIGHT: f32 = 1.8;
+/// Высота глаз относительно центра коллайдера
+const EYE_HEIGHT: f32 = 0.7;
+
 pub fn spawn_player(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut next_state: ResMut<NextState<InitStage>>,
 ) {
-    let visual = PlayerVisual::default();
-    let (mesh, material) = create_player_body_bundle(&mut meshes, &mut materials, &visual);
+    // Материал для тела
+    let body_material = materials.add(StandardMaterial {
+        base_color: Color::srgb(0.2, 0.6, 0.8),
+        ..default()
+    });
+
+    // Меш тела (видимый)
+    let body_mesh = meshes.add(Cuboid::new(0.6, PLAYER_HEIGHT, 0.3));
 
     let player_id = commands
         .spawn_empty()
@@ -32,10 +43,12 @@ pub fn spawn_player(
         .insert(PlayerControlled)
         .insert(Grounded(true))
         .insert(Velocity::default())
-        .insert(visual)
-        .insert(mesh)
-        .insert(material)
-        .insert(Collider::capsule_y(0.9, 0.3))
+        .insert(PlayerVisual::default())
+        // Видимое тело
+        .insert(Mesh3d(body_mesh))
+        .insert(MeshMaterial3d(body_material))
+        // Физика
+        .insert(Collider::capsule_y(PLAYER_HEIGHT / 2.0 - 0.3, 0.3))
         .insert(KinematicCharacterController {
             offset: CharacterLength::Absolute(0.01),
             ..default()
@@ -50,14 +63,25 @@ pub fn spawn_player(
         .insert(GameEntity)
         .id();
 
-    commands.entity(player_id).with_children(|parent| {
-        parent
-            .spawn((
-                Camera3d::default(),
-                FlyCamera::default(),
-                Name::new("PlayerCamera"),
-            ));
-    });
+    // Камера на уровне глаз
+    let camera_entity = commands
+        .spawn((
+            Camera3d::default(),
+            FlyCamera::default(),
+            Transform::from_translation(Vec3::new(0.0, EYE_HEIGHT, 0.0)),
+            Name::new("PlayerCamera"),
+        ))
+        .id();
+
+    commands.entity(player_id).add_child(camera_entity);
+
+    // Руки
+    spawn_first_person_arms(
+        &mut commands,
+        camera_entity,
+        meshes.as_mut(),
+        materials.as_mut(),
+    );
 
     next_state.set(InitStage::EnemiesReady);
 }

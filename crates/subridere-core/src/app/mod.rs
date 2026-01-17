@@ -7,10 +7,12 @@ use bevy_kira_audio::AudioPlugin;
 use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
 //use bevy_rapier3d::render::RapierDebugRenderPlugin;
 
+use crate::animation::PlayerAnimationPlugin;
 use crate::audio::plugin::SubAudioPlugin;
 use crate::camera::plugin::CameraPlugin;
 use crate::core::fps_stats::FpsStatsPlugin;
 use crate::enemies::EnemiesPlugin;
+use crate::fighting::CombatPlugin;
 use crate::game_init::plugin::GameInitPlugin;
 use crate::input::plugin::InputPlugin;
 use crate::inventory::InventoryPlugin;
@@ -51,6 +53,8 @@ pub fn run() {
         .add_plugins(StatsPlugin)
         .add_plugins(UnitPlugin)
         .add_plugins(PlayerPlugin)
+        .add_plugins(PlayerAnimationPlugin)
+        .add_plugins(CombatPlugin)
         .add_plugins(WorldPlugin)
         .add_plugins(EnemiesPlugin)
         .add_plugins(ItemsPlugin)
