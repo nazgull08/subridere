@@ -53,3 +53,11 @@ pub struct SlotQuantity;
 /// Label text for equipment slot
 #[derive(Component)]
 pub struct SlotLabel;
+
+/// Description panel root
+#[derive(Component)]
+pub struct DescriptionPanel;
+
+/// Text inside description panel
+#[derive(Component)]
+pub struct DescriptionText;

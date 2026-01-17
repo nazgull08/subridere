@@ -28,11 +28,9 @@ pub fn spawn_inventory_content(parent: &mut ChildSpawnerCommands, font: &Handle<
             Name::new("Inventory Content"),
         ))
         .with_children(|content| {
-            // Left: Equipment
             spawn_equipment_panel(content, font);
-
-            // Right: Inventory Grid
             spawn_inventory_grid(content, font);
+            spawn_description_panel(content, font);
         });
 }
 
@@ -319,6 +317,36 @@ fn spawn_inventory_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, 
                     ..default()
                 },
                 SlotQuantity,
+            ));
+        });
+}
+
+fn spawn_description_panel(parent: &mut ChildSpawnerCommands, font: &Handle<Font>) {
+    parent
+        .spawn((
+            Node {
+                width: Val::Px(200.0),
+                height: Val::Percent(100.0),
+                padding: UiRect::all(Val::Px(10.0)),
+                border: UiRect::all(Val::Px(1.0)),
+                flex_direction: FlexDirection::Column,
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.1, 0.1, 0.12, 0.8)),
+            BorderColor(Color::srgb(0.25, 0.25, 0.30)),
+            DescriptionPanel,
+            Name::new("Description Panel"),
+        ))
+        .with_children(|panel| {
+            panel.spawn((
+                Text::new(""),
+                TextFont {
+                    font: font.clone(),
+                    font_size: 11.0,
+                    ..default()
+                },
+                TextColor(TEXT_DIM),
+                DescriptionText,
             ));
         });
 }

@@ -9,7 +9,7 @@ use super::state::{GameMenuActiveTab, GameMenuState, game_menu_open};
 use super::tabs::character::sync::{
     sync_attributes_display, sync_level_display, sync_stats_display,
 };
-use super::tabs::inventory::sync::{sync_drag_visual, sync_slots};
+use super::tabs::inventory::sync::{sync_description_panel, sync_drag_visual, sync_slots};
 use super::tabs::inventory::tooltip::{clear_tooltip_on_unhover, update_hovered_tooltip};
 
 pub struct GameMenuPlugin;
@@ -40,6 +40,7 @@ impl Plugin for GameMenuPlugin {
                     // Inventory slot visuals
                     sync_slots,
                     sync_drag_visual,
+                    sync_description_panel,
                     // Character tab
                     sync_level_display,
                     sync_attributes_display,
