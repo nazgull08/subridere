@@ -1,4 +1,4 @@
-use bevy::{core_pipeline::bloom::Bloom, prelude::*};
+use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use crate::{
@@ -57,7 +57,6 @@ pub fn spawn_player(
             .spawn((
                 Camera3d::default(),
                 FlyCamera::default(),
-                Bloom::OLD_SCHOOL,
                 Name::new("PlayerCamera"),
             ))
             .with_children(|camera_parent| {

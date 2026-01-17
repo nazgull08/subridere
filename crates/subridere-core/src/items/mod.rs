@@ -15,7 +15,8 @@ mod generated {
 
 // Re-exports
 pub use definition::{
-    ArmorData, ConsumableData, ConsumableEffect, ItemCategory, ItemDefinition, WeaponData,
+    AccessoryData, ArmorData, ConsumableData, ConsumableEffect, ItemCategory, ItemDefinition,
+    WeaponData,
 };
 pub use flags::ItemFlags;
 pub use generated::ItemId;

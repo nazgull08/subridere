@@ -63,6 +63,48 @@ pub enum ModifierTarget {
     StatusResist,
 }
 
+// ============================================================
+// Display helpers
+// ============================================================
+
+impl ModifierTarget {
+    /// Human-readable name for UI
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            // Primary attributes
+            Self::Might => "Might",
+            Self::Fortitude => "Fortitude",
+            Self::Agility => "Agility",
+            Self::Arcana => "Arcana",
+            Self::Resolve => "Resolve",
+
+            // Resources
+            Self::MaxHealth => "Max HP",
+            Self::MaxMana => "Max Mana",
+            Self::MaxStamina => "Max Stamina",
+            Self::HealthRegen => "HP Regen",
+            Self::ManaRegen => "Mana Regen",
+            Self::StaminaRegen => "Stamina Regen",
+
+            // Combat
+            Self::MeleeDamage => "Melee Damage",
+            Self::MagicDamage => "Magic Damage",
+            Self::AttackSpeed => "Attack Speed",
+            Self::PhysicalDefense => "Defense",
+            Self::MagicResist => "Magic Resist",
+
+            // Movement
+            Self::MoveSpeed => "Move Speed",
+            Self::DodgeFrames => "Dodge Frames",
+
+            // Utility
+            Self::CarryCapacity => "Carry Capacity",
+            Self::KnockbackResist => "Knockback Resist",
+            Self::StatusResist => "Status Resist",
+        }
+    }
+}
+
 /// Тип операции
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum ModifierOp {
@@ -72,6 +114,30 @@ pub enum ModifierOp {
     Percent(f32),
     /// Умножение: ×1.5 (применяется после Flat и Percent)
     Multiply(f32),
+}
+
+impl ModifierOp {
+    /// Format value for UI display (e.g., "+10", "+15%", "×1.5")
+    pub fn format_value(&self) -> String {
+        match self {
+            Self::Flat(v) => {
+                if *v >= 0.0 {
+                    format!("+{:.0}", v)
+                } else {
+                    format!("{:.0}", v)
+                }
+            }
+            Self::Percent(v) => {
+                let pct = v * 100.0;
+                if *v >= 0.0 {
+                    format!("+{:.0}%", pct)
+                } else {
+                    format!("{:.0}%", pct)
+                }
+            }
+            Self::Multiply(v) => format!("×{:.1}", v),
+        }
+    }
 }
 
 impl StatModifiers {

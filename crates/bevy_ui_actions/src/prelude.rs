@@ -6,8 +6,9 @@ pub use crate::interactions::{
 };
 
 pub use crate::widgets::{
-    Active, Disabled, InteractiveVisual, ProgressBar, ProgressBarConfig, ProgressBarFill,
-    SpawnProgressBarExt, Tab, TabContent, TabGroup, Tooltip, TooltipState, TooltipStyle,
+    Active, BorderStyle, Disabled, InteractiveVisual, ProgressBar, ProgressBarConfig,
+    ProgressBarFill, Selected, SpawnProgressBarExt, StatDiff, Tab, TabContent, TabGroup, Tooltip,
+    TooltipBuilder, TooltipContent, TooltipSection, TooltipSet, TooltipState, TooltipStyle,
     VisualStyle,
 };
 

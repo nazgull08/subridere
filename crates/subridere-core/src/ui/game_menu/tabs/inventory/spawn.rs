@@ -2,6 +2,9 @@ use bevy::prelude::*;
 use bevy_ui_actions::prelude::*;
 
 use crate::items::EquipmentSlot;
+use crate::ui::game_menu::tabs::inventory::actions::{
+    ClearSelectionAction, SelectInventorySlotAction,
+};
 
 use super::actions::{
     DropToEquipmentSlot, DropToInventorySlot, DropToWorldAction, UseConsumableAction,
@@ -22,6 +25,8 @@ pub fn spawn_inventory_content(parent: &mut ChildSpawnerCommands, font: &Handle<
                 justify_content: JustifyContent::Center,
                 ..default()
             },
+            OnClick::new(ClearSelectionAction),
+            Interaction::None,
             Name::new("Inventory Content"),
         ))
         .with_children(|content| {
@@ -157,6 +162,7 @@ fn spawn_equipment_slot(
             DropTarget,
             OnDrop::new(DropToEquipmentSlot { target_slot: slot }),
             OnDragCancel::new(DropToWorldAction),
+            Tooltip::default(),
             Interaction::None,
             Name::new(format!("Equip: {:?}", slot)),
         ))
@@ -269,6 +275,7 @@ fn spawn_inventory_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, 
             },
             BackgroundColor(SLOT_EMPTY),
             BorderColor(SLOT_BORDER),
+            BorderStyle::slot(), // ← ДОБАВИТЬ
             InventorySlotUI { index },
             Draggable,
             DropTarget,
@@ -277,6 +284,8 @@ fn spawn_inventory_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, 
             }),
             OnDragCancel::new(DropToWorldAction),
             OnRightClick::new(UseConsumableAction { slot_index: index }),
+            OnClick::new(SelectInventorySlotAction { index }), // ← ДОБАВИТЬ
+            Tooltip::default(),
             Interaction::None,
             Name::new(format!("Slot {}", index)),
         ))
