@@ -1,13 +1,7 @@
 //! Dynamic tooltip generation for inventory UI.
-//!
-//! Instead of storing tooltip content on each slot, we generate it
-//! dynamically when the user hovers over a slot. This ensures:
-//! - Content is always up-to-date
-//! - No synchronization issues
-//! - Single source of truth (Inventory/Equipment components)
 
 use bevy::prelude::*;
-use bevy_ui_actions::{StatDiff, Tooltip, TooltipContent, TooltipState};
+use bevy_ui_actions::{StatDiff, Tooltip, TooltipContent, TooltipSection, TooltipState};
 
 use crate::inventory::component::{Equipment, Inventory};
 use crate::items::{
@@ -16,60 +10,49 @@ use crate::items::{
 };
 use crate::player::component::Player;
 
-use super::components::{EquipmentSlotUI, InventorySlotUI};
+use super::components::{SlotId, SlotUI};
 
 // ============================================================
 // Main System
 // ============================================================
 
-/// Dynamically generate tooltip content when hovering over inventory/equipment slots.
-///
-/// This system runs every frame when something is hovered, reading the current
-/// inventory state and building the tooltip content on-the-fly.
+/// Dynamically generate tooltip content when hovering over slots.
 pub fn update_hovered_tooltip(
     tooltip_state: Res<TooltipState>,
     player_query: Query<(&Inventory, &Equipment), With<Player>>,
     registry: Res<ItemRegistry>,
-    inv_slots: Query<&InventorySlotUI>,
-    eq_slots: Query<&EquipmentSlotUI>,
+    slots: Query<&SlotUI>,
     mut tooltips: Query<&mut Tooltip>,
 ) {
-    // Only process if something is hovered
     let Some(hovered_entity) = tooltip_state.hovered else {
         return;
     };
 
-    // Get tooltip component on hovered entity
     let Ok(mut tooltip) = tooltips.get_mut(hovered_entity) else {
         return;
     };
 
-    // Skip if content already set (avoid rebuilding every frame)
     if !tooltip.content.is_empty() {
         return;
     }
 
-    // Get player inventory/equipment
     let Ok((inventory, equipment)) = player_query.single() else {
         return;
     };
 
-    // Check if this is an inventory slot
-    if let Ok(slot_ui) = inv_slots.get(hovered_entity) {
-        tooltip.content =
-            build_inventory_slot_content(slot_ui.index, inventory, equipment, &registry);
+    let Ok(slot_ui) = slots.get(hovered_entity) else {
         return;
-    }
+    };
 
-    // Check if this is an equipment slot
-    if let Ok(slot_ui) = eq_slots.get(hovered_entity) {
-        tooltip.content = build_equipment_slot_content(slot_ui.slot, equipment, &registry);
-    }
+    tooltip.content = match slot_ui.id {
+        SlotId::Inventory(index) => {
+            build_inventory_slot_content(index, inventory, equipment, &registry)
+        }
+        SlotId::Equipment(slot) => build_equipment_slot_content(slot, equipment, &registry),
+    };
 }
 
 /// Clear tooltip content when hover ends.
-///
-/// This ensures fresh content is generated on next hover.
 pub fn clear_tooltip_on_unhover(
     tooltip_state: Res<TooltipState>,
     mut last_hovered: Local<Option<Entity>>,
@@ -77,9 +60,7 @@ pub fn clear_tooltip_on_unhover(
 ) {
     let current = tooltip_state.hovered;
 
-    // Detect when hover ends or changes
     if *last_hovered != current {
-        // Clear old hovered entity's tooltip content
         if let Some(old_entity) = *last_hovered {
             if let Ok(mut tooltip) = tooltips.get_mut(old_entity) {
                 tooltip.content = TooltipContent::Empty;
@@ -105,7 +86,6 @@ fn build_inventory_slot_content(
 
     let def = registry.get(stack.id);
 
-    // Find equipped item in same slot for comparison
     let equipped_def = def
         .equipment_slot()
         .and_then(|slot| equipment.get(slot))
@@ -124,10 +104,7 @@ fn build_equipment_slot_content(
             let def = registry.get(item_id);
             build_item_content(def, None, None)
         }
-        None => {
-            // Empty slot — show slot name
-            TooltipContent::Text(slot.display_name().to_string())
-        }
+        None => TooltipContent::Text(slot.display_name().to_string()),
     }
 }
 
@@ -140,8 +117,6 @@ fn build_item_content(
     equipped: Option<&ItemDefinition>,
     quantity: Option<u32>,
 ) -> TooltipContent {
-    use bevy_ui_actions::TooltipSection;
-
     let mut sections = Vec::new();
 
     // === Title ===
@@ -162,12 +137,6 @@ fn build_item_content(
         ItemCategory::Accessory(a) => add_accessory_stats(&mut sections, a),
         ItemCategory::Consumable(c) => add_consumable_stats(&mut sections, c),
         ItemCategory::Misc => {}
-    }
-
-    // === Description ===
-    if !def.description.is_empty() {
-        sections.push(TooltipSection::Separator);
-        sections.push(TooltipSection::Text(def.description.clone()));
     }
 
     // === Footer ===
@@ -204,32 +173,27 @@ fn build_subtitle(def: &ItemDefinition) -> String {
 // ============================================================
 
 fn add_weapon_stats(
-    sections: &mut Vec<bevy_ui_actions::TooltipSection>,
+    sections: &mut Vec<TooltipSection>,
     weapon: &crate::items::WeaponData,
     equipped: Option<&ItemDefinition>,
 ) {
-    use bevy_ui_actions::TooltipSection;
-
     let eq_weapon = equipped.and_then(|e| match &e.category {
         ItemCategory::Weapon(w) => Some(w),
         _ => None,
     });
 
-    // Damage
     sections.push(TooltipSection::Stat {
         label: "Damage".to_string(),
         value: format!("{:.0}", weapon.damage),
         diff: eq_weapon.map(|eq| calc_diff(weapon.damage, eq.damage)),
     });
 
-    // Speed
     sections.push(TooltipSection::Stat {
         label: "Speed".to_string(),
         value: format!("{:.1}x", weapon.speed),
         diff: eq_weapon.map(|eq| calc_diff(weapon.speed, eq.speed)),
     });
 
-    // Mana cost
     if weapon.mana_cost > 0.0 {
         sections.push(TooltipSection::Stat {
             label: "Mana Cost".to_string(),
@@ -240,25 +204,21 @@ fn add_weapon_stats(
 }
 
 fn add_armor_stats(
-    sections: &mut Vec<bevy_ui_actions::TooltipSection>,
+    sections: &mut Vec<TooltipSection>,
     armor: &ArmorData,
     equipped: Option<&ItemDefinition>,
 ) {
-    use bevy_ui_actions::TooltipSection;
-
     let eq_armor = equipped.and_then(|e| match &e.category {
         ItemCategory::Armor(a) => Some(a),
         _ => None,
     });
 
-    // Defense
     sections.push(TooltipSection::Stat {
         label: "Defense".to_string(),
         value: format!("{:.0}", armor.defense),
         diff: eq_armor.map(|eq| calc_diff(armor.defense, eq.defense)),
     });
 
-    // Magic Resist
     if armor.magic_resist > 0.0 {
         sections.push(TooltipSection::Stat {
             label: "Magic Resist".to_string(),
@@ -267,7 +227,6 @@ fn add_armor_stats(
         });
     }
 
-    // Modifiers
     for (target, op) in &armor.modifiers {
         sections.push(TooltipSection::Stat {
             label: target.display_name().to_string(),
@@ -277,12 +236,7 @@ fn add_armor_stats(
     }
 }
 
-fn add_accessory_stats(
-    sections: &mut Vec<bevy_ui_actions::TooltipSection>,
-    accessory: &AccessoryData,
-) {
-    use bevy_ui_actions::TooltipSection;
-
+fn add_accessory_stats(sections: &mut Vec<TooltipSection>, accessory: &AccessoryData) {
     for (target, op) in &accessory.modifiers {
         sections.push(TooltipSection::Stat {
             label: target.display_name().to_string(),
@@ -292,12 +246,7 @@ fn add_accessory_stats(
     }
 }
 
-fn add_consumable_stats(
-    sections: &mut Vec<bevy_ui_actions::TooltipSection>,
-    consumable: &ConsumableData,
-) {
-    use bevy_ui_actions::TooltipSection;
-
+fn add_consumable_stats(sections: &mut Vec<TooltipSection>, consumable: &ConsumableData) {
     let effect_text = match &consumable.effect {
         ConsumableEffect::Heal(amount) => format!("Restores {:.0} HP", amount),
         ConsumableEffect::RestoreMana(amount) => format!("Restores {:.0} Mana", amount),

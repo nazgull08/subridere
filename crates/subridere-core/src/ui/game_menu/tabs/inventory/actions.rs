@@ -6,9 +6,8 @@ use crate::inventory::systems::{DropSource, DropToWorldEvent};
 use crate::items::{ConsumableEffect, EquipmentSlot, ItemCategory, ItemRegistry, ItemStack};
 use crate::player::component::Player;
 use crate::stats::{Health, Mana, Stamina};
-use crate::ui::game_menu::tabs::inventory::SelectedSlot;
 
-use super::components::{EquipmentSlotUI, InventorySlotUI};
+use super::components::{SelectedSlot, SlotId, SlotUI};
 
 // ============================================================
 // Drop to Inventory Slot
@@ -35,6 +34,9 @@ impl UiAction for DropToInventorySlot {
                 unequip_to_slot(world, source_slot, self.target_index);
             }
         }
+
+        // Select the target slot after drop
+        set_selection(world, SlotId::Inventory(self.target_index));
     }
 }
 
@@ -52,16 +54,22 @@ impl UiAction for DropToEquipmentSlot {
             return;
         };
 
-        match source {
+        let success = match source {
             DropSource::Inventory(source_index) => {
-                equip_from_inventory(world, source_index, self.target_slot);
+                equip_from_inventory(world, source_index, self.target_slot)
             }
             DropSource::Equipment(source_slot) => {
                 if source_slot == self.target_slot {
                     return;
                 }
                 info!("Equipment to equipment swap not implemented");
+                false
             }
+        };
+
+        // Select the target slot only on success
+        if success {
+            set_selection(world, SlotId::Equipment(self.target_slot));
         }
     }
 }
@@ -99,6 +107,9 @@ impl UiAction for DropToWorldAction {
             return;
         }
 
+        // Clear selection when dropping to world
+        clear_selection(world);
+
         world.send_event(DropToWorldEvent { source });
         info!("📤 Queued drop to world: {:?}", source);
     }
@@ -118,8 +129,190 @@ impl UiAction for UseConsumableAction {
     }
 }
 
+// ============================================================
+// Selection Actions
+// ============================================================
+
+pub struct SelectSlotAction {
+    pub id: SlotId,
+}
+
+impl UiAction for SelectSlotAction {
+    fn execute(&self, world: &mut World) {
+        let current = world.resource::<SelectedSlot>().0;
+
+        // Click on same slot — deselect
+        if current == Some(self.id) {
+            clear_selection(world);
+            return;
+        }
+
+        // Select new slot
+        set_selection(world, self.id);
+    }
+}
+
+pub struct ClearSelectionAction;
+
+impl UiAction for ClearSelectionAction {
+    fn execute(&self, world: &mut World) {
+        clear_selection(world);
+    }
+}
+
+// ============================================================
+// Selection Helpers
+// ============================================================
+
+fn set_selection(world: &mut World, id: SlotId) {
+    // Remove old selection
+    let current = world.resource::<SelectedSlot>().0;
+    if let Some(old_id) = current {
+        if let Some(entity) = find_slot_entity(world, old_id) {
+            world.entity_mut(entity).remove::<Selected>();
+        }
+    }
+
+    // Add new selection
+    if let Some(entity) = find_slot_entity(world, id) {
+        world.entity_mut(entity).insert(Selected);
+    }
+    world.resource_mut::<SelectedSlot>().0 = Some(id);
+}
+
+fn clear_selection(world: &mut World) {
+    let current = world.resource::<SelectedSlot>().0;
+    if let Some(id) = current {
+        if let Some(entity) = find_slot_entity(world, id) {
+            world.entity_mut(entity).remove::<Selected>();
+        }
+    }
+    world.resource_mut::<SelectedSlot>().clear();
+}
+
+fn find_slot_entity(world: &mut World, id: SlotId) -> Option<Entity> {
+    let mut query = world.query::<(Entity, &SlotUI)>();
+    query
+        .iter(world)
+        .find(|(_, slot)| slot.id == id)
+        .map(|(e, _)| e)
+}
+
+// ============================================================
+// Drag Helpers
+// ============================================================
+
+fn get_drag_source(world: &mut World) -> Option<DropSource> {
+    let drag_state = world.resource::<DragState>();
+    let dragging_entity = drag_state.dragging?;
+
+    if let Some(slot_ui) = world.get::<SlotUI>(dragging_entity) {
+        return match slot_ui.id {
+            SlotId::Inventory(index) => Some(DropSource::Inventory(index)),
+            SlotId::Equipment(slot) => Some(DropSource::Equipment(slot)),
+        };
+    }
+
+    None
+}
+
+fn swap_inventory_slots(world: &mut World, a: usize, b: usize) {
+    let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
+    if let Ok(mut inventory) = query.single_mut(world) {
+        inventory.swap(a, b);
+        info!("🔄 Swapped slots {} ↔ {}", a, b);
+    }
+}
+
+fn unequip_to_slot(world: &mut World, equip_slot: EquipmentSlot, inv_slot: usize) {
+    let item_id = {
+        let mut query = world.query_filtered::<&Equipment, With<Player>>();
+        let Ok(equipment) = query.single(world) else {
+            return;
+        };
+        equipment.get(equip_slot)
+    };
+
+    let Some(id) = item_id else {
+        return;
+    };
+
+    {
+        let mut query = world.query_filtered::<&mut Equipment, With<Player>>();
+        if let Ok(mut equipment) = query.single_mut(world) {
+            equipment.unequip(equip_slot);
+        }
+    }
+
+    {
+        let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
+        if let Ok(mut inventory) = query.single_mut(world) {
+            inventory.set_slot(inv_slot, Some(ItemStack::new(id)));
+        }
+    }
+
+    info!("📤 Unequipped {:?} to slot {}", equip_slot, inv_slot);
+}
+
+fn equip_from_inventory(world: &mut World, inv_slot: usize, equip_slot: EquipmentSlot) -> bool {
+    let item_id = {
+        let mut query = world.query_filtered::<&Inventory, With<Player>>();
+        let Ok(inventory) = query.single(world) else {
+            return false;
+        };
+        inventory.get(inv_slot).map(|stack| stack.id)
+    };
+
+    let Some(id) = item_id else {
+        return false;
+    };
+
+    let valid_slot = {
+        let registry = world.resource::<ItemRegistry>();
+        registry.get(id).equipment_slot() == Some(equip_slot)
+    };
+
+    if !valid_slot {
+        info!("❌ Cannot equip in {:?}", equip_slot);
+        return false;
+    }
+
+    // Remove from inventory slot
+    {
+        let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
+        if let Ok(mut inventory) = query.single_mut(world) {
+            inventory.remove_slot(inv_slot);
+        }
+    }
+
+    // Equip and get previously equipped item
+    let previously_equipped = {
+        let mut query = world.query_filtered::<&mut Equipment, With<Player>>();
+        if let Ok(mut equipment) = query.single_mut(world) {
+            equipment.equip(equip_slot, id)
+        } else {
+            None
+        }
+    };
+
+    // Put previously equipped item back into the inventory slot
+    if let Some(old_id) = previously_equipped {
+        let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
+        if let Ok(mut inventory) = query.single_mut(world) {
+            inventory.set_slot(inv_slot, Some(ItemStack::new(old_id)));
+        }
+        info!(
+            "🔄 Equipped {} to {:?}, swapped with {}",
+            id, equip_slot, old_id
+        );
+    } else {
+        info!("✅ Equipped {} to {:?}", id, equip_slot);
+    }
+
+    true
+}
+
 fn use_consumable(world: &mut World, slot_index: usize) {
-    // 1. Получить item_id из слота
     let item_id = {
         let mut query = world.query_filtered::<&Inventory, With<Player>>();
         let Ok(inventory) = query.single(world) else {
@@ -132,7 +325,6 @@ fn use_consumable(world: &mut World, slot_index: usize) {
         return;
     };
 
-    // 2. Проверить, что это consumable, и получить эффект
     let effect = {
         let registry = world.resource::<ItemRegistry>();
         let def = registry.get(id);
@@ -143,10 +335,9 @@ fn use_consumable(world: &mut World, slot_index: usize) {
     };
 
     let Some(effect) = effect else {
-        return; // Не consumable — молча игнорируем
+        return;
     };
 
-    // 3. Применить эффект
     {
         let mut query =
             world.query_filtered::<(&mut Health, &mut Mana, &mut Stamina), With<Player>>();
@@ -168,7 +359,6 @@ fn use_consumable(world: &mut World, slot_index: usize) {
         }
     }
 
-    // 4. Уменьшить stack или удалить предмет
     {
         let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
         if let Ok(mut inventory) = query.single_mut(world) {
@@ -183,215 +373,4 @@ fn use_consumable(world: &mut World, slot_index: usize) {
             }
         }
     }
-}
-
-// ============================================================
-// Helpers
-// ============================================================
-
-fn get_drag_source(world: &mut World) -> Option<DropSource> {
-    let drag_state = world.resource::<DragState>();
-    let dragging_entity = drag_state.dragging?;
-
-    if let Some(inv_slot) = world.get::<InventorySlotUI>(dragging_entity) {
-        return Some(DropSource::Inventory(inv_slot.index));
-    }
-
-    if let Some(equip_slot) = world.get::<EquipmentSlotUI>(dragging_entity) {
-        return Some(DropSource::Equipment(equip_slot.slot));
-    }
-
-    None
-}
-
-fn swap_inventory_slots(world: &mut World, a: usize, b: usize) {
-    let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
-    if let Ok(mut inventory) = query.single_mut(world) {
-        inventory.swap(a, b);
-        info!("🔄 Swapped slots {} ↔ {}", a, b);
-    }
-}
-
-fn unequip_to_slot(world: &mut World, equip_slot: EquipmentSlot, inv_slot: usize) {
-    let mut inv_query = world.query_filtered::<&mut Inventory, With<Player>>();
-    let mut equip_query = world.query_filtered::<&mut Equipment, With<Player>>();
-
-    let item_id = {
-        let Ok(equipment) = equip_query.single(world) else {
-            return;
-        };
-        equipment.get(equip_slot)
-    };
-
-    let Some(id) = item_id else {
-        return;
-    };
-
-    if let Ok(mut equipment) = equip_query.single_mut(world) {
-        equipment.unequip(equip_slot);
-    }
-
-    if let Ok(mut inventory) = inv_query.single_mut(world) {
-        inventory.set_slot(inv_slot, Some(ItemStack::new(id)));
-    }
-
-    info!("📤 Unequipped {:?} to slot {}", equip_slot, inv_slot);
-}
-
-fn equip_from_inventory(world: &mut World, inv_slot: usize, equip_slot: EquipmentSlot) {
-    let item_id = {
-        let mut query = world.query_filtered::<&Inventory, With<Player>>();
-        let Ok(inventory) = query.single(world) else {
-            return;
-        };
-        inventory.get(inv_slot).map(|stack| stack.id)
-    };
-
-    let Some(id) = item_id else {
-        return;
-    };
-
-    let valid_slot = {
-        let registry = world.resource::<ItemRegistry>();
-        registry.get(id).equipment_slot() == Some(equip_slot)
-    };
-
-    if !valid_slot {
-        info!("❌ Cannot equip in {:?}", equip_slot);
-        return;
-    }
-
-    // Remove from inventory slot
-    {
-        let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
-        if let Ok(mut inventory) = query.single_mut(world) {
-            inventory.remove_slot(inv_slot);
-        }
-    }
-
-    // Equip and get previously equipped item
-    let previously_equipped = {
-        let mut query = world.query_filtered::<&mut Equipment, With<Player>>();
-        if let Ok(mut equipment) = query.single_mut(world) {
-            equipment.equip(equip_slot, id)
-        } else {
-            None
-        }
-    };
-
-    // Put previously equipped item back into the inventory slot we just emptied
-    if let Some(old_id) = previously_equipped {
-        let mut query = world.query_filtered::<&mut Inventory, With<Player>>();
-        if let Ok(mut inventory) = query.single_mut(world) {
-            inventory.set_slot(inv_slot, Some(ItemStack::new(old_id)));
-        }
-        info!(
-            "🔄 Equipped {} to {:?}, swapped with {}",
-            id, equip_slot, old_id
-        );
-    } else {
-        info!("✅ Equipped {} to {:?}", id, equip_slot);
-    }
-}
-
-pub struct SelectInventorySlotAction {
-    pub index: usize,
-}
-
-impl UiAction for SelectInventorySlotAction {
-    fn execute(&self, world: &mut World) {
-        select_inventory_slot(world, self.index);
-    }
-}
-
-fn select_inventory_slot(world: &mut World, index: usize) {
-    // Найти entity слота
-    let slot_entity = {
-        let mut query = world.query::<(Entity, &InventorySlotUI)>();
-        query
-            .iter(world)
-            .find(|(_, slot)| slot.index == index)
-            .map(|(e, _)| e)
-    };
-
-    let Some(clicked) = slot_entity else { return };
-
-    // Текущее выделение
-    let current = world.resource::<SelectedSlot>().inventory;
-
-    // Клик на тот же слот — снять выделение
-    if current == Some(index) {
-        world.entity_mut(clicked).remove::<Selected>();
-        world.resource_mut::<SelectedSlot>().clear();
-        return;
-    }
-
-    // Снять выделение с предыдущего inventory слота
-    if let Some(prev_index) = current {
-        let prev_entity = {
-            let mut query = world.query::<(Entity, &InventorySlotUI)>();
-            query
-                .iter(world)
-                .find(|(_, slot)| slot.index == prev_index)
-                .map(|(e, _)| e)
-        };
-        if let Some(prev) = prev_entity {
-            world.entity_mut(prev).remove::<Selected>();
-        }
-    }
-
-    // Снять выделение с equipment слота если был
-    clear_equipment_selection(world);
-
-    // Выделить новый
-    world.entity_mut(clicked).insert(Selected);
-    let mut selected = world.resource_mut::<SelectedSlot>();
-    selected.inventory = Some(index);
-    selected.equipment = None;
-}
-
-fn clear_equipment_selection(world: &mut World) {
-    let current_eq = world.resource::<SelectedSlot>().equipment;
-    if let Some(eq_slot) = current_eq {
-        let entity = {
-            let mut query = world.query::<(Entity, &EquipmentSlotUI)>();
-            query
-                .iter(world)
-                .find(|(_, slot)| slot.slot == eq_slot)
-                .map(|(e, _)| e)
-        };
-        if let Some(e) = entity {
-            world.entity_mut(e).remove::<Selected>();
-        }
-    }
-}
-
-pub struct ClearSelectionAction;
-
-impl UiAction for ClearSelectionAction {
-    fn execute(&self, world: &mut World) {
-        clear_all_selection(world);
-    }
-}
-
-fn clear_all_selection(world: &mut World) {
-    // Снять с inventory
-    if let Some(inv_index) = world.resource::<SelectedSlot>().inventory {
-        let entity = {
-            let mut query = world.query::<(Entity, &InventorySlotUI)>();
-            query
-                .iter(world)
-                .find(|(_, slot)| slot.index == inv_index)
-                .map(|(e, _)| e)
-        };
-        if let Some(e) = entity {
-            world.entity_mut(e).remove::<Selected>();
-        }
-    }
-
-    // Снять с equipment
-    clear_equipment_selection(world);
-
-    // Очистить ресурс
-    world.resource_mut::<SelectedSlot>().clear();
 }

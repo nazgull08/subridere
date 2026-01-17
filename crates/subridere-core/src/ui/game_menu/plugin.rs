@@ -2,14 +2,14 @@ use bevy::prelude::*;
 use bevy_ui_actions::{TooltipSet, TooltipStyle, UiActionsPlugin};
 
 use crate::app::AppState;
-use crate::ui::game_menu::tabs::inventory::SelectedSlot;
+use crate::ui::game_menu::tabs::inventory::{SelectedSlot, SlotUI};
 
 use super::spawn::{despawn_game_menu, save_active_tab, spawn_game_menu};
 use super::state::{GameMenuActiveTab, GameMenuState, game_menu_open};
 use super::tabs::character::sync::{
     sync_attributes_display, sync_level_display, sync_stats_display,
 };
-use super::tabs::inventory::sync::{sync_drag_visual, sync_equipment_slots, sync_inventory_slots};
+use super::tabs::inventory::sync::{sync_drag_visual, sync_slots};
 use super::tabs::inventory::tooltip::{clear_tooltip_on_unhover, update_hovered_tooltip};
 
 pub struct GameMenuPlugin;
@@ -31,15 +31,14 @@ impl Plugin for GameMenuPlugin {
             .add_systems(OnEnter(GameMenuState::Open), spawn_game_menu)
             .add_systems(
                 OnExit(GameMenuState::Open),
-                (save_active_tab, despawn_game_menu).chain(),
+                (save_active_tab, clear_selection_on_close, despawn_game_menu).chain(),
             )
             // Menu systems (only when open)
             .add_systems(
                 Update,
                 (
                     // Inventory slot visuals
-                    sync_inventory_slots,
-                    sync_equipment_slots,
+                    sync_slots,
                     sync_drag_visual,
                     // Character tab
                     sync_level_display,
@@ -66,6 +65,15 @@ fn init_tooltip_style(mut style: ResMut<TooltipStyle>, asset_server: Res<AssetSe
     let font = asset_server.load("fonts/dogica.ttf");
     style.font = Some(font);
     info!("✅ Tooltip style initialized with font");
+}
+
+/// Clear selection when menu closes
+fn clear_selection_on_close(
+    mut selected: ResMut<SelectedSlot>,
+    _slots: Query<&mut bevy_ui_actions::Selected, With<SlotUI>>,
+) {
+    // Note: entities will be despawned anyway, but let's clear the resource
+    selected.clear();
 }
 
 fn toggle_game_menu_input(

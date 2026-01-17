@@ -2,12 +2,10 @@ use bevy::prelude::*;
 use bevy_ui_actions::prelude::*;
 
 use crate::items::EquipmentSlot;
-use crate::ui::game_menu::tabs::inventory::actions::{
-    ClearSelectionAction, SelectInventorySlotAction,
-};
 
 use super::actions::{
-    DropToEquipmentSlot, DropToInventorySlot, DropToWorldAction, UseConsumableAction,
+    ClearSelectionAction, DropToEquipmentSlot, DropToInventorySlot, DropToWorldAction,
+    SelectSlotAction, UseConsumableAction,
 };
 use super::components::*;
 use super::layout::*;
@@ -68,7 +66,14 @@ fn spawn_equipment_panel(parent: &mut ChildSpawnerCommands, font: &Handle<Font>)
             // Helmet
             spawn_equip_row(col, font, &[EquipmentSlot::Helmet]);
 
-            // Shoulders + Chest
+            // Weapons
+            spawn_equip_row(
+                col,
+                font,
+                &[EquipmentSlot::MainHand, EquipmentSlot::OffHand],
+            );
+
+            // Upper armor
             spawn_equip_row(
                 col,
                 font,
@@ -79,34 +84,21 @@ fn spawn_equipment_panel(parent: &mut ChildSpawnerCommands, font: &Handle<Font>)
                 ],
             );
 
-            // Gauntlets
+            // Hands
             spawn_equip_row(
                 col,
                 font,
                 &[EquipmentSlot::LeftGauntlet, EquipmentSlot::RightGauntlet],
             );
 
-            // Greaves
-            spawn_equip_row(col, font, &[EquipmentSlot::Greaves]);
+            // Lower
+            spawn_equip_row(col, font, &[EquipmentSlot::Belt, EquipmentSlot::Greaves]);
 
-            // Boots
+            // Feet
             spawn_equip_row(
                 col,
                 font,
                 &[EquipmentSlot::LeftBoot, EquipmentSlot::RightBoot],
-            );
-
-            // Separator
-            col.spawn(Node {
-                height: Val::Px(10.0),
-                ..default()
-            });
-
-            // Weapons
-            spawn_equip_row(
-                col,
-                font,
-                &[EquipmentSlot::MainHand, EquipmentSlot::OffHand],
             );
 
             // Accessories
@@ -145,23 +137,27 @@ fn spawn_equipment_slot(
     font: &Handle<Font>,
     slot: EquipmentSlot,
 ) {
+    let slot_id = SlotId::Equipment(slot);
+
     parent
         .spawn((
             Node {
                 width: Val::Px(EQUIP_SLOT_SIZE),
                 height: Val::Px(EQUIP_SLOT_SIZE),
-                border: UiRect::all(Val::Px(1.0)),
+                border: UiRect::all(Val::Px(2.0)),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
                 ..default()
             },
             BackgroundColor(EQUIP_EMPTY),
             BorderColor(EQUIP_BORDER),
-            EquipmentSlotUI { slot },
+            BorderStyle::slot(),
+            SlotUI::equipment(slot),
             Draggable,
             DropTarget,
             OnDrop::new(DropToEquipmentSlot { target_slot: slot }),
             OnDragCancel::new(DropToWorldAction),
+            OnClick::new(SelectSlotAction { id: slot_id }),
             Tooltip::default(),
             Interaction::None,
             Name::new(format!("Equip: {:?}", slot)),
@@ -263,6 +259,8 @@ fn spawn_inventory_grid(parent: &mut ChildSpawnerCommands, font: &Handle<Font>) 
 }
 
 fn spawn_inventory_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, index: usize) {
+    let slot_id = SlotId::Inventory(index);
+
     parent
         .spawn((
             Node {
@@ -275,8 +273,8 @@ fn spawn_inventory_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, 
             },
             BackgroundColor(SLOT_EMPTY),
             BorderColor(SLOT_BORDER),
-            BorderStyle::slot(), // ← ДОБАВИТЬ
-            InventorySlotUI { index },
+            BorderStyle::slot(),
+            SlotUI::inventory(index),
             Draggable,
             DropTarget,
             OnDrop::new(DropToInventorySlot {
@@ -284,7 +282,7 @@ fn spawn_inventory_slot(parent: &mut ChildSpawnerCommands, font: &Handle<Font>, 
             }),
             OnDragCancel::new(DropToWorldAction),
             OnRightClick::new(UseConsumableAction { slot_index: index }),
-            OnClick::new(SelectInventorySlotAction { index }), // ← ДОБАВИТЬ
+            OnClick::new(SelectSlotAction { id: slot_id }),
             Tooltip::default(),
             Interaction::None,
             Name::new(format!("Slot {}", index)),
