@@ -3,16 +3,32 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::fighting::components::{CombatState, PlayerCombatState};
+use crate::fighting::components::{AttackPhase, CombatState, PlayerCombatState};
 use crate::items::WorldItem;
 use crate::player::body::MeleeHitbox;
 use crate::player::component::Player;
 
 use super::debug::PhysicsDebugTracker;
+use super::state::trigger_hitstop;
 
-const PUNCH_FORCE: f32 = 5.0;
-const PUNCH_LIFT: f32 = 2.0;
-const MIN_EFFECTIVE_MASS: f32 = 5.0;
+// ═══════════════════════════════════════════════════════════════════
+// SOULS-LIKE DAMAGE SYSTEM
+// ═══════════════════════════════════════════════════════════════════
+// - Урон наносится ТОЛЬКО в Active фазе
+// - При попадании срабатывает Hitstop
+// - Knockback зависит от массы (velocity-based)
+// ═══════════════════════════════════════════════════════════════════
+
+/// Базовая скорость для "среднего" предмета (5kg)
+const BASE_VELOCITY: f32 = 5.0;
+/// Вертикальная составляющая скорости
+const LIFT_VELOCITY: f32 = 2.5;
+/// Эталонная масса
+const REFERENCE_MASS: f32 = 5.0;
+/// Максимальный множитель скорости для лёгких предметов
+const MAX_LIGHT_BONUS: f32 = 2.0;
+/// Минимальный множитель для тяжёлых предметов
+const MIN_HEAVY_FACTOR: f32 = 0.5;
 
 pub fn process_melee_collisions(
     mut commands: Commands,
@@ -21,7 +37,7 @@ pub fn process_melee_collisions(
     hitbox_query: Query<Entity, With<MeleeHitbox>>,
     camera_query: Query<&GlobalTransform, With<Camera>>,
     world_items: Query<Entity, With<WorldItem>>,
-    mass_query: Query<&ColliderMassProperties>,
+    mass_query: Query<&AdditionalMassProperties>,
     parent_query: Query<&ChildOf>,
     names: Query<&Name>,
     transforms: Query<&Transform>,
@@ -32,17 +48,22 @@ pub fn process_melee_collisions(
         return;
     };
 
-    let CombatState::Attacking {
-        ref mut damage_dealt,
-        timer,
-        duration,
-    } = combat.state
-    else {
-        collision_events.clear();
-        return;
+    // ═══════════════════════════════════════════════════════════════
+    // SOULS-LIKE: Урон только в Active фазе!
+    // ═══════════════════════════════════════════════════════════════
+    let (is_active, damage_dealt) = match &combat.state {
+        CombatState::Attacking {
+            phase: AttackPhase::Active,
+            damage_dealt,
+            ..
+        } => (true, *damage_dealt),
+        _ => {
+            collision_events.clear();
+            return;
+        }
     };
 
-    if *damage_dealt {
+    if damage_dealt {
         collision_events.clear();
         return;
     }
@@ -61,10 +82,7 @@ pub fn process_melee_collisions(
 
     if !events.is_empty() {
         info!("════════════════════════════════════════════════════");
-        info!(
-            "🔔 COLLISION FRAME | attack progress: {:.0}%",
-            (timer / duration) * 100.0
-        );
+        info!("🔔 COLLISION in ACTIVE phase");
         info!("   events count: {}", events.len());
     }
 
@@ -113,7 +131,7 @@ pub fn process_melee_collisions(
     }
 
     info!("────────────────────────────────────────────────────");
-    info!("📦 APPLYING IMPULSE to {} targets:", targets.len());
+    info!("💥 HIT! Applying impulse to {} targets", targets.len());
 
     for root in targets.iter() {
         let name = names.get(*root).map(|n| n.as_str()).unwrap_or("?");
@@ -121,26 +139,25 @@ pub fn process_melee_collisions(
         let real_mass = mass_query
             .get(*root)
             .map(|m| match m {
-                ColliderMassProperties::Mass(m) => *m,
-                ColliderMassProperties::Density(d) => *d,
-                ColliderMassProperties::MassProperties(props) => props.mass,
+                AdditionalMassProperties::Mass(mass) => *mass,
+                AdditionalMassProperties::MassProperties(props) => props.mass,
             })
             .unwrap_or(1.0);
 
-        let effective_mass = real_mass.max(MIN_EFFECTIVE_MASS);
+        // Velocity-based knockback
+        let velocity_factor = (REFERENCE_MASS / real_mass)
+            .sqrt()
+            .clamp(MIN_HEAVY_FACTOR, MAX_LIGHT_BONUS);
 
-        let impulse = punch_direction * PUNCH_FORCE + Vec3::Y * PUNCH_LIFT;
-        let resulting_velocity = impulse / effective_mass;
+        let target_velocity = BASE_VELOCITY * velocity_factor;
+        let target_lift = LIFT_VELOCITY * velocity_factor;
+
+        let impulse =
+            punch_direction * target_velocity * real_mass + Vec3::Y * target_lift * real_mass;
 
         info!(
-            "   '{}': mass={:.1}kg (eff={:.1}kg) → impulse=[{:.1},{:.1},{:.1}] → {:.1} m/s",
-            name,
-            real_mass,
-            effective_mass,
-            impulse.x,
-            impulse.y,
-            impulse.z,
-            resulting_velocity.length()
+            "   '{}': mass={:.1}kg → vel={:.1} m/s",
+            name, real_mass, target_velocity,
         );
 
         commands.entity(*root).insert(ExternalImpulse {
@@ -148,7 +165,7 @@ pub fn process_melee_collisions(
             torque_impulse: Vec3::ZERO,
         });
 
-        // Добавляем трекер сразу здесь
+        // Debug tracker
         let start_pos = transforms
             .get(*root)
             .map(|t| t.translation)
@@ -163,7 +180,10 @@ pub fn process_melee_collisions(
 
     info!("════════════════════════════════════════════════════");
 
-    *damage_dealt = true;
+    // ═══════════════════════════════════════════════════════════════
+    // SOULS-LIKE: Hitstop при попадании!
+    // ═══════════════════════════════════════════════════════════════
+    trigger_hitstop(&mut combat);
 }
 
 fn find_root(entity: Entity, parent_query: &Query<&ChildOf>) -> Entity {

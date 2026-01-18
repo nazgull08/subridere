@@ -1,24 +1,31 @@
 use bevy::prelude::*;
 
-use crate::fighting::components::{CombatState, PlayerCombatState};
+use crate::fighting::components::{
+    AttackPhase, AttackTimings, CombatState, CurrentAttackTimings, PlayerCombatState,
+};
 use crate::player::body::components::{ArmPart, ArmSide};
 use crate::player::component::Player;
 
 /// Базовая позиция правой руки
 const BASE_POSITION_RIGHT: Vec3 = Vec3::new(1.0, -0.8, -2.0);
-/// Насколько рука выдвигается вперёд при ударе
+/// Насколько рука отводится назад при замахе (Windup)
+const WINDUP_BACK: f32 = 0.5;
+/// Насколько рука выдвигается вперёд при ударе (Active)
 const PUNCH_FORWARD: f32 = 1.5;
 /// Насколько рука смещается к центру при ударе
 const PUNCH_INWARD: f32 = 0.5;
 
-/// Анимирует правую руку при атаке (боксёрский удар)
+/// Анимирует правую руку при атаке (Souls-like phases)
 pub fn animate_arm_swing(
     player_query: Query<&PlayerCombatState, With<Player>>,
+    timings: Res<CurrentAttackTimings>,
     mut arms: Query<(&mut Transform, &ArmPart)>,
 ) {
     let Ok(combat) = player_query.single() else {
         return;
     };
+
+    let timings = &timings.0;
 
     for (mut transform, arm_part) in &mut arms {
         // Анимируем только правую руку
@@ -26,32 +33,74 @@ pub fn animate_arm_swing(
             continue;
         }
 
-        let target_position = match &combat.state {
-            CombatState::Attacking {
-                timer, duration, ..
-            } => {
-                // Прогресс атаки 0.0 → 1.0
-                let progress = *timer / *duration;
-
-                // Удар: быстро вперёд в первой половине, возврат во второй
-                let punch_amount = if progress < 0.4 {
-                    // 0.0 → 0.4: быстро вперёд (ease out)
-                    (progress / 0.4).sqrt()
-                } else {
-                    // 0.4 → 1.0: плавный возврат
-                    1.0 - ((progress - 0.4) / 0.6).powi(2)
-                };
-
-                Vec3::new(
-                    BASE_POSITION_RIGHT.x - PUNCH_INWARD * punch_amount, // к центру
-                    BASE_POSITION_RIGHT.y,
-                    BASE_POSITION_RIGHT.z - PUNCH_FORWARD * punch_amount, // вперёд (-Z)
-                )
-            }
-            _ => BASE_POSITION_RIGHT,
-        };
+        let target_position = compute_arm_position(&combat.state, timings);
 
         // Плавный переход
         transform.translation = transform.translation.lerp(target_position, 0.4);
+    }
+}
+
+/// Вычисляет позицию руки для фазы атаки
+fn compute_phase_position(phase: &AttackPhase, phase_timer: f32, timings: &AttackTimings) -> Vec3 {
+    match phase {
+        AttackPhase::Windup => {
+            // Замах: рука отводится назад
+            let progress = (phase_timer / timings.windup).clamp(0.0, 1.0);
+            let amount = progress.sqrt();
+
+            Vec3::new(
+                BASE_POSITION_RIGHT.x,
+                BASE_POSITION_RIGHT.y,
+                BASE_POSITION_RIGHT.z + WINDUP_BACK * amount,
+            )
+        }
+
+        AttackPhase::Active => {
+            // Удар: рука резко идёт вперёд
+            let progress = (phase_timer / timings.active).clamp(0.0, 1.0);
+            let amount = progress.sqrt();
+
+            let z = WINDUP_BACK - (WINDUP_BACK + PUNCH_FORWARD) * amount;
+            let x_offset = PUNCH_INWARD * amount;
+
+            Vec3::new(
+                BASE_POSITION_RIGHT.x - x_offset,
+                BASE_POSITION_RIGHT.y,
+                BASE_POSITION_RIGHT.z + z,
+            )
+        }
+
+        AttackPhase::Recovery => {
+            // Возврат: рука плавно возвращается
+            let progress = (phase_timer / timings.recovery).clamp(0.0, 1.0);
+            let amount = 1.0 - (1.0 - progress).powi(2);
+
+            let punch_z = BASE_POSITION_RIGHT.z - PUNCH_FORWARD;
+            let z = punch_z + (BASE_POSITION_RIGHT.z - punch_z) * amount;
+            let x_offset = PUNCH_INWARD * (1.0 - amount);
+
+            Vec3::new(BASE_POSITION_RIGHT.x - x_offset, BASE_POSITION_RIGHT.y, z)
+        }
+    }
+}
+
+/// Вычисляет целевую позицию руки в зависимости от состояния боя
+fn compute_arm_position(state: &CombatState, timings: &AttackTimings) -> Vec3 {
+    match state {
+        CombatState::Ready => BASE_POSITION_RIGHT,
+
+        CombatState::Attacking {
+            phase, phase_timer, ..
+        } => compute_phase_position(phase, *phase_timer, timings),
+
+        CombatState::Hitstop {
+            return_phase,
+            return_timer,
+            ..
+        } => {
+            // Во время hitstop — застываем в ТОЧНОЙ позиции на момент попадания
+            // Это избегает "прыжка" анимации
+            compute_phase_position(return_phase, *return_timer, timings)
+        }
     }
 }

@@ -49,31 +49,31 @@ pub fn spawn_world_item(
     // Масса из веса предмета (минимум 0.5 чтобы не было слишком лёгких)
     let mass = def.weight.max(0.5);
 
-    let mut entity_commands = commands.spawn((
-        Name::new(def.name.clone()),
-        WorldItem::with_quantity(id, quantity),
-        Pickupable,
-        Transform::from_translation(position),
-        Visibility::Visible,
-        RigidBody::Dynamic,
-        // Используем вес предмета как массу
-        ColliderMassProperties::Mass(mass),
-        Restitution::coefficient(0.2),
-        Damping {
-            linear_damping: 3.0, // Увеличено для быстрой остановки
-            angular_damping: 2.0,
-        },
-        GameEntity,
-    ));
-
-    if let Some(vel) = velocity {
-        entity_commands.insert(Velocity {
-            linvel: vel,
-            ..default()
-        });
-    }
-
-    let entity = entity_commands.id();
+    let entity = commands
+        .spawn((
+            Name::new(def.name.clone()),
+            WorldItem::with_quantity(id, quantity),
+            Pickupable,
+            Transform::from_translation(position),
+            Visibility::Visible,
+            RigidBody::Dynamic,
+            // ВАЖНО: AdditionalMassProperties работает на rigid body БЕЗ collider'а
+            // ColliderMassProperties работает только если на этой же entity есть Collider
+            // У нас collider'ы на детях, поэтому используем AdditionalMassProperties
+            AdditionalMassProperties::Mass(mass),
+            Restitution::coefficient(0.2),
+            Damping {
+                linear_damping: 3.0,
+                angular_damping: 2.0,
+            },
+            // Velocity нужен ВСЕГДА — для физики и debug tracking
+            Velocity {
+                linvel: velocity.unwrap_or(Vec3::ZERO),
+                ..default()
+            },
+            GameEntity,
+        ))
+        .id();
 
     // Spawn visual children with colliders
     if let ItemVisual::Primitive { parts } = &def.visual {

@@ -1,3 +1,5 @@
+// fighting/mod.rs
+
 pub mod components;
 pub mod events;
 pub mod melee;
