@@ -1,3 +1,5 @@
+// crates/block-bodies-core/src/lib.rs
+
 pub mod body;
 pub mod error;
 pub mod ik;

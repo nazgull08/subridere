@@ -1,11 +1,11 @@
-// fighting/melee/damage.rs
+// crates/subridere-core/src/fighting/melee/damage.rs
 
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use crate::fighting::components::{AttackPhase, CombatState, PlayerCombatState};
 use crate::items::WorldItem;
-use crate::player::body::MeleeHitbox;
+use crate::player::arm::MeleeHitbox; // ← НОВЫЙ ПУТЬ
 use crate::player::component::Player;
 
 use super::debug::PhysicsDebugTracker;

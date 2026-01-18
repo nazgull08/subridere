@@ -1,3 +1,5 @@
+// crates/subridere-core/src/player/component.rs
+
 use bevy::prelude::*;
 
 /// Marks the player entity.
@@ -21,4 +23,5 @@ impl Default for PlayerVisual {
 }
 
 /// Where the player spawns initially and on death.
-pub static PLAYER_START_POS: Vec3 = Vec3::new(0.0, 8.0, 0.0);
+/// Поднято выше чтобы игрок не проваливался в пол
+pub static PLAYER_START_POS: Vec3 = Vec3::new(0.0, 10.0, 0.0);

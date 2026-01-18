@@ -1,5 +1,9 @@
-pub mod body;
+// crates/subridere-core/src/player/mod.rs
+
+pub mod arm;
 pub mod component;
 pub mod plugin;
-pub mod systems;
-pub mod visual;
+
+pub use arm::{MeleeHitbox, PlayerArmPlugin, spawn_player_arms};
+pub use component::{Player, PlayerVisual};
+pub use plugin::PlayerPlugin;

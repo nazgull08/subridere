@@ -43,9 +43,9 @@ pub struct AttackTimings {
 impl Default for AttackTimings {
     fn default() -> Self {
         Self {
-            windup: 0.12,
-            active: 0.15,
-            recovery: 0.25,
+            windup: 0.50,
+            active: 0.60,
+            recovery: 1.00,
         }
     }
 }

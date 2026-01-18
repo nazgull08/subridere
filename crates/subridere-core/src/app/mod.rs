@@ -1,3 +1,5 @@
+// crates/subridere-core/src/app/mod.rs
+
 pub mod state;
 pub use state::AppState;
 
@@ -7,7 +9,7 @@ use bevy_kira_audio::AudioPlugin;
 use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
 use bevy_rapier3d::render::RapierDebugRenderPlugin;
 
-use crate::animation::PlayerAnimationPlugin;
+// УДАЛЕНО: use crate::animation::PlayerAnimationPlugin;
 use crate::audio::plugin::SubAudioPlugin;
 use crate::camera::plugin::CameraPlugin;
 use crate::core::fps_stats::FpsStatsPlugin;
@@ -17,6 +19,7 @@ use crate::game_init::plugin::GameInitPlugin;
 use crate::input::plugin::InputPlugin;
 use crate::inventory::InventoryPlugin;
 use crate::items::ItemsPlugin;
+use crate::player::PlayerArmPlugin; // ← НОВЫЙ ИМПОРТ
 use crate::player::plugin::PlayerPlugin;
 use crate::stats::plugin::StatsPlugin;
 use crate::ui::hud::plugin::HudUiPlugin;
@@ -53,7 +56,7 @@ pub fn run() {
         .add_plugins(StatsPlugin)
         .add_plugins(UnitPlugin)
         .add_plugins(PlayerPlugin)
-        .add_plugins(PlayerAnimationPlugin)
+        .add_plugins(PlayerArmPlugin) // ← ЗАМЕНЕНО: PlayerAnimationPlugin → PlayerArmPlugin
         .add_plugins(CombatPlugin)
         .add_plugins(WorldPlugin)
         .add_plugins(EnemiesPlugin)

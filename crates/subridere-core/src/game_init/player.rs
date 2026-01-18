@@ -1,3 +1,5 @@
+// crates/subridere-core/src/game_init/player.rs
+
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
@@ -8,7 +10,7 @@ use crate::{
     input::component::PlayerControlled,
     inventory::{Equipment, Inventory},
     player::{
-        body::spawn_first_person_arms,
+        arm::spawn_player_arms,
         component::{PLAYER_START_POS, Player, PlayerVisual},
     },
     stats::plugin::StatsBundle,
@@ -77,13 +79,15 @@ pub fn spawn_player(
 
     commands.entity(player_id).add_child(camera_entity);
 
-    // Руки
-    spawn_first_person_arms(
+    // === НОВАЯ СИСТЕМА РУК С IK ===
+    spawn_player_arms(
         &mut commands,
         camera_entity,
         meshes.as_mut(),
         materials.as_mut(),
     );
+
+    info!("✅ Player spawned with IK arms");
 
     next_state.set(InitStage::EnemiesReady);
 }
