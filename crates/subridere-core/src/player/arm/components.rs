@@ -232,20 +232,18 @@ impl ArmPose {
     /// Sword Light Windup - меч отведён вправо, кисть развёрнута
     pub fn sword_windup_right() -> Self {
         Self {
-            hand_offset: Vec3::new(0.55, -0.25, -0.40),
-            elbow_hint: Vec3::new(0.6, -0.3, 0.3),
-            // Кисть повёрнута вправо, меч "взведён" для слэша
-            hand_rotation: Self::rot(0.0, 60.0, -90.0),
+            hand_offset: Vec3::new(0.55, -0.15, -0.35),
+            elbow_hint: Vec3::new(0.60, -0.30, 0.30),
+            hand_rotation: Self::rot(0.0, 15.0, -30.0),
         }
     }
 
     /// Sword Light Active - слэш влево, кисть вращается
     pub fn sword_slash_right() -> Self {
         Self {
-            hand_offset: Vec3::new(-0.30, -0.30, -1.00),
-            elbow_hint: Vec3::new(0.10, -0.4, -0.4),
-            // Кисть повёрнута влево, завершение слэша
-            hand_rotation: Self::rot(0.0, -60.0, 90.0),
+            hand_offset: Vec3::new(0.10, -0.25, -0.85),
+            elbow_hint: Vec3::new(0.10, -0.40, -0.40),
+            hand_rotation: Self::rot(75.0, -61.5, -11.1),
         }
     }
 
@@ -253,7 +251,7 @@ impl ArmPose {
     // SWORD HEAVY (вертикальный удар сверху)
     // ───────────────────────────────────────────────────────────────
 
-    /// Sword Heavy Charging - меч поднимается над головой
+    /// Sword Heavy Charging - меч поднимается над головой (сдвинут вправо)
     pub fn sword_heavy_charging_right() -> Self {
         Self {
             hand_offset: Vec3::new(0.40, 0.05, -0.30),
@@ -263,7 +261,7 @@ impl ArmPose {
         }
     }
 
-    /// Sword Heavy Windup - меч занесён над головой
+    /// Sword Heavy Windup - меч занесён над головой (сдвинут вправо)
     pub fn sword_heavy_windup_right() -> Self {
         Self {
             hand_offset: Vec3::new(0.35, 0.25, -0.15),

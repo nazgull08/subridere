@@ -51,7 +51,7 @@ pub fn update_ik_target_from_combat(
         // Интерполяция позиции и elbow_hint
         ik_target.position = ik_target.position.lerp(pose.hand_offset, 0.3);
         ik_target.elbow_hint = ik_target.elbow_hint.lerp(pose.elbow_hint, 0.3);
-        
+
         // Интерполяция ротации кисти (slerp для плавности)
         ik_target.hand_rotation = ik_target.hand_rotation.slerp(pose.hand_rotation, 0.3);
     }
@@ -319,7 +319,7 @@ pub fn apply_arm_ik(
                 for hand_entity in forearm_children.iter() {
                     if let Ok(mut hand_transform) = hand_query.get_mut(hand_entity) {
                         hand_transform.translation = Vec3::new(0.0, 0.0, -config.forearm_length);
-                        
+
                         // === ПРИМЕНЯЕМ РОТАЦИЮ КИСТИ ===
                         hand_transform.rotation = ik_target.hand_rotation;
                     }

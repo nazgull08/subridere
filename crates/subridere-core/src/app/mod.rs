@@ -7,7 +7,7 @@ use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy_kira_audio::AudioPlugin;
 use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
-use bevy_rapier3d::render::RapierDebugRenderPlugin;
+//use bevy_rapier3d::render::RapierDebugRenderPlugin;
 
 use crate::audio::plugin::SubAudioPlugin;
 use crate::camera::plugin::CameraPlugin;
@@ -18,12 +18,13 @@ use crate::game_init::plugin::GameInitPlugin;
 use crate::input::plugin::InputPlugin;
 use crate::inventory::InventoryPlugin;
 use crate::items::ItemsPlugin;
-use crate::player::PlayerArmPlugin; // ← НОВЫЙ ИМПОРТ
+use crate::player::PlayerArmPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::stats::plugin::StatsPlugin;
 use crate::ui::hud::plugin::HudUiPlugin;
 use crate::ui::{
-    DeathScreenPlugin, GameMenuPlugin, MainMenuPlugin, SystemMenuPlugin, VictoryScreenPlugin,
+    DeathScreenPlugin, GameMenuPlugin, MainMenuPlugin, PoseDebugUiPlugin, SystemMenuPlugin,
+    VictoryScreenPlugin,
 };
 use crate::unit::plugin::UnitPlugin;
 use crate::world::plugin::WorldPlugin;
@@ -43,7 +44,7 @@ pub fn run() {
         .add_plugins(GameInitPlugin)
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default().with_default_system_setup(true))
-        .add_plugins(RapierDebugRenderPlugin::default())
+        //.add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(AudioPlugin)
         .add_plugins(SubAudioPlugin)
         // ── Core systems ─────────────────────────
@@ -55,7 +56,7 @@ pub fn run() {
         .add_plugins(StatsPlugin)
         .add_plugins(UnitPlugin)
         .add_plugins(PlayerPlugin)
-        .add_plugins(PlayerArmPlugin) // ← ЗАМЕНЕНО: PlayerAnimationPlugin → PlayerArmPlugin
+        .add_plugins(PlayerArmPlugin)
         .add_plugins(CombatPlugin)
         .add_plugins(WorldPlugin)
         .add_plugins(EnemiesPlugin)
@@ -66,5 +67,6 @@ pub fn run() {
         .add_plugins(MainMenuPlugin)
         .add_plugins(DeathScreenPlugin)
         .add_plugins(VictoryScreenPlugin)
+        .add_plugins(PoseDebugUiPlugin) // ← NEW: Pose debug UI
         .run();
 }
