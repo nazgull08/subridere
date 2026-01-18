@@ -1,3 +1,5 @@
+// animation/arms.rs
+
 use bevy::prelude::*;
 
 use crate::fighting::components::{
@@ -28,79 +30,57 @@ pub fn animate_arm_swing(
     let timings = &timings.0;
 
     for (mut transform, arm_part) in &mut arms {
-        // Анимируем только правую руку
         if arm_part.side != ArmSide::Right {
             continue;
         }
 
         let target_position = compute_arm_position(&combat.state, timings);
-
-        // Плавный переход
         transform.translation = transform.translation.lerp(target_position, 0.4);
     }
 }
 
-/// Вычисляет позицию руки для фазы атаки
-fn compute_phase_position(phase: &AttackPhase, phase_timer: f32, timings: &AttackTimings) -> Vec3 {
-    match phase {
-        AttackPhase::Windup => {
-            // Замах: рука отводится назад
-            let progress = (phase_timer / timings.windup).clamp(0.0, 1.0);
-            let amount = progress.sqrt();
-
-            Vec3::new(
-                BASE_POSITION_RIGHT.x,
-                BASE_POSITION_RIGHT.y,
-                BASE_POSITION_RIGHT.z + WINDUP_BACK * amount,
-            )
-        }
-
-        AttackPhase::Active => {
-            // Удар: рука резко идёт вперёд
-            let progress = (phase_timer / timings.active).clamp(0.0, 1.0);
-            let amount = progress.sqrt();
-
-            let z = WINDUP_BACK - (WINDUP_BACK + PUNCH_FORWARD) * amount;
-            let x_offset = PUNCH_INWARD * amount;
-
-            Vec3::new(
-                BASE_POSITION_RIGHT.x - x_offset,
-                BASE_POSITION_RIGHT.y,
-                BASE_POSITION_RIGHT.z + z,
-            )
-        }
-
-        AttackPhase::Recovery => {
-            // Возврат: рука плавно возвращается
-            let progress = (phase_timer / timings.recovery).clamp(0.0, 1.0);
-            let amount = 1.0 - (1.0 - progress).powi(2);
-
-            let punch_z = BASE_POSITION_RIGHT.z - PUNCH_FORWARD;
-            let z = punch_z + (BASE_POSITION_RIGHT.z - punch_z) * amount;
-            let x_offset = PUNCH_INWARD * (1.0 - amount);
-
-            Vec3::new(BASE_POSITION_RIGHT.x - x_offset, BASE_POSITION_RIGHT.y, z)
-        }
-    }
-}
-
-/// Вычисляет целевую позицию руки в зависимости от состояния боя
 fn compute_arm_position(state: &CombatState, timings: &AttackTimings) -> Vec3 {
     match state {
         CombatState::Ready => BASE_POSITION_RIGHT,
 
         CombatState::Attacking {
             phase, phase_timer, ..
-        } => compute_phase_position(phase, *phase_timer, timings),
+        } => match phase {
+            AttackPhase::Windup => {
+                let progress = (*phase_timer / timings.windup).clamp(0.0, 1.0);
+                let amount = progress.sqrt();
 
-        CombatState::Hitstop {
-            return_phase,
-            return_timer,
-            ..
-        } => {
-            // Во время hitstop — застываем в ТОЧНОЙ позиции на момент попадания
-            // Это избегает "прыжка" анимации
-            compute_phase_position(return_phase, *return_timer, timings)
-        }
+                Vec3::new(
+                    BASE_POSITION_RIGHT.x,
+                    BASE_POSITION_RIGHT.y,
+                    BASE_POSITION_RIGHT.z + WINDUP_BACK * amount,
+                )
+            }
+
+            AttackPhase::Active => {
+                let progress = (*phase_timer / timings.active).clamp(0.0, 1.0);
+                let amount = progress.sqrt();
+
+                let z = WINDUP_BACK - (WINDUP_BACK + PUNCH_FORWARD) * amount;
+                let x_offset = PUNCH_INWARD * amount;
+
+                Vec3::new(
+                    BASE_POSITION_RIGHT.x - x_offset,
+                    BASE_POSITION_RIGHT.y,
+                    BASE_POSITION_RIGHT.z + z,
+                )
+            }
+
+            AttackPhase::Recovery => {
+                let progress = (*phase_timer / timings.recovery).clamp(0.0, 1.0);
+                let amount = 1.0 - (1.0 - progress).powi(2);
+
+                let punch_z = BASE_POSITION_RIGHT.z - PUNCH_FORWARD;
+                let z = punch_z + (BASE_POSITION_RIGHT.z - punch_z) * amount;
+                let x_offset = PUNCH_INWARD * (1.0 - amount);
+
+                Vec3::new(BASE_POSITION_RIGHT.x - x_offset, BASE_POSITION_RIGHT.y, z)
+            }
+        },
     }
 }

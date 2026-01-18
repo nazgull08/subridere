@@ -3,13 +3,10 @@
 use bevy::prelude::*;
 
 use crate::fighting::components::{
-    AttackPhase, AttackTimings, CombatState, CurrentAttackTimings, PlayerCombatState,
+    AttackPhase, CombatState, CurrentAttackTimings, PlayerCombatState,
 };
 use crate::fighting::melee::MeleeAttackIntent;
 use crate::player::component::Player;
-
-/// Hitstop duration (секунды)
-const HITSTOP_DURATION: f32 = 0.07;
 
 /// Система обработки боевых состояний (Souls-like phases)
 pub fn process_combat_state(
@@ -22,7 +19,6 @@ pub fn process_combat_state(
     let timings = &timings.0;
 
     for (entity, mut combat, maybe_intent) in &mut query {
-        // Убираем intent после обработки
         let has_intent = maybe_intent.is_some();
         if has_intent {
             commands.entity(entity).remove::<MeleeAttackIntent>();
@@ -41,9 +37,7 @@ pub fn process_combat_state(
             }
 
             CombatState::Attacking {
-                phase,
-                phase_timer,
-                damage_dealt,
+                phase, phase_timer, ..
             } => {
                 *phase_timer += dt;
 
@@ -72,43 +66,11 @@ pub fn process_combat_state(
                     }
                 }
             }
-
-            CombatState::Hitstop {
-                remaining,
-                return_phase,
-                return_timer,
-            } => {
-                *remaining -= dt;
-
-                if *remaining <= 0.0 {
-                    info!("⚔️ Hitstop END → {:?}", return_phase);
-                    combat.state = CombatState::Attacking {
-                        phase: *return_phase,
-                        phase_timer: *return_timer,
-                        damage_dealt: true, // Уже нанесли урон
-                    };
-                }
-            }
         }
     }
 }
 
-/// Запустить hitstop (вызывается из damage.rs при попадании)
-pub fn trigger_hitstop(combat: &mut PlayerCombatState) {
-    if let CombatState::Attacking {
-        phase, phase_timer, ..
-    } = &combat.state
-    {
-        info!("💥 HITSTOP triggered!");
-        combat.state = CombatState::Hitstop {
-            remaining: HITSTOP_DURATION,
-            return_phase: *phase,
-            return_timer: *phase_timer,
-        };
-    }
-}
-
-/// Проверка: находимся ли в активной фазе (можно наносить урон)
+/// Проверка: находимся ли в активной фазе
 pub fn is_in_active_phase(combat: &PlayerCombatState) -> bool {
     matches!(
         combat.state,

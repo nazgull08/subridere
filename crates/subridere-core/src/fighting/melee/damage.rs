@@ -9,15 +9,6 @@ use crate::player::body::MeleeHitbox;
 use crate::player::component::Player;
 
 use super::debug::PhysicsDebugTracker;
-use super::state::trigger_hitstop;
-
-// ═══════════════════════════════════════════════════════════════════
-// SOULS-LIKE DAMAGE SYSTEM
-// ═══════════════════════════════════════════════════════════════════
-// - Урон наносится ТОЛЬКО в Active фазе
-// - При попадании срабатывает Hitstop
-// - Knockback зависит от массы (velocity-based)
-// ═══════════════════════════════════════════════════════════════════
 
 /// Базовая скорость для "среднего" предмета (5kg)
 const BASE_VELOCITY: f32 = 5.0;
@@ -48,15 +39,13 @@ pub fn process_melee_collisions(
         return;
     };
 
-    // ═══════════════════════════════════════════════════════════════
-    // SOULS-LIKE: Урон только в Active фазе!
-    // ═══════════════════════════════════════════════════════════════
-    let (is_active, damage_dealt) = match &combat.state {
+    // Проверяем Active фазу и damage_dealt
+    let damage_dealt = match &combat.state {
         CombatState::Attacking {
             phase: AttackPhase::Active,
             damage_dealt,
             ..
-        } => (true, *damage_dealt),
+        } => *damage_dealt,
         _ => {
             collision_events.clear();
             return;
@@ -144,7 +133,6 @@ pub fn process_melee_collisions(
             })
             .unwrap_or(1.0);
 
-        // Velocity-based knockback
         let velocity_factor = (REFERENCE_MASS / real_mass)
             .sqrt()
             .clamp(MIN_HEAVY_FACTOR, MAX_LIGHT_BONUS);
@@ -165,7 +153,6 @@ pub fn process_melee_collisions(
             torque_impulse: Vec3::ZERO,
         });
 
-        // Debug tracker
         let start_pos = transforms
             .get(*root)
             .map(|t| t.translation)
@@ -180,10 +167,10 @@ pub fn process_melee_collisions(
 
     info!("════════════════════════════════════════════════════");
 
-    // ═══════════════════════════════════════════════════════════════
-    // SOULS-LIKE: Hitstop при попадании!
-    // ═══════════════════════════════════════════════════════════════
-    trigger_hitstop(&mut combat);
+    // Помечаем что урон нанесён
+    if let CombatState::Attacking { damage_dealt, .. } = &mut combat.state {
+        *damage_dealt = true;
+    }
 }
 
 fn find_root(entity: Entity, parent_query: &Query<&ChildOf>) -> Entity {

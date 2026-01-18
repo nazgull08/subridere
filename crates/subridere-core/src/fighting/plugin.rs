@@ -12,12 +12,8 @@ pub struct CombatPlugin;
 
 impl Plugin for CombatPlugin {
     fn build(&self, app: &mut App) {
-        app
-            // Resources
-            .init_resource::<CurrentAttackTimings>()
-            // Events
+        app.init_resource::<CurrentAttackTimings>()
             .add_event::<MeleeHitEvent>()
-            // Systems
             .add_systems(
                 Update,
                 (
@@ -29,6 +25,6 @@ impl Plugin for CombatPlugin {
                     .run_if(in_state(AppState::InGame)),
             );
 
-        info!("✅ Combat plugin initialized (Souls-like mode)");
+        info!("✅ Combat plugin initialized (Souls-like)");
     }
 }
