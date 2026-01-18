@@ -1,14 +1,14 @@
 use std::f32::consts::FRAC_PI_2;
 
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 use super::components::*;
 
-/// Цвета рук
 const ARM_COLOR: Color = Color::srgb(0.8, 0.6, 0.5);
 const HAND_COLOR: Color = Color::srgb(0.75, 0.55, 0.45);
+const HAND_SIZE: Vec3 = Vec3::new(0.35, 0.4, 0.2);
 
-/// Спавнит first-person руки как children камеры
 pub fn spawn_first_person_arms(
     commands: &mut Commands,
     camera_entity: Entity,
@@ -27,9 +27,8 @@ pub fn spawn_first_person_arms(
         ..default()
     });
 
-    // Меши
     let arm_mesh = meshes.add(Cuboid::new(0.3, 0.9, 0.3));
-    let hand_mesh = meshes.add(Cuboid::new(0.35, 0.4, 0.2));
+    let hand_mesh = meshes.add(Cuboid::new(HAND_SIZE.x, HAND_SIZE.y, HAND_SIZE.z));
 
     commands.entity(camera_entity).with_children(|camera| {
         camera
@@ -40,7 +39,6 @@ pub fn spawn_first_person_arms(
                 Name::new("FirstPersonArms"),
             ))
             .with_children(|arms_root| {
-                // === ПРАВАЯ РУКА ===
                 spawn_arm(
                     arms_root,
                     ArmSide::Right,
@@ -51,7 +49,6 @@ pub fn spawn_first_person_arms(
                     &hand_material,
                 );
 
-                // === ЛЕВАЯ РУКА ===
                 spawn_arm(
                     arms_root,
                     ArmSide::Left,
@@ -81,10 +78,8 @@ fn spawn_arm(
         ArmSide::Right => "Right",
     };
 
-    // Поворот на 90° по X — рука направлена вперёд (-Z)
     let arm_rotation = Quat::from_rotation_x(FRAC_PI_2);
 
-    // Рука
     parent
         .spawn((
             ArmPart { side },
@@ -95,15 +90,26 @@ fn spawn_arm(
             Name::new(format!("Arm{}", side_name)),
         ))
         .with_children(|arm| {
-            // Кисть
-            arm.spawn((
+            // Кисть — она же хитбокс для правой руки
+            let mut hand_cmd = arm.spawn((
                 HandPart { side },
-                WeaponMount,
                 Mesh3d(hand_mesh.clone()),
                 MeshMaterial3d(hand_material.clone()),
                 Transform::from_translation(Vec3::new(0.0, -0.6, 0.0)),
                 Visibility::Visible,
                 Name::new(format!("Hand{}", side_name)),
             ));
+
+            // Только правая рука — боевая
+            if side == ArmSide::Right {
+                hand_cmd.insert((
+                    MeleeHitbox,
+                    WeaponMount { side },
+                    Collider::cuboid(HAND_SIZE.x, HAND_SIZE.y, HAND_SIZE.z),
+                    Sensor,
+                    ActiveEvents::COLLISION_EVENTS,
+                ));
+                info!("  👊 Right hand has hitbox");
+            }
         });
 }

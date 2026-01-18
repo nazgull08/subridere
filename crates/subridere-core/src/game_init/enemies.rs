@@ -27,7 +27,7 @@ pub fn spawn_test_enemies(
         return;
     }
 
-    let worm_count = rng.gen_range(3..=5);
+    let worm_count = 0; //rng.gen_range(3..=5);
 
     info!(
         "🐛 Spawning {} worms across {} rooms",

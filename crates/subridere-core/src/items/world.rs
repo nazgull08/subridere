@@ -46,6 +46,9 @@ pub fn spawn_world_item(
 ) -> Entity {
     let def = registry.get(id);
 
+    // Масса из веса предмета (минимум 0.5 чтобы не было слишком лёгких)
+    let mass = def.weight.max(0.5);
+
     let mut entity_commands = commands.spawn((
         Name::new(def.name.clone()),
         WorldItem::with_quantity(id, quantity),
@@ -53,10 +56,12 @@ pub fn spawn_world_item(
         Transform::from_translation(position),
         Visibility::Visible,
         RigidBody::Dynamic,
-        Restitution::coefficient(0.3),
+        // Используем вес предмета как массу
+        ColliderMassProperties::Mass(mass),
+        Restitution::coefficient(0.2),
         Damping {
-            linear_damping: 2.0,
-            angular_damping: 1.5,
+            linear_damping: 3.0, // Увеличено для быстрой остановки
+            angular_damping: 2.0,
         },
         GameEntity,
     ));
