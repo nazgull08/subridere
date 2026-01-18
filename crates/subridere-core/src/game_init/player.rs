@@ -11,6 +11,7 @@ use crate::{
     inventory::{Equipment, Inventory},
     player::{
         arm::spawn_player_arms,
+        body::{VisibleBodyConfig, spawn_visible_body},
         component::{PLAYER_START_POS, Player, PlayerVisual},
     },
     stats::plugin::StatsBundle,
@@ -85,6 +86,15 @@ pub fn spawn_player(
         camera_entity,
         meshes.as_mut(),
         materials.as_mut(),
+    );
+
+    let body_config = VisibleBodyConfig::default();
+    spawn_visible_body(
+        &mut commands,
+        player_id,
+        meshes.as_mut(),
+        materials.as_mut(),
+        &body_config,
     );
 
     info!("✅ Player spawned with IK arms");

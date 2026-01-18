@@ -102,21 +102,18 @@ pub fn spawn_player_arm(
         config.hand_size.z,
     ));
 
-    let mut hand_cmd = commands.spawn((
-        Hand { side },
-        WeaponSocket { side },
-        Mesh3d(hand_mesh),
-        MeshMaterial3d(arm_material),
-        Transform::from_translation(Vec3::new(0.0, 0.0, -config.forearm_length)),
-        GlobalTransform::default(),
-        Visibility::Inherited,
-        Name::new(format!("Hand_{}", side_name)),
-    ));
-
-    // Только правая рука имеет хитбокс для melee
-    if side == ArmSide::Right {
-        hand_cmd.insert((
-            MeleeHitbox,
+    let hand_entity = commands
+        .spawn((
+            Hand { side },
+            WeaponSocket { side },
+            Mesh3d(hand_mesh),
+            MeshMaterial3d(arm_material),
+            Transform::from_translation(Vec3::new(0.0, 0.0, -config.forearm_length)),
+            GlobalTransform::default(),
+            Visibility::Inherited,
+            Name::new(format!("Hand_{}", side_name)),
+            // Обе руки имеют хитбокс для melee
+            MeleeHitbox { side },
             Collider::cuboid(
                 config.hand_size.x * 1.5,
                 config.hand_size.y * 1.5,
@@ -124,12 +121,12 @@ pub fn spawn_player_arm(
             ),
             Sensor,
             ActiveEvents::COLLISION_EVENTS,
-        ));
-        info!("  👊 Right hand has MeleeHitbox");
-    }
+        ))
+        .id();
 
-    let hand_entity = hand_cmd.id();
     commands.entity(forearm_entity).add_child(hand_entity);
+
+    info!("  👊 {} hand has MeleeHitbox", side_name);
 
     // === IK Target ===
     let ik_target = match side {

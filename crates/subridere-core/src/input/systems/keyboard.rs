@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
-use crate::fighting::melee::MeleeAttackIntent;
+use crate::fighting::melee::intent::{LeftAttackIntent, RightAttackIntent};
 use crate::input::component::PlayerControlled;
 use crate::input::resources::InputSettings;
-use crate::unit::component::{DashIntent, JumpIntent, MoveIntent, ShootIntent};
+use crate::unit::component::{DashIntent, JumpIntent, MoveIntent};
 
 /// Processes keyboard input and generates intent components.
 pub fn handle_keyboard_input(
@@ -58,10 +58,15 @@ pub fn handle_melee_input(
     mut commands: Commands,
     player_query: Query<Entity, With<PlayerControlled>>,
 ) {
+    let Ok(player_entity) = player_query.single() else {
+        return;
+    };
+
     if buttons.just_pressed(MouseButton::Left) {
-        if let Ok(player_entity) = player_query.single() {
-            commands.entity(player_entity).insert(MeleeAttackIntent);
-            info!("⚔️ MeleeAttackIntent created");
-        }
+        commands.entity(player_entity).insert(RightAttackIntent);
+    }
+
+    if buttons.just_pressed(MouseButton::Right) {
+        commands.entity(player_entity).insert(LeftAttackIntent);
     }
 }

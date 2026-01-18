@@ -3,12 +3,10 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::fighting::components::{AttackPhase, CombatState, PlayerCombatState};
+use crate::fighting::components::{ArmCombatState, AttackPhase, PlayerCombatState};
 use crate::items::WorldItem;
-use crate::player::arm::MeleeHitbox; // ← НОВЫЙ ПУТЬ
+use crate::player::arm::{ArmSide, MeleeHitbox};
 use crate::player::component::Player;
-
-use super::debug::PhysicsDebugTracker;
 
 /// Базовая скорость для "среднего" предмета (5kg)
 const BASE_VELOCITY: f32 = 5.0;
@@ -25,7 +23,7 @@ pub fn process_melee_collisions(
     mut commands: Commands,
     mut collision_events: EventReader<CollisionEvent>,
     mut player_query: Query<&mut PlayerCombatState, With<Player>>,
-    hitbox_query: Query<Entity, With<MeleeHitbox>>,
+    hitbox_query: Query<(Entity, &MeleeHitbox)>,
     camera_query: Query<&GlobalTransform, With<Camera>>,
     world_items: Query<Entity, With<WorldItem>>,
     mass_query: Query<&AdditionalMassProperties>,
@@ -39,28 +37,14 @@ pub fn process_melee_collisions(
         return;
     };
 
-    // Проверяем Active фазу и damage_dealt
-    let damage_dealt = match &combat.state {
-        CombatState::Attacking {
-            phase: AttackPhase::Active,
-            damage_dealt,
-            ..
-        } => *damage_dealt,
-        _ => {
-            collision_events.clear();
-            return;
-        }
-    };
+    // Проверяем есть ли хотя бы одна рука в Active фазе без damage_dealt
+    let right_can_hit = can_arm_hit(&combat.right);
+    let left_can_hit = can_arm_hit(&combat.left);
 
-    if damage_dealt {
+    if !right_can_hit && !left_can_hit {
         collision_events.clear();
         return;
     }
-
-    let Ok(hitbox_entity) = hitbox_query.single() else {
-        collision_events.clear();
-        return;
-    };
 
     let punch_direction = camera_query
         .single()
@@ -69,26 +53,46 @@ pub fn process_melee_collisions(
 
     let events: Vec<_> = collision_events.read().collect();
 
-    if !events.is_empty() {
-        info!("════════════════════════════════════════════════════");
-        info!("🔔 COLLISION in ACTIVE phase");
-        info!("   events count: {}", events.len());
+    if events.is_empty() {
+        return;
     }
 
-    let mut targets: Vec<Entity> = Vec::new();
+    info!("════════════════════════════════════════════════════");
+    info!("🔔 COLLISION in ACTIVE phase");
+    info!("   events count: {}", events.len());
+
+    let mut targets: Vec<(Entity, ArmSide)> = Vec::new();
 
     for (i, event) in events.iter().enumerate() {
         let CollisionEvent::Started(e1, e2, _) = event else {
             continue;
         };
 
-        let target_entity = if *e1 == hitbox_entity {
-            *e2
-        } else if *e2 == hitbox_entity {
-            *e1
-        } else {
-            continue;
+        // Найти какой хитбокс участвовал в коллизии
+        let (hitbox_entity, hitbox_side) = {
+            let mut found = None;
+            for (entity, hitbox) in &hitbox_query {
+                if *e1 == entity || *e2 == entity {
+                    found = Some((entity, hitbox.side));
+                    break;
+                }
+            }
+            match found {
+                Some(f) => f,
+                None => continue,
+            }
         };
+
+        // Проверяем что эта рука может нанести урон
+        let arm_can_hit = match hitbox_side {
+            ArmSide::Right => right_can_hit,
+            ArmSide::Left => left_can_hit,
+        };
+        if !arm_can_hit {
+            continue;
+        }
+
+        let target_entity = if *e1 == hitbox_entity { *e2 } else { *e1 };
 
         let target_name = names
             .get(target_entity)
@@ -101,11 +105,19 @@ pub fn process_melee_collisions(
             .map(|n| n.to_string())
             .unwrap_or_else(|_| format!("{:?}", root));
 
-        info!("   [{}] hit: '{}' → root: '{}'", i, target_name, root_name);
+        let side_name = match hitbox_side {
+            ArmSide::Right => "RIGHT",
+            ArmSide::Left => "LEFT",
+        };
+
+        info!(
+            "   [{}] {} hand hit: '{}' → root: '{}'",
+            i, side_name, target_name, root_name
+        );
 
         if world_items.get(root).is_ok() {
-            if !targets.contains(&root) {
-                targets.push(root);
+            if !targets.iter().any(|(e, _)| *e == root) {
+                targets.push((root, hitbox_side));
                 info!("       ✓ added to targets");
             } else {
                 info!("       ⏭️ already in targets");
@@ -122,7 +134,11 @@ pub fn process_melee_collisions(
     info!("────────────────────────────────────────────────────");
     info!("💥 HIT! Applying impulse to {} targets", targets.len());
 
-    for root in targets.iter() {
+    // Собираем какие руки попали
+    let mut right_hit = false;
+    let mut left_hit = false;
+
+    for (root, side) in targets.iter() {
         let name = names.get(*root).map(|n| n.as_str()).unwrap_or("?");
 
         let real_mass = mass_query
@@ -153,22 +169,38 @@ pub fn process_melee_collisions(
             torque_impulse: Vec3::ZERO,
         });
 
-        let start_pos = transforms
-            .get(*root)
-            .map(|t| t.translation)
-            .unwrap_or(Vec3::ZERO);
-        commands.entity(*root).insert(PhysicsDebugTracker {
-            start_time: time.elapsed_secs(),
-            start_pos,
-            max_speed: 0.0,
-            item_name: name.to_string(),
-        });
+        match side {
+            ArmSide::Right => right_hit = true,
+            ArmSide::Left => left_hit = true,
+        }
     }
 
     info!("════════════════════════════════════════════════════");
 
-    // Помечаем что урон нанесён
-    if let CombatState::Attacking { damage_dealt, .. } = &mut combat.state {
+    // Помечаем damage_dealt на руках которые попали
+    if right_hit {
+        mark_damage_dealt(&mut combat.right);
+    }
+    if left_hit {
+        mark_damage_dealt(&mut combat.left);
+    }
+}
+
+/// Проверяет может ли рука нанести урон (Active фаза, урон ещё не нанесён)
+fn can_arm_hit(arm: &ArmCombatState) -> bool {
+    matches!(
+        arm,
+        ArmCombatState::Attacking {
+            phase: AttackPhase::Active,
+            damage_dealt: false,
+            ..
+        }
+    )
+}
+
+/// Помечает что рука нанесла урон
+fn mark_damage_dealt(arm: &mut ArmCombatState) {
+    if let ArmCombatState::Attacking { damage_dealt, .. } = arm {
         *damage_dealt = true;
     }
 }

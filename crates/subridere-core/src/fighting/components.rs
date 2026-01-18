@@ -6,19 +6,16 @@ use bevy::prelude::*;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum AttackPhase {
     #[default]
-    Windup, // Замах — можно отменить (roll, etc)
-    Active,   // Hitbox активен — наносит урон
-    Recovery, // Откат — уязвим, нельзя действовать
+    Windup,
+    Active,
+    Recovery,
 }
 
-/// Состояние боевой системы игрока
+/// Состояние одной руки
 #[derive(Debug, Clone, PartialEq, Default)]
-pub enum CombatState {
-    /// Готов к действию
+pub enum ArmCombatState {
     #[default]
     Ready,
-
-    /// В процессе атаки
     Attacking {
         phase: AttackPhase,
         phase_timer: f32,
@@ -26,10 +23,11 @@ pub enum CombatState {
     },
 }
 
-/// Компонент боевого состояния игрока
+/// Компонент боевого состояния игрока (обе руки независимо)
 #[derive(Component, Default)]
 pub struct PlayerCombatState {
-    pub state: CombatState,
+    pub right: ArmCombatState,
+    pub left: ArmCombatState,
 }
 
 /// Тайминги атаки (можно менять для разного оружия)
@@ -43,9 +41,9 @@ pub struct AttackTimings {
 impl Default for AttackTimings {
     fn default() -> Self {
         Self {
-            windup: 0.50,
-            active: 0.60,
-            recovery: 1.00,
+            windup: 0.10,
+            active: 0.12,
+            recovery: 0.20,
         }
     }
 }

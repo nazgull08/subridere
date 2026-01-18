@@ -17,7 +17,7 @@ impl Default for PlayerVisual {
     fn default() -> Self {
         Self {
             body_color: Color::srgb(0.2, 0.6, 0.8),
-            body_size: Vec3::new(0.6, 1.8, 0.3),
+            body_size: Vec3::new(0.6, 2.3, 0.3),
         }
     }
 }

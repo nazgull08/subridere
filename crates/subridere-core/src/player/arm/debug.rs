@@ -28,7 +28,7 @@ impl Default for ArmDebugState {
         Self {
             current_axis: 2, // Начинаем с Z (вперёд-назад)
             step: 0.05,
-            enabled: true,
+            enabled: false,
         }
     }
 }

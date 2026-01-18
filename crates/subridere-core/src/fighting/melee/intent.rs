@@ -1,5 +1,9 @@
 use bevy::prelude::*;
 
-/// Intent: игрок хочет совершить melee атаку
+/// Intent: атака правой рукой
 #[derive(Component)]
-pub struct MeleeAttackIntent;
+pub struct RightAttackIntent;
+
+/// Intent: атака левой рукой  
+#[derive(Component)]
+pub struct LeftAttackIntent;

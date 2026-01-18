@@ -44,7 +44,9 @@ pub struct WeaponSocket {
 }
 
 #[derive(Component)]
-pub struct MeleeHitbox;
+pub struct MeleeHitbox {
+    pub side: ArmSide,
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // IK TARGET
@@ -93,14 +95,12 @@ pub struct ArmConfig {
 impl Default for ArmConfig {
     fn default() -> Self {
         Self {
-            shoulder_offset_right: Vec3::new(0.20, -0.25, -0.35),
-            shoulder_offset_left: Vec3::new(-0.20, -0.25, -0.35),
+            shoulder_offset_right: Vec3::new(0.45, -0.10, -0.30),
+            shoulder_offset_left: Vec3::new(-0.45, -0.10, -0.30),
 
-            // Длины сегментов — УВЕЛИЧЕНЫ
-            upper_arm_length: 0.40, // было 0.22
-            forearm_length: 0.40,   // было 0.20
+            upper_arm_length: 0.40,
+            forearm_length: 0.40,
 
-            // Размеры мешей — тоже больше
             upper_arm_size: Vec3::new(0.14, 0.14, 0.40),
             forearm_size: Vec3::new(0.12, 0.12, 0.35),
             hand_size: Vec3::new(0.20, 0.16, 0.20),

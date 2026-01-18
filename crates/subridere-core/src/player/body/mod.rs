@@ -1,5 +1,2 @@
-pub mod components;
-pub mod spawn;
-
-pub use components::{ArmPart, ArmSide, FirstPersonArms, HandPart, MeleeHitbox, WeaponMount};
-pub use spawn::spawn_first_person_arms;
+pub mod visible_body;
+pub use visible_body::{Legs, Torso, VisibleBody, VisibleBodyConfig, spawn_visible_body};

@@ -7,7 +7,7 @@ use block_bodies_core::solve_arm_ik;
 
 use super::components::*;
 use crate::fighting::components::{
-    AttackPhase, AttackTimings, CombatState, CurrentAttackTimings, PlayerCombatState,
+    ArmCombatState, AttackPhase, AttackTimings, CurrentAttackTimings, PlayerCombatState,
 };
 use crate::player::component::Player;
 
@@ -27,11 +27,19 @@ pub fn update_ik_target_from_combat(
     let timings = &timings.0;
 
     for mut ik_target in &mut ik_targets {
+        // Получаем состояние нужной руки
+        let arm_state = match ik_target.side {
+            ArmSide::Right => &combat.right,
+            ArmSide::Left => &combat.left,
+        };
+
+        // Вычисляем позу (всегда как для правой)
+        let pose = compute_arm_pose(arm_state, timings);
+
+        // Зеркалим если левая рука
         let pose = match ik_target.side {
-            // Правая рука атакует
-            ArmSide::Right => compute_arm_pose(&combat.state, timings),
-            // Левая рука пока в idle
-            ArmSide::Left => ArmPose::idle_right().mirror(),
+            ArmSide::Right => pose,
+            ArmSide::Left => pose.mirror(),
         };
 
         ik_target.position = ik_target.position.lerp(pose.hand_offset, 0.3);
@@ -39,11 +47,11 @@ pub fn update_ik_target_from_combat(
     }
 }
 
-fn compute_arm_pose(state: &CombatState, timings: &AttackTimings) -> ArmPose {
+fn compute_arm_pose(state: &ArmCombatState, timings: &AttackTimings) -> ArmPose {
     match state {
-        CombatState::Ready => ArmPose::idle_right(),
+        ArmCombatState::Ready => ArmPose::idle_right(),
 
-        CombatState::Attacking {
+        ArmCombatState::Attacking {
             phase, phase_timer, ..
         } => match phase {
             AttackPhase::Windup => {

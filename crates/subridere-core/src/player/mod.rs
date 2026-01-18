@@ -1,6 +1,7 @@
 // crates/subridere-core/src/player/mod.rs
 
 pub mod arm;
+pub mod body;
 pub mod component;
 pub mod plugin;
 
