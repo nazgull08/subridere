@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::fighting::melee::intent::{LeftAttackIntent, RightAttackIntent};
+use crate::fighting::melee::intent::{AttackInputState, LeftAttackInput, RightAttackInput};
 use crate::input::component::PlayerControlled;
 use crate::input::resources::InputSettings;
 use crate::unit::component::{DashIntent, JumpIntent, MoveIntent};
@@ -10,7 +10,7 @@ pub fn handle_keyboard_input(
     mut commands: Commands,
     keys: Res<ButtonInput<KeyCode>>,
     settings: Res<InputSettings>,
-    query: Query<Entity, With<PlayerControlled>>, // ← ensure included
+    query: Query<Entity, With<PlayerControlled>>,
 ) {
     let bindings = &settings.key_bindings;
 
@@ -53,6 +53,7 @@ pub fn handle_keyboard_input(
     }
 }
 
+/// Processes mouse input for melee attacks (pressed/released for charge system)
 pub fn handle_melee_input(
     buttons: Res<ButtonInput<MouseButton>>,
     mut commands: Commands,
@@ -62,11 +63,27 @@ pub fn handle_melee_input(
         return;
     };
 
+    // === ПРАВАЯ РУКА (ЛКМ) ===
     if buttons.just_pressed(MouseButton::Left) {
-        commands.entity(player_entity).insert(RightAttackIntent);
+        commands
+            .entity(player_entity)
+            .insert(RightAttackInput(AttackInputState::Pressed));
+    }
+    if buttons.just_released(MouseButton::Left) {
+        commands
+            .entity(player_entity)
+            .insert(RightAttackInput(AttackInputState::Released));
     }
 
+    // === ЛЕВАЯ РУКА (ПКМ) ===
     if buttons.just_pressed(MouseButton::Right) {
-        commands.entity(player_entity).insert(LeftAttackIntent);
+        commands
+            .entity(player_entity)
+            .insert(LeftAttackInput(AttackInputState::Pressed));
+    }
+    if buttons.just_released(MouseButton::Right) {
+        commands
+            .entity(player_entity)
+            .insert(LeftAttackInput(AttackInputState::Released));
     }
 }

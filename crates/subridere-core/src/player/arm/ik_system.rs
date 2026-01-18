@@ -7,7 +7,8 @@ use block_bodies_core::solve_arm_ik;
 
 use super::components::*;
 use crate::fighting::components::{
-    ArmCombatState, AttackPhase, AttackType, CurrentAttackTimings, PlayerCombatState,
+    ArmCombatState, AttackPhase, AttackTimings, AttackType, ChargeConfig, CurrentAttackTimings,
+    PlayerCombatState, WeaponKind,
 };
 use crate::player::component::Player;
 
@@ -18,6 +19,7 @@ use crate::player::component::Player;
 pub fn update_ik_target_from_combat(
     player_query: Query<&PlayerCombatState, With<Player>>,
     timings: Res<CurrentAttackTimings>,
+    charge_config: Res<ChargeConfig>,
     mut ik_targets: Query<&mut IkTarget>,
 ) {
     let Ok(combat) = player_query.single() else {
@@ -26,13 +28,19 @@ pub fn update_ik_target_from_combat(
 
     for mut ik_target in &mut ik_targets {
         // Получаем состояние нужной руки
-        let arm_state = match ik_target.side {
-            ArmSide::Right => &combat.right,
-            ArmSide::Left => &combat.left,
+        let (arm_state, weapon_kind) = match ik_target.side {
+            ArmSide::Right => (&combat.right, timings.right_weapon),
+            ArmSide::Left => (&combat.left, timings.left_weapon),
         };
 
         // Вычисляем позу (всегда как для правой)
-        let pose = compute_arm_pose(arm_state, &timings);
+        let pose = compute_arm_pose(
+            arm_state,
+            weapon_kind,
+            &timings,
+            &charge_config,
+            ik_target.side,
+        );
 
         // Зеркалим если левая рука
         let pose = match ik_target.side {
@@ -45,87 +53,193 @@ pub fn update_ik_target_from_combat(
     }
 }
 
-fn compute_arm_pose(state: &ArmCombatState, timings: &CurrentAttackTimings) -> ArmPose {
-    match state {
-        ArmCombatState::Ready => ArmPose::idle_right(),
+// ═══════════════════════════════════════════════════════════════════
+// POSE COMPUTATION
+// ═══════════════════════════════════════════════════════════════════
 
-        ArmCombatState::Charging { charge_timer } => {
-            // Интерполяция idle → charging по мере заряда
-            // TODO: добавить ArmPose::heavy_charging()
-            let t = (*charge_timer / 0.3).clamp(0.0, 1.0); // 0.3 = heavy_threshold
-            ArmPose::idle_right().lerp(&ArmPose::windup_right(), ease_out_quad(t))
+fn compute_arm_pose(
+    state: &ArmCombatState,
+    default_weapon: WeaponKind,
+    timings: &CurrentAttackTimings,
+    charge_config: &ChargeConfig,
+    side: ArmSide,
+) -> ArmPose {
+    match state {
+        ArmCombatState::Ready => idle_pose(default_weapon),
+
+        ArmCombatState::Charging {
+            charge_timer,
+            weapon_kind,
+        } => {
+            let weapon = *weapon_kind;
+            let t = (*charge_timer / charge_config.heavy_threshold).clamp(0.0, 1.0);
+            idle_pose(weapon).lerp(&heavy_charging_pose(weapon), ease_out_quad(t))
         }
 
         ArmCombatState::Attacking {
             attack_type,
             phase,
             phase_timer,
+            weapon_kind,
             ..
         } => {
-            // Выбираем тайминги по типу атаки
-            let attack_timings = match attack_type {
-                AttackType::Light => &timings.light,
-                AttackType::Heavy => &timings.heavy,
-            };
+            let weapon = *weapon_kind;
+            let attack_timings = timings.get(side, *attack_type);
 
             match attack_type {
-                AttackType::Light => compute_light_pose(*phase, *phase_timer, attack_timings),
-                AttackType::Heavy => compute_heavy_pose(*phase, *phase_timer, attack_timings),
+                AttackType::Light => {
+                    compute_light_pose(weapon, *phase, *phase_timer, attack_timings)
+                }
+                AttackType::Heavy => {
+                    compute_heavy_pose(weapon, *phase, *phase_timer, attack_timings)
+                }
             }
         }
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// POSE HELPERS BY WEAPON
+// ═══════════════════════════════════════════════════════════════════
+
+fn idle_pose(weapon: WeaponKind) -> ArmPose {
+    match weapon {
+        WeaponKind::Fists => ArmPose::idle_right(),
+        WeaponKind::Sword => ArmPose::sword_idle_right(),
+    }
+}
+
+fn heavy_charging_pose(weapon: WeaponKind) -> ArmPose {
+    match weapon {
+        WeaponKind::Fists => ArmPose::fists_heavy_charging_right(),
+        WeaponKind::Sword => ArmPose::sword_heavy_charging_right(),
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LIGHT ATTACK POSES
+// ═══════════════════════════════════════════════════════════════════
+
 fn compute_light_pose(
+    weapon: WeaponKind,
     phase: AttackPhase,
     phase_timer: f32,
-    timings: &crate::fighting::components::AttackTimings,
+    timings: &AttackTimings,
+) -> ArmPose {
+    match weapon {
+        WeaponKind::Fists => compute_fists_light_pose(phase, phase_timer, timings),
+        WeaponKind::Sword => compute_sword_light_pose(phase, phase_timer, timings),
+    }
+}
+
+fn compute_fists_light_pose(
+    phase: AttackPhase,
+    phase_timer: f32,
+    timings: &AttackTimings,
 ) -> ArmPose {
     match phase {
         AttackPhase::Windup => {
             let progress = (phase_timer / timings.windup).clamp(0.0, 1.0);
             let eased = ease_out_quad(progress);
-            ArmPose::idle_right().lerp(&ArmPose::windup_right(), eased)
+            ArmPose::idle_right().lerp(&ArmPose::fists_windup_right(), eased)
         }
-
         AttackPhase::Active => {
             let progress = (phase_timer / timings.active).clamp(0.0, 1.0);
             let eased = ease_out_quad(progress);
-            ArmPose::windup_right().lerp(&ArmPose::punch_right(), eased)
+            ArmPose::fists_windup_right().lerp(&ArmPose::fists_punch_right(), eased)
         }
-
         AttackPhase::Recovery => {
             let progress = (phase_timer / timings.recovery).clamp(0.0, 1.0);
             let eased = ease_in_out_quad(progress);
-            ArmPose::punch_right().lerp(&ArmPose::idle_right(), eased)
+            ArmPose::fists_punch_right().lerp(&ArmPose::idle_right(), eased)
         }
     }
 }
 
-fn compute_heavy_pose(
+fn compute_sword_light_pose(
     phase: AttackPhase,
     phase_timer: f32,
-    timings: &crate::fighting::components::AttackTimings,
+    timings: &AttackTimings,
 ) -> ArmPose {
-    // TODO: заменить на отдельные heavy позы (апперкот)
-    // Пока используем light позы
     match phase {
         AttackPhase::Windup => {
             let progress = (phase_timer / timings.windup).clamp(0.0, 1.0);
             let eased = ease_out_quad(progress);
-            ArmPose::idle_right().lerp(&ArmPose::windup_right(), eased)
+            ArmPose::sword_idle_right().lerp(&ArmPose::sword_windup_right(), eased)
         }
-
         AttackPhase::Active => {
             let progress = (phase_timer / timings.active).clamp(0.0, 1.0);
             let eased = ease_out_quad(progress);
-            ArmPose::windup_right().lerp(&ArmPose::punch_right(), eased)
+            ArmPose::sword_windup_right().lerp(&ArmPose::sword_slash_right(), eased)
         }
-
         AttackPhase::Recovery => {
             let progress = (phase_timer / timings.recovery).clamp(0.0, 1.0);
             let eased = ease_in_out_quad(progress);
-            ArmPose::punch_right().lerp(&ArmPose::idle_right(), eased)
+            ArmPose::sword_slash_right().lerp(&ArmPose::sword_idle_right(), eased)
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// HEAVY ATTACK POSES
+// ═══════════════════════════════════════════════════════════════════
+
+fn compute_heavy_pose(
+    weapon: WeaponKind,
+    phase: AttackPhase,
+    phase_timer: f32,
+    timings: &AttackTimings,
+) -> ArmPose {
+    match weapon {
+        WeaponKind::Fists => compute_fists_heavy_pose(phase, phase_timer, timings),
+        WeaponKind::Sword => compute_sword_heavy_pose(phase, phase_timer, timings),
+    }
+}
+
+fn compute_fists_heavy_pose(
+    phase: AttackPhase,
+    phase_timer: f32,
+    timings: &AttackTimings,
+) -> ArmPose {
+    match phase {
+        AttackPhase::Windup => {
+            let progress = (phase_timer / timings.windup).clamp(0.0, 1.0);
+            let eased = ease_out_quad(progress);
+            ArmPose::fists_heavy_charging_right().lerp(&ArmPose::fists_heavy_windup_right(), eased)
+        }
+        AttackPhase::Active => {
+            let progress = (phase_timer / timings.active).clamp(0.0, 1.0);
+            let eased = ease_out_quad(progress);
+            ArmPose::fists_heavy_windup_right().lerp(&ArmPose::fists_heavy_active_right(), eased)
+        }
+        AttackPhase::Recovery => {
+            let progress = (phase_timer / timings.recovery).clamp(0.0, 1.0);
+            let eased = ease_in_out_quad(progress);
+            ArmPose::fists_heavy_active_right().lerp(&ArmPose::idle_right(), eased)
+        }
+    }
+}
+
+fn compute_sword_heavy_pose(
+    phase: AttackPhase,
+    phase_timer: f32,
+    timings: &AttackTimings,
+) -> ArmPose {
+    match phase {
+        AttackPhase::Windup => {
+            let progress = (phase_timer / timings.windup).clamp(0.0, 1.0);
+            let eased = ease_out_quad(progress);
+            ArmPose::sword_heavy_charging_right().lerp(&ArmPose::sword_heavy_windup_right(), eased)
+        }
+        AttackPhase::Active => {
+            let progress = (phase_timer / timings.active).clamp(0.0, 1.0);
+            let eased = ease_out_quad(progress);
+            ArmPose::sword_heavy_windup_right().lerp(&ArmPose::sword_heavy_slash_right(), eased)
+        }
+        AttackPhase::Recovery => {
+            let progress = (phase_timer / timings.recovery).clamp(0.0, 1.0);
+            let eased = ease_in_out_quad(progress);
+            ArmPose::sword_heavy_slash_right().lerp(&ArmPose::sword_idle_right(), eased)
         }
     }
 }
@@ -179,11 +293,9 @@ pub fn apply_arm_ik(
                 continue;
             };
 
-            // Конвертируем мировую ротацию в локальную относительно shoulder
             let local_upper_rot = shoulder_rot.inverse() * ik_result.upper_rotation;
             upper_transform.rotation = local_upper_rot;
 
-            // Forearm
             let Ok(upper_children) = children_query.get(upper_arm_entity) else {
                 continue;
             };
@@ -196,7 +308,6 @@ pub fn apply_arm_ik(
                 forearm_transform.rotation = ik_result.lower_rotation;
                 forearm_transform.translation = Vec3::new(0.0, 0.0, -config.upper_arm_length);
 
-                // Hand
                 let Ok(forearm_children) = children_query.get(forearm_entity) else {
                     continue;
                 };

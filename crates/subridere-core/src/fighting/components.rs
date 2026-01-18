@@ -19,6 +19,15 @@ pub enum AttackType {
     Heavy,
 }
 
+/// Тип оружия — определяет анимации и тайминги
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum WeaponKind {
+    #[default]
+    Fists,
+    Sword,
+    // TODO: Staff, Hammer, Shield, Dagger...
+}
+
 /// Состояние одной руки
 #[derive(Debug, Clone, PartialEq, Default)]
 pub enum ArmCombatState {
@@ -26,7 +35,10 @@ pub enum ArmCombatState {
     Ready,
 
     /// Зарядка атаки (кнопка зажата)
-    Charging { charge_timer: f32 },
+    Charging {
+        charge_timer: f32,
+        weapon_kind: WeaponKind,
+    },
 
     /// Атака (light или heavy)
     Attacking {
@@ -34,7 +46,8 @@ pub enum ArmCombatState {
         phase: AttackPhase,
         phase_timer: f32,
         damage_dealt: bool,
-        charge_level: f32, // 0.0-1.0, влияет на урон/knockback
+        charge_level: f32,
+        weapon_kind: WeaponKind,
     },
 }
 
@@ -112,6 +125,10 @@ impl Default for AttackTimings {
 }
 
 impl AttackTimings {
+    // ─────────────────────────────────────────────────────────────
+    // FISTS (кулаки)
+    // ─────────────────────────────────────────────────────────────
+
     pub fn fists() -> Self {
         Self {
             windup: 0.10,
@@ -122,19 +139,35 @@ impl AttackTimings {
 
     pub fn fists_heavy() -> Self {
         Self {
-            windup: 0.15,
-            active: 0.15,
-            recovery: 0.30,
+            windup: 0.28,
+            active: 0.22,
+            recovery: 0.45,
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // SWORD (меч)
+    // ─────────────────────────────────────────────────────────────
+
     pub fn sword() -> Self {
         Self {
-            windup: 0.15,
-            active: 0.18,
-            recovery: 0.30,
+            windup: 0.12,
+            active: 0.15,
+            recovery: 0.25,
         }
     }
+
+    pub fn sword_heavy() -> Self {
+        Self {
+            windup: 0.25,
+            active: 0.20,
+            recovery: 0.40,
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // TODO: другие типы оружия
+    // ─────────────────────────────────────────────────────────────
 
     pub fn hammer() -> Self {
         Self {
@@ -147,20 +180,82 @@ impl AttackTimings {
     pub fn total(&self) -> f32 {
         self.windup + self.active + self.recovery
     }
+
+    /// Получить тайминги по типу оружия и типу атаки
+    pub fn for_weapon(kind: WeaponKind, attack_type: AttackType) -> Self {
+        match (kind, attack_type) {
+            (WeaponKind::Fists, AttackType::Light) => Self::fists(),
+            (WeaponKind::Fists, AttackType::Heavy) => Self::fists_heavy(),
+            (WeaponKind::Sword, AttackType::Light) => Self::sword(),
+            (WeaponKind::Sword, AttackType::Heavy) => Self::sword_heavy(),
+            // TODO: другие комбинации
+        }
+    }
 }
 
-/// Resource: текущие тайминги атаки (light)
+/// Resource: текущие тайминги атаки для каждой руки
 #[derive(Resource)]
 pub struct CurrentAttackTimings {
-    pub light: AttackTimings,
-    pub heavy: AttackTimings,
+    pub right_light: AttackTimings,
+    pub right_heavy: AttackTimings,
+    pub left_light: AttackTimings,
+    pub left_heavy: AttackTimings,
+    pub right_weapon: WeaponKind,
+    pub left_weapon: WeaponKind,
 }
 
 impl Default for CurrentAttackTimings {
     fn default() -> Self {
         Self {
-            light: AttackTimings::fists(),
-            heavy: AttackTimings::fists_heavy(),
+            right_light: AttackTimings::fists(),
+            right_heavy: AttackTimings::fists_heavy(),
+            left_light: AttackTimings::fists(),
+            left_heavy: AttackTimings::fists_heavy(),
+            right_weapon: WeaponKind::Fists,
+            left_weapon: WeaponKind::Fists,
+        }
+    }
+}
+
+impl CurrentAttackTimings {
+    /// Обновить тайминги для руки
+    pub fn set_weapon(&mut self, side: crate::player::arm::ArmSide, kind: WeaponKind) {
+        use crate::player::arm::ArmSide;
+        match side {
+            ArmSide::Right => {
+                self.right_weapon = kind;
+                self.right_light = AttackTimings::for_weapon(kind, AttackType::Light);
+                self.right_heavy = AttackTimings::for_weapon(kind, AttackType::Heavy);
+            }
+            ArmSide::Left => {
+                self.left_weapon = kind;
+                self.left_light = AttackTimings::for_weapon(kind, AttackType::Light);
+                self.left_heavy = AttackTimings::for_weapon(kind, AttackType::Heavy);
+            }
+        }
+    }
+
+    /// Получить тайминги для руки и типа атаки
+    pub fn get(
+        &self,
+        side: crate::player::arm::ArmSide,
+        attack_type: AttackType,
+    ) -> &AttackTimings {
+        use crate::player::arm::ArmSide;
+        match (side, attack_type) {
+            (ArmSide::Right, AttackType::Light) => &self.right_light,
+            (ArmSide::Right, AttackType::Heavy) => &self.right_heavy,
+            (ArmSide::Left, AttackType::Light) => &self.left_light,
+            (ArmSide::Left, AttackType::Heavy) => &self.left_heavy,
+        }
+    }
+
+    /// Получить тип оружия для руки
+    pub fn weapon(&self, side: crate::player::arm::ArmSide) -> WeaponKind {
+        use crate::player::arm::ArmSide;
+        match side {
+            ArmSide::Right => self.right_weapon,
+            ArmSide::Left => self.left_weapon,
         }
     }
 }

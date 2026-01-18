@@ -119,6 +119,10 @@ pub struct ArmPose {
 }
 
 impl ArmPose {
+    // ───────────────────────────────────────────────────────────────
+    // БАЗОВЫЕ ПОЗЫ
+    // ───────────────────────────────────────────────────────────────
+
     /// Idle - руки опущены по бокам, слегка согнуты
     pub fn idle_right() -> Self {
         Self {
@@ -127,26 +131,129 @@ impl ArmPose {
         }
     }
 
-    pub fn windup_right() -> Self {
+    // ═══════════════════════════════════════════════════════════════
+    // FISTS (кулаки)
+    // ═══════════════════════════════════════════════════════════════
+
+    // ───────────────────────────────────────────────────────────────
+    // FISTS LIGHT (прямой удар)
+    // ───────────────────────────────────────────────────────────────
+
+    /// Fists Light Windup - рука отводится назад
+    pub fn fists_windup_right() -> Self {
         Self {
-            hand_offset: Vec3::new(0.40, -0.25, -0.35), // отводим назад
+            hand_offset: Vec3::new(0.40, -0.25, -0.35),
             elbow_hint: Vec3::new(0.5, -0.4, 0.4),
         }
     }
 
-    pub fn punch_right() -> Self {
+    /// Fists Light Active - прямой удар вперёд
+    pub fn fists_punch_right() -> Self {
         Self {
-            hand_offset: Vec3::new(0.08, -0.20, -1.10), // ДАЛЕКО вперёд (было -0.80)
+            hand_offset: Vec3::new(0.08, -0.20, -1.10),
             elbow_hint: Vec3::new(0.20, -0.5, -0.5),
         }
     }
 
-    pub fn recovery_right() -> Self {
+    // ───────────────────────────────────────────────────────────────
+    // FISTS HEAVY (оверхенд — удар сверху)
+    // ───────────────────────────────────────────────────────────────
+
+    /// Fists Heavy Charging - рука поднимается и отводится назад
+    pub fn fists_heavy_charging_right() -> Self {
         Self {
-            hand_offset: Vec3::new(0.25, -0.30, -0.50),
-            elbow_hint: Vec3::new(0.4, -0.5, 0.0),
+            hand_offset: Vec3::new(0.20, -0.15, -0.25),
+            elbow_hint: Vec3::new(0.4, -0.2, 0.3),
         }
     }
+
+    /// Fists Heavy Windup - рука поднята и взведена
+    pub fn fists_heavy_windup_right() -> Self {
+        Self {
+            hand_offset: Vec3::new(0.25, -0.05, -0.15),
+            elbow_hint: Vec3::new(0.45, -0.1, 0.35),
+        }
+    }
+
+    /// Fists Heavy Active - удар сверху вниз-вперёд
+    pub fn fists_heavy_active_right() -> Self {
+        Self {
+            hand_offset: Vec3::new(0.05, -0.35, -1.40),
+            elbow_hint: Vec3::new(0.15, -0.5, -0.6),
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SWORD (меч)
+    // ═══════════════════════════════════════════════════════════════
+
+    // ───────────────────────────────────────────────────────────────
+    // SWORD IDLE
+    // ───────────────────────────────────────────────────────────────
+
+    /// Sword Idle - меч держится наготове, чуть впереди
+    pub fn sword_idle_right() -> Self {
+        Self {
+            hand_offset: Vec3::new(0.25, -0.30, -0.55),
+            elbow_hint: Vec3::new(0.4, -0.4, 0.1),
+        }
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    // SWORD LIGHT (горизонтальный слэш справа налево)
+    // ───────────────────────────────────────────────────────────────
+
+    /// Sword Light Windup - меч отведён вправо
+    pub fn sword_windup_right() -> Self {
+        Self {
+            hand_offset: Vec3::new(0.50, -0.20, -0.30),
+            elbow_hint: Vec3::new(0.6, -0.3, 0.3),
+        }
+    }
+
+    /// Sword Light Active - слэш влево-вперёд
+    pub fn sword_slash_right() -> Self {
+        Self {
+            hand_offset: Vec3::new(-0.10, -0.25, -0.90),
+            elbow_hint: Vec3::new(0.15, -0.4, -0.4),
+        }
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    // SWORD HEAVY (вертикальный удар сверху)
+    // ───────────────────────────────────────────────────────────────
+
+    /// Sword Heavy Charging - меч поднимается над головой
+    pub fn sword_heavy_charging_right() -> Self {
+        Self {
+            hand_offset: Vec3::new(0.15, 0.00, -0.30),
+            elbow_hint: Vec3::new(0.35, 0.1, 0.2),
+        }
+    }
+
+    /// Sword Heavy Windup - меч занесён над головой
+    pub fn sword_heavy_windup_right() -> Self {
+        Self {
+            hand_offset: Vec3::new(0.10, 0.15, -0.20),
+            elbow_hint: Vec3::new(0.30, 0.2, 0.3),
+        }
+    }
+
+    /// Sword Heavy Active - вертикальный удар вниз-вперёд
+    pub fn sword_heavy_slash_right() -> Self {
+        Self {
+            hand_offset: Vec3::new(0.05, -0.40, -1.10),
+            elbow_hint: Vec3::new(0.15, -0.5, -0.5),
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TODO: STAFF, HAMMER, SHIELD...
+    // ═══════════════════════════════════════════════════════════════
+
+    // ───────────────────────────────────────────────────────────────
+    // СПЕЦИАЛЬНЫЕ ПОЗЫ
+    // ───────────────────────────────────────────────────────────────
 
     /// Питьё зелья - рука у рта
     pub fn drinking_right() -> Self {
@@ -156,6 +263,18 @@ impl ArmPose {
         }
     }
 
+    /// Recovery - возврат к idle (универсальная)
+    pub fn recovery_right() -> Self {
+        Self {
+            hand_offset: Vec3::new(0.25, -0.30, -0.50),
+            elbow_hint: Vec3::new(0.4, -0.5, 0.0),
+        }
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    // УТИЛИТЫ
+    // ───────────────────────────────────────────────────────────────
+
     /// Зеркальная версия для левой руки
     pub fn mirror(&self) -> ArmPose {
         ArmPose {
@@ -164,10 +283,42 @@ impl ArmPose {
         }
     }
 
+    /// Линейная интерполяция между позами
     pub fn lerp(&self, other: &ArmPose, t: f32) -> ArmPose {
         ArmPose {
             hand_offset: self.hand_offset.lerp(other.hand_offset, t),
             elbow_hint: self.elbow_hint.lerp(other.elbow_hint, t),
         }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LEGACY ALIASES (для совместимости)
+// ═══════════════════════════════════════════════════════════════════
+
+impl ArmPose {
+    /// Alias: windup_right → fists_windup_right
+    pub fn windup_right() -> Self {
+        Self::fists_windup_right()
+    }
+
+    /// Alias: punch_right → fists_punch_right
+    pub fn punch_right() -> Self {
+        Self::fists_punch_right()
+    }
+
+    /// Alias: heavy_charging_right → fists_heavy_charging_right
+    pub fn heavy_charging_right() -> Self {
+        Self::fists_heavy_charging_right()
+    }
+
+    /// Alias: heavy_windup_right → fists_heavy_windup_right
+    pub fn heavy_windup_right() -> Self {
+        Self::fists_heavy_windup_right()
+    }
+
+    /// Alias: heavy_active_right → fists_heavy_active_right
+    pub fn heavy_active_right() -> Self {
+        Self::fists_heavy_active_right()
     }
 }

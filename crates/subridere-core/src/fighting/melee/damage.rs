@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::fighting::components::{ArmCombatState, AttackPhase, PlayerCombatState};
+use crate::fighting::components::{ArmCombatState, AttackPhase, ChargeConfig, PlayerCombatState};
 use crate::items::WorldItem;
 use crate::player::arm::{ArmSide, MeleeHitbox};
 use crate::player::component::Player;
@@ -29,8 +29,7 @@ pub fn process_melee_collisions(
     mass_query: Query<&AdditionalMassProperties>,
     parent_query: Query<&ChildOf>,
     names: Query<&Name>,
-    transforms: Query<&Transform>,
-    time: Res<Time>,
+    charge_config: Res<ChargeConfig>,
 ) {
     let Ok(mut combat) = player_query.single_mut() else {
         collision_events.clear();
@@ -45,6 +44,10 @@ pub fn process_melee_collisions(
         collision_events.clear();
         return;
     }
+
+    // Получаем charge_level для каждой руки
+    let right_charge = get_charge_level(&combat.right);
+    let left_charge = get_charge_level(&combat.left);
 
     let punch_direction = camera_query
         .single()
@@ -61,7 +64,8 @@ pub fn process_melee_collisions(
     info!("🔔 COLLISION in ACTIVE phase");
     info!("   events count: {}", events.len());
 
-    let mut targets: Vec<(Entity, ArmSide)> = Vec::new();
+    // targets теперь хранит (Entity, ArmSide, charge_level)
+    let mut targets: Vec<(Entity, ArmSide, f32)> = Vec::new();
 
     for (i, event) in events.iter().enumerate() {
         let CollisionEvent::Started(e1, e2, _) = event else {
@@ -92,6 +96,12 @@ pub fn process_melee_collisions(
             continue;
         }
 
+        // Получаем charge_level для этой руки
+        let charge_level = match hitbox_side {
+            ArmSide::Right => right_charge,
+            ArmSide::Left => left_charge,
+        };
+
         let target_entity = if *e1 == hitbox_entity { *e2 } else { *e1 };
 
         let target_name = names
@@ -111,13 +121,17 @@ pub fn process_melee_collisions(
         };
 
         info!(
-            "   [{}] {} hand hit: '{}' → root: '{}'",
-            i, side_name, target_name, root_name
+            "   [{}] {} hand hit: '{}' → root: '{}' (charge: {:.0}%)",
+            i,
+            side_name,
+            target_name,
+            root_name,
+            charge_level * 100.0
         );
 
         if world_items.get(root).is_ok() {
-            if !targets.iter().any(|(e, _)| *e == root) {
-                targets.push((root, hitbox_side));
+            if !targets.iter().any(|(e, _, _)| *e == root) {
+                targets.push((root, hitbox_side, charge_level));
                 info!("       ✓ added to targets");
             } else {
                 info!("       ⏭️ already in targets");
@@ -138,7 +152,7 @@ pub fn process_melee_collisions(
     let mut right_hit = false;
     let mut left_hit = false;
 
-    for (root, side) in targets.iter() {
+    for (root, side, charge_level) in targets.iter() {
         let name = names.get(*root).map(|n| n.as_str()).unwrap_or("?");
 
         let real_mass = mass_query
@@ -153,15 +167,22 @@ pub fn process_melee_collisions(
             .sqrt()
             .clamp(MIN_HEAVY_FACTOR, MAX_LIGHT_BONUS);
 
-        let target_velocity = BASE_VELOCITY * velocity_factor;
-        let target_lift = LIFT_VELOCITY * velocity_factor;
+        // Применяем множитель knockback от charge_level
+        let knockback_mult = charge_config.knockback_mult(*charge_level);
+
+        let target_velocity = BASE_VELOCITY * velocity_factor * knockback_mult;
+        let target_lift = LIFT_VELOCITY * velocity_factor * knockback_mult;
 
         let impulse =
             punch_direction * target_velocity * real_mass + Vec3::Y * target_lift * real_mass;
 
         info!(
-            "   '{}': mass={:.1}kg → vel={:.1} m/s",
-            name, real_mass, target_velocity,
+            "   '{}': mass={:.1}kg, charge={:.0}%, knockback_mult={:.2}x → vel={:.1} m/s",
+            name,
+            real_mass,
+            charge_level * 100.0,
+            knockback_mult,
+            target_velocity,
         );
 
         commands.entity(*root).insert(ExternalImpulse {
@@ -196,6 +217,14 @@ fn can_arm_hit(arm: &ArmCombatState) -> bool {
             ..
         }
     )
+}
+
+/// Получает charge_level из состояния руки
+fn get_charge_level(arm: &ArmCombatState) -> f32 {
+    match arm {
+        ArmCombatState::Attacking { charge_level, .. } => *charge_level,
+        _ => 0.0,
+    }
 }
 
 /// Помечает что рука нанесла урон
