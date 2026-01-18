@@ -35,7 +35,7 @@ impl Plugin for CombatPlugin {
                     .run_if(in_state(AppState::InGame)),
             );
 
-        info!("✅ Combat plugin initialized (Souls-like)");
+        info!("✅ Combat plugin initialized");
         info!("🗡️ WEAPON DEBUG: F7=toggle, F8=axis, ↑/↓=adjust, F9=print");
     }
 }

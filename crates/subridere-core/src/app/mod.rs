@@ -7,9 +7,8 @@ use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy_kira_audio::AudioPlugin;
 use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
-//use bevy_rapier3d::render::RapierDebugRenderPlugin;
+use bevy_rapier3d::render::RapierDebugRenderPlugin;
 
-// УДАЛЕНО: use crate::animation::PlayerAnimationPlugin;
 use crate::audio::plugin::SubAudioPlugin;
 use crate::camera::plugin::CameraPlugin;
 use crate::core::fps_stats::FpsStatsPlugin;
@@ -44,7 +43,7 @@ pub fn run() {
         .add_plugins(GameInitPlugin)
         .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default().with_default_system_setup(true))
-        //.add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(AudioPlugin)
         .add_plugins(SubAudioPlugin)
         // ── Core systems ─────────────────────────

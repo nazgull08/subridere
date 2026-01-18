@@ -57,6 +57,7 @@ pub struct IkTarget {
     pub side: ArmSide,
     pub position: Vec3,
     pub elbow_hint: Vec3,
+    pub hand_rotation: Quat,
 }
 
 impl IkTarget {
@@ -65,6 +66,7 @@ impl IkTarget {
             side: ArmSide::Right,
             position: Vec3::new(0.30, -0.35, -0.60),
             elbow_hint: Vec3::new(0.4, -0.5, 0.1),
+            hand_rotation: Quat::IDENTITY,
         }
     }
 
@@ -73,6 +75,7 @@ impl IkTarget {
             side: ArmSide::Left,
             position: Vec3::new(-0.30, -0.35, -0.60),
             elbow_hint: Vec3::new(-0.4, -0.5, 0.1),
+            hand_rotation: Quat::IDENTITY,
         }
     }
 }
@@ -116,9 +119,24 @@ impl Default for ArmConfig {
 pub struct ArmPose {
     pub hand_offset: Vec3,
     pub elbow_hint: Vec3,
+    pub hand_rotation: Quat,
 }
 
 impl ArmPose {
+    // ───────────────────────────────────────────────────────────────
+    // ХЕЛПЕР ДЛЯ СОЗДАНИЯ РОТАЦИИ
+    // ───────────────────────────────────────────────────────────────
+
+    /// Создаёт Quat из градусов (pitch, yaw, roll)
+    fn rot(pitch: f32, yaw: f32, roll: f32) -> Quat {
+        Quat::from_euler(
+            EulerRot::XYZ,
+            pitch.to_radians(),
+            yaw.to_radians(),
+            roll.to_radians(),
+        )
+    }
+
     // ───────────────────────────────────────────────────────────────
     // БАЗОВЫЕ ПОЗЫ
     // ───────────────────────────────────────────────────────────────
@@ -128,6 +146,7 @@ impl ArmPose {
         Self {
             hand_offset: Vec3::new(0.30, -0.35, -0.60),
             elbow_hint: Vec3::new(0.4, -0.5, 0.1),
+            hand_rotation: Quat::IDENTITY,
         }
     }
 
@@ -144,6 +163,7 @@ impl ArmPose {
         Self {
             hand_offset: Vec3::new(0.40, -0.25, -0.35),
             elbow_hint: Vec3::new(0.5, -0.4, 0.4),
+            hand_rotation: Quat::IDENTITY,
         }
     }
 
@@ -152,6 +172,7 @@ impl ArmPose {
         Self {
             hand_offset: Vec3::new(0.08, -0.20, -1.10),
             elbow_hint: Vec3::new(0.20, -0.5, -0.5),
+            hand_rotation: Quat::IDENTITY,
         }
     }
 
@@ -164,6 +185,7 @@ impl ArmPose {
         Self {
             hand_offset: Vec3::new(0.20, -0.15, -0.25),
             elbow_hint: Vec3::new(0.4, -0.2, 0.3),
+            hand_rotation: Quat::IDENTITY,
         }
     }
 
@@ -172,6 +194,7 @@ impl ArmPose {
         Self {
             hand_offset: Vec3::new(0.25, -0.05, -0.15),
             elbow_hint: Vec3::new(0.45, -0.1, 0.35),
+            hand_rotation: Quat::IDENTITY,
         }
     }
 
@@ -180,22 +203,25 @@ impl ArmPose {
         Self {
             hand_offset: Vec3::new(0.05, -0.35, -1.40),
             elbow_hint: Vec3::new(0.15, -0.5, -0.6),
+            hand_rotation: Quat::IDENTITY,
         }
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // SWORD (меч)
+    // SWORD (меч) — ГОРИЗОНТАЛЬНЫЙ СЛЭШ
     // ═══════════════════════════════════════════════════════════════
 
     // ───────────────────────────────────────────────────────────────
     // SWORD IDLE
     // ───────────────────────────────────────────────────────────────
 
-    /// Sword Idle - меч держится наготове, чуть впереди
+    /// Sword Idle - меч наготове, направлен вперёд-вверх
     pub fn sword_idle_right() -> Self {
         Self {
             hand_offset: Vec3::new(0.25, -0.30, -0.55),
             elbow_hint: Vec3::new(0.4, -0.4, 0.1),
+            // Кисть нейтральная, меч чуть наклонён
+            hand_rotation: Self::rot(0.0, 0.0, 0.0),
         }
     }
 
@@ -203,19 +229,23 @@ impl ArmPose {
     // SWORD LIGHT (горизонтальный слэш справа налево)
     // ───────────────────────────────────────────────────────────────
 
-    /// Sword Light Windup - меч отведён вправо
+    /// Sword Light Windup - меч отведён вправо, кисть развёрнута
     pub fn sword_windup_right() -> Self {
         Self {
-            hand_offset: Vec3::new(0.50, -0.20, -0.30),
+            hand_offset: Vec3::new(0.55, -0.25, -0.40),
             elbow_hint: Vec3::new(0.6, -0.3, 0.3),
+            // Кисть повёрнута вправо, меч "взведён" для слэша
+            hand_rotation: Self::rot(0.0, 60.0, -90.0),
         }
     }
 
-    /// Sword Light Active - слэш влево-вперёд
+    /// Sword Light Active - слэш влево, кисть вращается
     pub fn sword_slash_right() -> Self {
         Self {
-            hand_offset: Vec3::new(-0.10, -0.25, -0.90),
-            elbow_hint: Vec3::new(0.15, -0.4, -0.4),
+            hand_offset: Vec3::new(-0.30, -0.30, -1.00),
+            elbow_hint: Vec3::new(0.10, -0.4, -0.4),
+            // Кисть повёрнута влево, завершение слэша
+            hand_rotation: Self::rot(0.0, -60.0, 90.0),
         }
     }
 
@@ -226,24 +256,30 @@ impl ArmPose {
     /// Sword Heavy Charging - меч поднимается над головой
     pub fn sword_heavy_charging_right() -> Self {
         Self {
-            hand_offset: Vec3::new(0.15, 0.00, -0.30),
+            hand_offset: Vec3::new(0.40, 0.05, -0.30),
             elbow_hint: Vec3::new(0.35, 0.1, 0.2),
+            // Кисть начинает подниматься
+            hand_rotation: Self::rot(-20.0, 0.0, 0.0),
         }
     }
 
     /// Sword Heavy Windup - меч занесён над головой
     pub fn sword_heavy_windup_right() -> Self {
         Self {
-            hand_offset: Vec3::new(0.10, 0.15, -0.20),
-            elbow_hint: Vec3::new(0.30, 0.2, 0.3),
+            hand_offset: Vec3::new(0.35, 0.25, -0.15),
+            elbow_hint: Vec3::new(0.30, 0.3, 0.35),
+            // Кисть отогнута назад, меч над головой
+            hand_rotation: Self::rot(-45.0, 0.0, 0.0),
         }
     }
 
     /// Sword Heavy Active - вертикальный удар вниз-вперёд
     pub fn sword_heavy_slash_right() -> Self {
         Self {
-            hand_offset: Vec3::new(0.05, -0.40, -1.10),
+            hand_offset: Vec3::new(0.05, -0.45, -1.00),
             elbow_hint: Vec3::new(0.15, -0.5, -0.5),
+            // Кисть резко вниз, завершение удара
+            hand_rotation: Self::rot(30.0, 0.0, 0.0),
         }
     }
 
@@ -260,6 +296,7 @@ impl ArmPose {
         Self {
             hand_offset: Vec3::new(0.10, -0.10, -0.30),
             elbow_hint: Vec3::new(0.4, -0.4, 0.1),
+            hand_rotation: Self::rot(-30.0, 0.0, 0.0),
         }
     }
 
@@ -268,6 +305,7 @@ impl ArmPose {
         Self {
             hand_offset: Vec3::new(0.25, -0.30, -0.50),
             elbow_hint: Vec3::new(0.4, -0.5, 0.0),
+            hand_rotation: Quat::IDENTITY,
         }
     }
 
@@ -277,9 +315,18 @@ impl ArmPose {
 
     /// Зеркальная версия для левой руки
     pub fn mirror(&self) -> ArmPose {
+        // Для зеркалирования Quat: инвертируем Y и Z компоненты
+        let mirrored_rotation = Quat::from_xyzw(
+            self.hand_rotation.x,
+            -self.hand_rotation.y,
+            -self.hand_rotation.z,
+            self.hand_rotation.w,
+        );
+
         ArmPose {
             hand_offset: Vec3::new(-self.hand_offset.x, self.hand_offset.y, self.hand_offset.z),
             elbow_hint: Vec3::new(-self.elbow_hint.x, self.elbow_hint.y, self.elbow_hint.z),
+            hand_rotation: mirrored_rotation,
         }
     }
 
@@ -288,6 +335,7 @@ impl ArmPose {
         ArmPose {
             hand_offset: self.hand_offset.lerp(other.hand_offset, t),
             elbow_hint: self.elbow_hint.lerp(other.elbow_hint, t),
+            hand_rotation: self.hand_rotation.slerp(other.hand_rotation, t),
         }
     }
 }

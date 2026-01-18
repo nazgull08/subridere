@@ -72,8 +72,9 @@ impl Default for WeaponDebugState {
         Self {
             enabled: false,
             axis: WeaponDebugAxis::TranslationX,
-            translation: Vec3::new(0.0, 0.16, 0.0),
-            rotation_degrees: Vec3::new(-30.0, 180.0, 0.0),
+            // Найденные через дебаг правильные значения
+            translation: Vec3::new(0.04, -0.08, -0.14),
+            rotation_degrees: Vec3::new(-150.0, 80.0, 5.0),
         }
     }
 }
@@ -310,19 +311,18 @@ fn create_mesh_for_shape(
     }
 }
 
-/// Трансформ для правильного хвата оружия (дефолтные значения)
+/// Трансформ для правильного хвата оружия
+/// Найдено через дебаг (F7/F9)
 fn weapon_grip_transform(_side: ArmSide) -> Transform {
-    // TODO: подобрать правильные значения через дебаг (F7)
-
     let rotation = Quat::from_euler(
         EulerRot::XYZ,
-        (-30.0_f32).to_radians(),
-        (180.0_f32).to_radians(),
-        0.0,
+        (-150.0_f32).to_radians(),
+        (80.0_f32).to_radians(),
+        (5.0_f32).to_radians(),
     );
 
     Transform {
-        translation: Vec3::new(0.0, 0.16, 0.0),
+        translation: Vec3::new(0.04, -0.08, -0.14),
         rotation,
         scale: Vec3::ONE,
     }
