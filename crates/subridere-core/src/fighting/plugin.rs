@@ -3,6 +3,7 @@
 use bevy::prelude::*;
 
 use crate::app::AppState;
+use crate::fighting::ChargeConfig;
 
 use super::components::CurrentAttackTimings;
 use super::events::MeleeHitEvent;
@@ -13,6 +14,7 @@ pub struct CombatPlugin;
 impl Plugin for CombatPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<CurrentAttackTimings>()
+            .init_resource::<ChargeConfig>()
             .add_event::<MeleeHitEvent>()
             .add_systems(
                 Update,

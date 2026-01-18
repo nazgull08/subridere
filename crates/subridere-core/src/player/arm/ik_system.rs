@@ -7,7 +7,7 @@ use block_bodies_core::solve_arm_ik;
 
 use super::components::*;
 use crate::fighting::components::{
-    ArmCombatState, AttackPhase, AttackTimings, CurrentAttackTimings, PlayerCombatState,
+    ArmCombatState, AttackPhase, AttackType, CurrentAttackTimings, PlayerCombatState,
 };
 use crate::player::component::Player;
 
@@ -24,8 +24,6 @@ pub fn update_ik_target_from_combat(
         return;
     };
 
-    let timings = &timings.0;
-
     for mut ik_target in &mut ik_targets {
         // Получаем состояние нужной руки
         let arm_state = match ik_target.side {
@@ -34,7 +32,7 @@ pub fn update_ik_target_from_combat(
         };
 
         // Вычисляем позу (всегда как для правой)
-        let pose = compute_arm_pose(arm_state, timings);
+        let pose = compute_arm_pose(arm_state, &timings);
 
         // Зеркалим если левая рука
         let pose = match ik_target.side {
@@ -47,31 +45,88 @@ pub fn update_ik_target_from_combat(
     }
 }
 
-fn compute_arm_pose(state: &ArmCombatState, timings: &AttackTimings) -> ArmPose {
+fn compute_arm_pose(state: &ArmCombatState, timings: &CurrentAttackTimings) -> ArmPose {
     match state {
         ArmCombatState::Ready => ArmPose::idle_right(),
 
+        ArmCombatState::Charging { charge_timer } => {
+            // Интерполяция idle → charging по мере заряда
+            // TODO: добавить ArmPose::heavy_charging()
+            let t = (*charge_timer / 0.3).clamp(0.0, 1.0); // 0.3 = heavy_threshold
+            ArmPose::idle_right().lerp(&ArmPose::windup_right(), ease_out_quad(t))
+        }
+
         ArmCombatState::Attacking {
-            phase, phase_timer, ..
-        } => match phase {
-            AttackPhase::Windup => {
-                let progress = (*phase_timer / timings.windup).clamp(0.0, 1.0);
-                let eased = ease_out_quad(progress);
-                ArmPose::idle_right().lerp(&ArmPose::windup_right(), eased)
-            }
+            attack_type,
+            phase,
+            phase_timer,
+            ..
+        } => {
+            // Выбираем тайминги по типу атаки
+            let attack_timings = match attack_type {
+                AttackType::Light => &timings.light,
+                AttackType::Heavy => &timings.heavy,
+            };
 
-            AttackPhase::Active => {
-                let progress = (*phase_timer / timings.active).clamp(0.0, 1.0);
-                let eased = ease_out_quad(progress);
-                ArmPose::windup_right().lerp(&ArmPose::punch_right(), eased)
+            match attack_type {
+                AttackType::Light => compute_light_pose(*phase, *phase_timer, attack_timings),
+                AttackType::Heavy => compute_heavy_pose(*phase, *phase_timer, attack_timings),
             }
+        }
+    }
+}
 
-            AttackPhase::Recovery => {
-                let progress = (*phase_timer / timings.recovery).clamp(0.0, 1.0);
-                let eased = ease_in_out_quad(progress);
-                ArmPose::punch_right().lerp(&ArmPose::idle_right(), eased)
-            }
-        },
+fn compute_light_pose(
+    phase: AttackPhase,
+    phase_timer: f32,
+    timings: &crate::fighting::components::AttackTimings,
+) -> ArmPose {
+    match phase {
+        AttackPhase::Windup => {
+            let progress = (phase_timer / timings.windup).clamp(0.0, 1.0);
+            let eased = ease_out_quad(progress);
+            ArmPose::idle_right().lerp(&ArmPose::windup_right(), eased)
+        }
+
+        AttackPhase::Active => {
+            let progress = (phase_timer / timings.active).clamp(0.0, 1.0);
+            let eased = ease_out_quad(progress);
+            ArmPose::windup_right().lerp(&ArmPose::punch_right(), eased)
+        }
+
+        AttackPhase::Recovery => {
+            let progress = (phase_timer / timings.recovery).clamp(0.0, 1.0);
+            let eased = ease_in_out_quad(progress);
+            ArmPose::punch_right().lerp(&ArmPose::idle_right(), eased)
+        }
+    }
+}
+
+fn compute_heavy_pose(
+    phase: AttackPhase,
+    phase_timer: f32,
+    timings: &crate::fighting::components::AttackTimings,
+) -> ArmPose {
+    // TODO: заменить на отдельные heavy позы (апперкот)
+    // Пока используем light позы
+    match phase {
+        AttackPhase::Windup => {
+            let progress = (phase_timer / timings.windup).clamp(0.0, 1.0);
+            let eased = ease_out_quad(progress);
+            ArmPose::idle_right().lerp(&ArmPose::windup_right(), eased)
+        }
+
+        AttackPhase::Active => {
+            let progress = (phase_timer / timings.active).clamp(0.0, 1.0);
+            let eased = ease_out_quad(progress);
+            ArmPose::windup_right().lerp(&ArmPose::punch_right(), eased)
+        }
+
+        AttackPhase::Recovery => {
+            let progress = (phase_timer / timings.recovery).clamp(0.0, 1.0);
+            let eased = ease_in_out_quad(progress);
+            ArmPose::punch_right().lerp(&ArmPose::idle_right(), eased)
+        }
     }
 }
 
