@@ -7,7 +7,7 @@
     category: Weapon((
         damage: 8.0,
         speed: 1.2,
-        slot: MainHand,
+        slot: OneHanded,
         mana_cost: 5.0,
     )),
 

@@ -105,18 +105,38 @@ impl EquipmentSlot {
 /// Weapon-specific slots (for WeaponData in RON)
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub enum WeaponSlot {
-    MainHand,
-    OffHand,
-    TwoHanded, // Takes both MainHand and OffHand
+    /// One-handed weapon — can be equipped in MainHand OR OffHand
+    OneHanded,
+    /// Two-handed weapon — takes both MainHand and OffHand
+    TwoHanded,
+}
+
+impl WeaponSlot {
+    /// Check if this weapon slot allows equipping in the given equipment slot
+    pub fn can_equip_in(&self, target: EquipmentSlot) -> bool {
+        match self {
+            Self::OneHanded => matches!(target, EquipmentSlot::MainHand | EquipmentSlot::OffHand),
+            Self::TwoHanded => target == EquipmentSlot::MainHand,
+        }
+    }
+
+    /// Get the primary slot for this weapon (for UI display)
+    pub fn primary_slot(&self) -> EquipmentSlot {
+        EquipmentSlot::MainHand
+    }
+
+    /// Human-readable name for tooltip display
+    pub fn display_name(&self) -> &'static str {
+        match self {
+            Self::OneHanded => "One-Handed",
+            Self::TwoHanded => "Two-Handed",
+        }
+    }
 }
 
 impl From<WeaponSlot> for EquipmentSlot {
     fn from(slot: WeaponSlot) -> Self {
-        match slot {
-            WeaponSlot::MainHand => EquipmentSlot::MainHand,
-            WeaponSlot::OffHand => EquipmentSlot::OffHand,
-            WeaponSlot::TwoHanded => EquipmentSlot::MainHand, // Primary slot
-        }
+        slot.primary_slot()
     }
 }
 

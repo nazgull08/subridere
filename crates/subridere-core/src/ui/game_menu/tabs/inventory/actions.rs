@@ -269,7 +269,7 @@ fn equip_from_inventory(world: &mut World, inv_slot: usize, equip_slot: Equipmen
 
     let valid_slot = {
         let registry = world.resource::<ItemRegistry>();
-        registry.get(id).equipment_slot() == Some(equip_slot)
+        registry.get(id).can_equip_in(equip_slot)
     };
 
     if !valid_slot {

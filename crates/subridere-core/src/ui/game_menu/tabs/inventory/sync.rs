@@ -217,7 +217,9 @@ fn build_description(
         ItemCategory::Consumable(_) => "Consumable",
         ItemCategory::Misc => "Misc",
     };
-    if let Some(slot) = def.equipment_slot() {
+    if let Some(slot_name) = def.weapon_slot_display() {
+        lines.push(format!("{} • {}", category, slot_name));
+    } else if let Some(slot) = def.equipment_slot() {
         lines.push(format!("{} • {}", category, slot.display_name()));
     } else {
         lines.push(category.to_string());

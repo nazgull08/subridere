@@ -1,4 +1,4 @@
-// Iron Sword — basic melee weapon
+// Iron Sword — basic one-handed melee weapon
 (
     id: "iron_sword",
     name: "Iron Sword",
@@ -7,7 +7,7 @@
     category: Weapon((
         damage: 12.0,
         speed: 1.0,
-        slot: MainHand,
+        slot: OneHanded,
         mana_cost: 0.0,
     )),
 

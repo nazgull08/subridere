@@ -162,9 +162,12 @@ fn build_subtitle(def: &ItemDefinition) -> String {
         ItemCategory::Misc => "Misc",
     };
 
-    match def.equipment_slot() {
-        Some(slot) => format!("{} • {}", category, slot.display_name()),
-        None => category.to_string(),
+    if let Some(slot_name) = def.weapon_slot_display() {
+        format!("{} • {}", category, slot_name)
+    } else if let Some(slot) = def.equipment_slot() {
+        format!("{} • {}", category, slot.display_name())
+    } else {
+        category.to_string()
     }
 }
 

@@ -1,14 +1,19 @@
-// Torch — light source
+// Torch — light source and improvised weapon
 (
     id: "torch",
     name: "Torch",
-    description: "A wooden torch wrapped in oil-soaked cloth. Provides light in dark places.",
+    description: "A wooden torch wrapped in oil-soaked cloth. Provides light in dark places. Can be used as an improvised weapon.",
 
-    category: Misc,
+    category: Weapon((
+        damage: 4.0,
+        speed: 1.1,
+        slot: OneHanded,
+        mana_cost: 0.0,
+    )),
 
     weight: 0.5,
     value: 5,
-    max_stack: 5,
+    max_stack: 1,
 
     flags: (),
 

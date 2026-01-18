@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::stats::{ModifierOp, ModifierTarget};
 
 use super::flags::ItemFlags;
-use super::slots::{AccessorySlot, ArmorSlot, WeaponSlot};
+use super::slots::{AccessorySlot, ArmorSlot, EquipmentSlot, WeaponSlot};
 use super::visual::ItemVisual;
 
 /// Complete item definition — loaded from a single RON file
@@ -75,12 +75,32 @@ impl ItemDefinition {
         )
     }
 
-    /// Get equipment slot if equippable
-    pub fn equipment_slot(&self) -> Option<super::slots::EquipmentSlot> {
+    /// Check if this item can be equipped in the given slot
+    pub fn can_equip_in(&self, target_slot: EquipmentSlot) -> bool {
+        match &self.category {
+            ItemCategory::Weapon(w) => w.slot.can_equip_in(target_slot),
+            ItemCategory::Armor(a) => EquipmentSlot::from(a.slot) == target_slot,
+            ItemCategory::Accessory(a) => EquipmentSlot::from(a.slot) == target_slot,
+            _ => false,
+        }
+    }
+
+    /// Get primary equipment slot if equippable (for UI display)
+    /// For weapons, returns the primary slot (MainHand for OneHanded/TwoHanded)
+    pub fn equipment_slot(&self) -> Option<EquipmentSlot> {
         match &self.category {
             ItemCategory::Weapon(w) => Some(w.slot.into()),
             ItemCategory::Armor(a) => Some(a.slot.into()),
             ItemCategory::Accessory(a) => Some(a.slot.into()),
+            _ => None,
+        }
+    }
+
+    /// Get weapon slot type display name (One-Handed, Two-Handed, etc.)
+    /// Returns None for non-weapons
+    pub fn weapon_slot_display(&self) -> Option<&'static str> {
+        match &self.category {
+            ItemCategory::Weapon(w) => Some(w.slot.display_name()),
             _ => None,
         }
     }
@@ -122,7 +142,7 @@ pub struct WeaponData {
     #[serde(default = "default_speed")]
     pub speed: f32,
 
-    /// Equipment slot
+    /// Equipment slot type
     pub slot: WeaponSlot,
 
     /// Mana cost per attack (for magic weapons)
